@@ -42,8 +42,12 @@ h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:#00ff41; text-s
 .piece.t-program.p1 { background:linear-gradient(145deg,#001833,#003366); border:2px solid #0066cc; color:#44aaff; box-shadow:0 0 10px rgba(0,102,204,.5); }
 .piece.t-program.p2 { background:linear-gradient(145deg,#1a0000,#3a0000); border:2px solid #cc2200; color:#ff6633; box-shadow:0 0 10px rgba(204,34,0,.5); }
 .piece.t-firewall { background:linear-gradient(145deg,#001a0d,#003320); border:2px solid #00aa44; color:#44ff88; box-shadow:0 0 10px rgba(0,160,60,.5); }
+.piece.t-firewall.p2 { border-color:#aa3311; box-shadow:0 0 10px rgba(170,51,17,.5); }
 .piece.t-virus { background:linear-gradient(145deg,#1a1a00,#333300); border:2px solid #cccc00; color:#ffff44; box-shadow:0 0 10px rgba(200,200,0,.5); }
+.piece.t-virus.p2 { border-color:#cc5500; box-shadow:0 0 10px rgba(200,85,0,.5); }
 .piece.t-linker { background:linear-gradient(145deg,#1a0d00,#332200); border:2px solid #ffaa00; color:#ffdd55; box-shadow:0 0 16px rgba(255,170,0,.7); animation:lp 1.8s ease-in-out infinite; }
+.piece.t-linker.p2 { border-color:#ff4400; box-shadow:0 0 16px rgba(255,68,0,.7); animation:lp2 1.8s ease-in-out infinite; }
+@keyframes lp2 { 0%,100%{box-shadow:0 0 14px rgba(255,68,0,.6);}50%{box-shadow:0 0 26px rgba(255,68,0,.95);} }
 @keyframes lp { 0%,100%{box-shadow:0 0 14px rgba(255,170,0,.6);}50%{box-shadow:0 0 26px rgba(255,170,0,.95);} }
 .piece .pi { font-size:20px; line-height:1; }
 .piece .pl { font-size:8px; letter-spacing:1px; opacity:.85; text-transform:uppercase; }
@@ -393,7 +397,7 @@ function pieceInfo(p){
   if(!visible)return['?','???'];
   return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK']}[p.type];
 }
-function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type}`;}
+function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type} p${p.player}`;}
 
 function render(){
   const bd=document.getElementById('board');bd.innerHTML='';
