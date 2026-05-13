@@ -242,7 +242,11 @@ const sndOnline=()=>{tone(440,.05,'sine',.08);tone(880,.05,'sine',.08,.08);tone(
 
 // ── Gun.js ──────────────────────────────────────────
 const gun = Gun({
-  peers: ['https://peer.wallie.io/gun'],
+  peers: [
+    'https://peer.wallie.io/gun',
+    'https://gun-manhattan.herokuapp.com/gun',
+    'https://relay.peer.ooo/gun'
+  ],
   localStorage: false
 });
 
@@ -456,40 +460,39 @@ function enterOnlineMode(){
   show('ov-online');
 }
 
+async function scanQueue(){
+  return new Promise(resolve=>{
+    let best=null;
+    gun.get('dna-q').map().once((data,uid)=>{
+      if(!data||uid===myUid||uid==='_'||typeof data!=='object')return;
+      if(data.roomId&&data.ts&&(Date.now()-data.ts)<120000){
+        if(!best||data.ts<best.ts)best={uid,roomId:data.roomId,ts:data.ts};
+      }
+    });
+    setTimeout(()=>resolve(best),3000);
+  });
+}
+
 async function startRandomMatch(){
   hide('ov-online');
   cancelWait=false;
   showWaiting('ランダム対戦中...');
-  document.getElementById('wait-code').textContent='接続中...';
+  document.getElementById('wait-code').textContent='接続中...（最大5秒）';
 
-  // Wait for Gun.js peers to connect
-  await new Promise(r=>setTimeout(r,1200));
+  await new Promise(r=>setTimeout(r,2500));
   if(cancelWait)return;
 
-  let found=null;
-  const qNode=gun.get('dna-q');
-
-  // Scan queue for a waiting player
-  await new Promise(resolve=>{
-    let checked=false;
-    qNode.map().once((data,uid)=>{
-      if(found||!data||uid===myUid||uid==='_'||typeof data!=='object')return;
-      if(data.roomId&&data.ts&&(Date.now()-data.ts)<90000){
-        found={uid,roomId:data.roomId};
-      }
-    });
-    setTimeout(()=>{checked=true;resolve();},1500);
-  });
-
+  document.getElementById('wait-code').textContent='対戦相手を検索中...';
+  let found=await scanQueue();
   if(cancelWait)return;
 
   if(found){
-    qNode.get(found.uid).put(null);
+    gun.get('dna-q').get(found.uid).put(null);
     await joinRoom(found.roomId,'guest');
   }else{
     const rid='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
     await createRoom(rid,'host');
-    qNode.get(myUid).put({ts:Date.now(),roomId:rid});
+    gun.get('dna-q').get(myUid).put({ts:Date.now(),roomId:rid,name:myName});
     document.getElementById('wait-code').textContent='対戦相手を待っています...';
     waitForGuest();
   }
@@ -503,15 +506,16 @@ async function startPassMatch(){
   showWaiting(`あいことば: 「${pp}」`);
   document.getElementById('wait-code').textContent='接続中...';
 
-  await new Promise(r=>setTimeout(r,1000));
+  await new Promise(r=>setTimeout(r,2500));
   if(cancelWait)return;
 
   const rid='pp-'+[...pp].map(c=>c.charCodeAt(0).toString(36)).join('').slice(0,20);
-  const data=await gunOnce(gun.get('dna-room-'+rid));
+  const data=await gunOnce(gun.get('dna-room-'+rid),6000);
 
   if(cancelWait)return;
 
-  if(!data||!data.host){
+  const isStale=!data||!data.host||data.status==='done'||data.status==='abandoned';
+  if(isStale){
     await createRoom(rid,'host');
     document.getElementById('wait-code').textContent='対戦相手を待っています...';
     waitForGuest();
