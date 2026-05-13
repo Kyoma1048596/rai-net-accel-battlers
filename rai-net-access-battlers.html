@@ -110,6 +110,12 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 /* Online badge */
 #online-badge { display:none; font-size:.65rem; background:#001a22; border:1px solid #005577; color:#0099cc; padding:2px 8px; border-radius:3px; letter-spacing:1px; margin-bottom:2px; text-align:center; }
 #online-badge.on { display:block; }
+
+/* Name edit */
+#name-row { font-size:.68rem; color:#446644; margin-top:5px; display:flex; align-items:center; gap:6px; }
+#name-row span { color:#00cc33; }
+#name-edit-btn { background:none; border:1px solid #1a3a1a; color:#335533; padding:1px 5px; font-size:.58rem; width:auto; display:inline-block; cursor:pointer; letter-spacing:0; }
+#name-edit-btn:hover { background:#0a1e0a; color:#00ff41; }
 </style>
 </head>
 <body>
@@ -126,6 +132,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
       <div id="turn-label"></div>
       <div id="msg"></div>
       <div id="think-bar"><div id="think-fill"></div></div>
+      <div id="name-row">▶ <span id="name-label"></span> <button id="name-edit-btn" onclick="editName()">編集</button></div>
     </div>
 
     <button onclick="newGame()">// NEW GAME [F2]</button>
@@ -160,6 +167,20 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
         ▶ ① <span class="rt lnk">★</span>をゴールへ<br>
         &nbsp;&nbsp;② 相手の<span class="rt lnk">★</span>を撃破
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Name input overlay -->
+<div class="overlay on" id="ov-name">
+  <div class="ov-title" style="color:#00ff41;font-size:clamp(.9rem,2.5vw,1.3rem)">電ネット・アクセルバトラーズ</div>
+  <div class="ov-sub">STEINS;GATE :: DEN-NET ACCEL BATTLERS</div>
+  <div class="ov-panel">
+    <h3>// PLAYER NAME</h3>
+    <div class="pp-row">
+      <input id="name-input" type="text" placeholder="名前を入力..." maxlength="12"
+        onkeydown="if(event.key==='Enter')confirmName()">
+      <button onclick="confirmName()" style="width:80px">START</button>
     </div>
   </div>
 </div>
@@ -238,6 +259,8 @@ let thinkTimer=null,tickIv=null,difficulty=2;
 let gameMode='cpu',myRole=null,myPN=1;
 let roomNode=null,lastMoveTs=0,applyingRemote=false;
 let cancelWait=false;
+let myName=localStorage.getItem('dna-name')||'';
+let opponentName='???';
 
 const myUid=(()=>{
   let u=localStorage.getItem('dna-uid');
@@ -391,7 +414,7 @@ function render(){
   }
   const tl=document.getElementById('turn-label');
   if(over){tl.textContent='GAME OVER';}
-  else{const isMyTurn=turn===myPN;tl.innerHTML=isMyTurn?'<span class="c1">▶ あなたのターン</span>':(gameMode==='cpu'?'<span class="c2">▶ CPU のターン</span>':'<span class="c2">▶ 相手のターン</span>');}
+  else{const isMyTurn=turn===myPN;tl.innerHTML=isMyTurn?`<span class="c1">▶ ${myName} のターン</span>`:`<span class="c2">▶ ${gameMode==='cpu'?'CPU':opponentName} のターン</span>`;}
   renderCaptured();
 }
 function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl'}[p.type]||'cp';}
@@ -418,7 +441,8 @@ function newGame(){
   turn=1;sel=null;validMoves=[];over=false;cpuThinking=false;captured={1:[],2:[]};
   [1,2].forEach(placePieces);
   hide('ov-win');setThinkBar(0);
-  setMsg('あなたのターンです（PLAYER 1 / 青）');
+  updateNameLabel();
+  setMsg(`${myName} のターンです（PLAYER 1 / 青）`);
   sndBoot();render();
 }
 
@@ -503,7 +527,7 @@ async function createRoom(rid,role){
   roomNode=gun.get('dna-room-'+rid);
   const boardStr=JSON.stringify(board);
   await new Promise(resolve=>{
-    roomNode.put({host:myUid,guest:null,board:boardStr,turn:1,status:'waiting',lastMove:null},resolve);
+    roomNode.put({host:myUid,guest:null,board:boardStr,turn:1,status:'waiting',lastMove:null,hostName:myName},resolve);
   });
 }
 
@@ -531,20 +555,40 @@ async function joinRoom(rid,role){
   board=JSON.parse(data.board);
   turn=data.turn||1;
   captured={1:[],2:[]};
+  opponentName=data.hostName||'???';
   roomNode.get('guest').put(myUid);
+  roomNode.get('guestName').put(myName);
   roomNode.get('status').put('playing');
   hideWaiting();
   startOnlineGame();
+}
+
+function showVsMsg(){
+  document.getElementById('badge-role').textContent=`${myName} vs ${opponentName}`;
+  setMsg(`マッチ成立！ ${myName}（あなた / P${myPN}）vs ${opponentName}（相手 / P${myPN===1?2:1}）`);
+  render();
 }
 
 function startOnlineGame(){
   gameMode='online';over=false;sel=null;validMoves=[];lastMoveTs=0;
   if(!captured)captured={1:[],2:[]};
   document.getElementById('online-badge').classList.add('on');
-  document.getElementById('badge-role').textContent=myPN===1?'PLAYER 1 (青・下)':'PLAYER 2 (赤・上)';
   document.getElementById('diff-box').style.display='none';
-  setMsg(`あなたは PLAYER ${myPN}（${myPN===1?'青・下側':'赤・上側'}）`);
+  updateNameLabel();
   hide('ov-win');sndOnline();
+  if(myRole==='host'){
+    document.getElementById('badge-role').textContent=`${myName} vs ???`;
+    setMsg(`${myName}（P1）— 相手の接続を待っています...`);
+    let gotName=false;
+    roomNode.get('guestName').on(function cb(n){
+      if(!n||gotName)return;
+      gotName=true;
+      opponentName=n;
+      showVsMsg();
+    });
+  }else{
+    showVsMsg();
+  }
 
   // Listen for opponent moves
   roomNode.get('lastMove').on(move=>{
@@ -601,7 +645,8 @@ async function cancelWaiting(){
 }
 
 // ── Helpers ──────────────────────────────────────────
-function pname(pl){if(gameMode==='cpu')return pl===1?'あなた':'CPU';return pl===myPN?'あなた':'相手';}
+function pname(pl){if(gameMode==='cpu')return pl===1?myName:'CPU';return pl===myPN?myName:opponentName;}
+function updateNameLabel(){document.getElementById('name-label').textContent=myName;}
 function setMsg(m){document.getElementById('msg').textContent=m;}
 function show(id){document.getElementById(id).classList.add('on');}
 function hide(id){document.getElementById(id).classList.remove('on');}
@@ -621,12 +666,29 @@ function showWin(w){
   show('ov-win');
 }
 
+function confirmName(){
+  const v=document.getElementById('name-input').value.trim();
+  myName=v||'PLAYER';
+  localStorage.setItem('dna-name',myName);
+  hide('ov-name');
+  newGame();
+}
+function editName(){
+  document.getElementById('name-input').value=myName;
+  show('ov-name');
+}
+
 document.addEventListener('keydown',e=>{
   if(e.key==='F2')newGame();
   if(e.key==='Escape'){sel=null;validMoves=[];sndDesel();render();}
 });
 
-newGame();
+if(myName){
+  hide('ov-name');
+  newGame();
+}else{
+  document.getElementById('name-input').focus();
+}
 </script>
 </body>
 </html>
