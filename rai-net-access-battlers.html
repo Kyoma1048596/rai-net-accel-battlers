@@ -156,8 +156,8 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 
     <div class="box" id="captured">
       <h3>// CAPTURED</h3>
-      <div>あなたが取得: <div class="cap-row" id="cap1"></div></div>
-      <div style="margin-top:6px">相手が取得: <div class="cap-row" id="cap2"></div></div>
+      <div><span id="cap-label1">あなた</span>が取得: <div class="cap-row" id="cap1"></div></div>
+      <div style="margin-top:6px"><span id="cap-label2">相手</span>が取得: <div class="cap-row" id="cap2"></div></div>
     </div>
 
     <div class="box">
@@ -552,14 +552,15 @@ function newGame(){
   turn=1;sel=null;validMoves=[];over=false;cpuThinking=false;captured={1:[],2:[]};
   [1,2].forEach(placePieces);
   hide('ov-win');setThinkBar(0);
-  updateNameLabel();
+  updateNameLabel();updateCapLabels();
   setMsg(`${myName} のターンです（PLAYER 1 / 青）`);
-  sndBoot();render();
+  sndBoot();startBGM();render();
 }
 
 // ── Online ───────────────────────────────────────────
 function enterOnlineMode(){
   document.getElementById('match-err').textContent='';
+  hide('ov-title');
   show('ov-online');
 }
 
@@ -756,11 +757,13 @@ function showVsMsg(){
 function startOnlineGame(){
   gameMode='online';over=false;sel=null;validMoves=[];
   if(!captured)captured={1:[],2:[]};
+  ['ov-title','ov-online','ov-waiting','ov-win','ov-difficulty','ov-rules'].forEach(hide);
   document.getElementById('online-badge').classList.add('on');
   document.getElementById('diff-box').style.display='none';
-  updateNameLabel();hide('ov-win');sndOnline();
+  updateNameLabel();updateCapLabels();sndOnline();
   showVsMsg();
   startMoveListen();
+  startBGM();
 }
 
 function sendOnlineMove(fr,fc,tr,tc){
@@ -793,6 +796,54 @@ async function cancelWaiting(){
 // ── Helpers ──────────────────────────────────────────
 function pname(pl){if(gameMode==='cpu')return pl===1?myName:'CPU';return pl===myPN?myName:opponentName;}
 function updateNameLabel(){document.getElementById('name-label').textContent=myName;}
+function updateCapLabels(){document.getElementById('cap-label1').textContent=pname(1);document.getElementById('cap-label2').textContent=pname(2);}
+
+// ── BGM ──────────────────────────────────────────────
+let _bgmGain=null,_bgmPlaying=false;
+function startBGM(){
+  if(_bgmPlaying)return;
+  try{
+    const ctx=getAC();
+    _bgmGain=ctx.createGain();_bgmGain.gain.value=0.04;
+    _bgmGain.connect(ctx.destination);
+    _bgmPlaying=true;
+    _bgmLoop(ctx.currentTime);
+  }catch(e){}
+}
+function stopBGM(){
+  _bgmPlaying=false;
+  if(_bgmGain){try{_bgmGain.disconnect();}catch(e){}}_bgmGain=null;
+}
+function _bgmNote(f,s,d,v,type){
+  if(!_bgmPlaying||!_bgmGain)return;
+  const ctx=getAC(),o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type||'square';o.frequency.value=f;
+  g.gain.setValueAtTime(0,s);
+  g.gain.linearRampToValueAtTime(v,s+0.01);
+  g.gain.setValueAtTime(v,s+d*0.75);
+  g.gain.linearRampToValueAtTime(0,s+d);
+  o.connect(g);g.connect(_bgmGain);
+  o.start(s);o.stop(s+d+0.05);
+}
+function _bgmLoop(t){
+  if(!_bgmPlaying||!_bgmGain)return;
+  const b=60/125;
+  // Lead melody: A minor, square wave
+  [[440,0,.5],[494,.5,.5],[440,1,1],[392,2,1],[329.6,3,1],
+   [349.2,4,.5],[392,4.5,.5],[440,5,2],[329.6,7,1],
+   [293.7,8,.5],[329.6,8.5,.5],[349.2,9,1],[392,10,1],[440,11,1],
+   [494,12,.5],[523.25,12.5,.5],[587.3,13,2],[440,15,1]
+  ].forEach(([f,s,d])=>_bgmNote(f,t+s*b,d*b,0.7));
+  // Bass: sawtooth
+  [[110,0,.75],[110,1,.75],[98,2,.75],[87.3,3,.75],
+   [98,4,.75],[110,5,.75],[130.8,6,.75],[110,7,.75],
+   [110,8,.75],[110,9,.75],[98,10,.75],[87.3,11,.75],
+   [98,12,.75],[110,13,.75],[130.8,14,.75],[110,15,.75]
+  ].forEach(([f,s,d])=>_bgmNote(f,t+s*b,d*b,0.45,'sawtooth'));
+  // Kick pulse: sine
+  [0,2,4,6,8,10,12,14].forEach(s=>_bgmNote(55,t+s*b,0.1,0.9,'sine'));
+  setTimeout(()=>_bgmLoop(t+16*b),(16*b-0.15)*1000);
+}
 function setMsg(m){document.getElementById('msg').textContent=m;}
 function show(id){document.getElementById(id).classList.add('on');}
 function hide(id){document.getElementById(id).classList.remove('on');}
@@ -843,6 +894,7 @@ function showTitle(){
   if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
   if(tickIv){clearInterval(tickIv);tickIv=null;}
   cleanupOnline();
+  stopBGM();
   show('ov-title');
 }
 function selectDifficulty(){
