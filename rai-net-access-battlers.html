@@ -95,6 +95,11 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 .ov-sub { font-size:.75rem; color:#556655; letter-spacing:2px; text-align:center; }
 @keyframes blink { 0%,49%{opacity:1}50%,100%{opacity:0} }
 .push-start { animation:blink 1.1s step-start infinite; color:#00ff41; letter-spacing:5px; font-size:clamp(.85rem,2.5vw,1.05rem); cursor:pointer; margin-top:32px; user-select:none; }
+@keyframes win-pop { 0%{transform:scale(1.5);opacity:0;filter:brightness(4)} 60%{filter:brightness(1.8)} 100%{transform:scale(1);opacity:1;filter:brightness(1)} }
+@keyframes lose-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+.win-anim { animation:win-pop .45s cubic-bezier(.2,1.5,.4,1) both; }
+.lose-anim { animation:lose-shake .4s ease both; }
+#win-count { font-size:.68rem; color:#336633; letter-spacing:2px; margin-top:4px; }
 .push-start:hover { color:#66ff88; }
 .overlay button { width:220px; margin:0 auto; }
 .ov-panel { background:#080e08; border:1px solid #1a3a1a; padding:16px; width:min(320px,90vw); }
@@ -201,6 +206,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 <div class="overlay" id="ov-win">
   <div class="ov-title" id="ov-win-title"></div>
   <div class="ov-sub" id="ov-win-sub">EL PSY KONGROO</div>
+  <div id="win-count"></div>
   <button id="btn-return-room" onclick="returnToRoom()" style="display:none;border-color:#00aa44;color:#00cc44">// 🏠 部屋に戻る</button>
   <button onclick="showTitle()">// TITLE へ戻る</button>
 </div>
@@ -849,25 +855,49 @@ function show(id){document.getElementById(id).classList.add('on');}
 function hide(id){document.getElementById(id).classList.remove('on');}
 function setDiff(d){difficulty=d;[1,2,3].forEach(i=>document.getElementById(`d${i}`).classList.toggle('on',i===d));}
 
+let _winTimer=null;
+function flashScreen(color){
+  const d=document.createElement('div');
+  d.style.cssText=`position:fixed;inset:0;background:${color};opacity:.5;z-index:500;pointer-events:none;`;
+  document.body.appendChild(d);
+  d.style.transition='opacity .5s';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),600);}));
+}
 function showWin(w){
   const isOnline=gameMode==='online';
   const isHost=myRole==='host';
   if(isOnline){
-    if(gameConn){try{gameConn.close();}catch(e){}gameConn=null;}
+    if(typeof gameConn!=='undefined'&&gameConn){try{gameConn.close();}catch(e){}gameConn=null;}
   }else{
     cleanupOnline();
   }
+  stopBGM();
   const el=document.getElementById('ov-win-title'),sub=document.getElementById('ov-win-sub');
-  if(w==='draw'){el.style.color='#aaaaaa';el.textContent='DRAW';sub.textContent='両者のLINKERが同時に失われた';sndDraw();}
-  else{
+  el.className='ov-title';
+  void el.offsetWidth;
+  if(w==='draw'){
+    el.style.color='#aaaaaa';el.textContent='DRAW';sub.textContent='両者のLINKERが同時に失われた';
+    sndDraw();flashScreen('rgba(150,150,150,.4)');
+    el.classList.add('win-anim');
+  }else{
     const iWin=(gameMode==='cpu'&&w===1)||(gameMode==='online'&&w===myPN);
     el.style.color=iWin?'#0088ff':'#ff3300';
     el.innerHTML=(iWin?'YOU WIN':'YOU LOSE')+'<br><span style="font-size:.55em;letter-spacing:2px">'+(iWin?'アクセス成功！':'侵入を阻止された...')+'</span>';
     sub.textContent='EL PSY KONGROO';
     setTimeout(iWin?sndVictory:sndDefeat,200);
+    flashScreen(iWin?'rgba(0,80,255,.35)':'rgba(200,0,0,.35)');
+    el.classList.add(iWin?'win-anim':'lose-anim');
   }
   document.getElementById('btn-return-room').style.display=(isOnline&&isHost)?'':'none';
   show('ov-win');
+  if(_winTimer){clearTimeout(_winTimer);_winTimer=null;}
+  let n=4;const countEl=document.getElementById('win-count');
+  countEl.textContent=`-- TITLE へ ${n}秒後 --`;
+  _winTimer=setInterval(()=>{
+    n--;
+    if(n<=0){clearInterval(_winTimer);_winTimer=null;showTitle();}
+    else countEl.textContent=`-- TITLE へ ${n}秒後 --`;
+  },1000);
 }
 
 function startFromSplash(){
@@ -893,6 +923,8 @@ function showTitle(){
   ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win'].forEach(hide);
   if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
   if(tickIv){clearInterval(tickIv);tickIv=null;}
+  if(_winTimer){clearInterval(_winTimer);_winTimer=null;}
+  const countEl=document.getElementById('win-count');if(countEl)countEl.textContent='';
   cleanupOnline();
   stopBGM();
   show('ov-title');
