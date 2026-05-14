@@ -306,7 +306,9 @@ const gun = Gun({
   peers: [
     'https://peer.wallie.io/gun',
     'https://relay.peer.ooo/gun',
-    'wss://gundb-relay.glitch.me/gun'
+    'wss://gundb-relay.glitch.me/gun',
+    'https://gun-us.herokuapp.com/gun',
+    'https://gun.eco/gun'
   ]
 });
 
@@ -582,15 +584,23 @@ async function startHost(){
   board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
   [1,2].forEach(placePieces);turn=1;captured={1:[],2:[]};
   hostStartTs=Date.now();
-  gun.get(currentRoomKey).put({hostName:myName,board:JSON.stringify(board),ts:hostStartTs,status:'waiting'});
+  const hostRoomData={hostName:myName,board:JSON.stringify(board),ts:hostStartTs,status:'waiting'};
+  gun.get(currentRoomKey).put(hostRoomData);
   gun.get(currentRoomKey+'-g').put(null);
   myMvNode().put(null);oppMvNode().put(null);
   showWaiting(`🏠 HOST — 「${pp}」`);
   document.getElementById('wait-code').textContent=`あいことば:「${pp}」で待機中...`;
+  // 5秒ごとに再送（リレーサーバーが遅れて起動する場合に対応）
+  if(window._hostHB) clearInterval(window._hostHB);
+  window._hostHB=setInterval(()=>{
+    if(myRole!=='host'||!currentRoomKey){clearInterval(window._hostHB);return;}
+    gun.get(currentRoomKey).put(hostRoomData);
+  },5000);
   if(guestWatchNode)guestWatchNode.off();
   guestWatchNode=gun.get(currentRoomKey+'-g');
   guestWatchNode.on(data=>{
     if(!data||!data.guestName||!data.ts||data.ts<hostStartTs||cancelWait)return;
+    clearInterval(window._hostHB);
     opponentName=data.guestName;
     gun.get(currentRoomKey).get('status').put('playing');
     hideWaiting();startOnlineGame();
@@ -621,14 +631,15 @@ async function startJoin(){
     setTimeout(()=>{if(!done){done=true;bc.removeEventListener('message',h);resolve(null);}},800);
   });
 
-  // BCで見つからなければGun.jsで検索 (最大5秒)
+  // BCで見つからなければGun.jsで検索 (最大14秒・リレー起動待ち)
   if(!data||!data.hostName){
-    let sec=5;
+    let sec=14;
+    waitEl.textContent=`リレー接続中... ${sec}s`;
     const ticker=setInterval(()=>{
       if(cancelWait){clearInterval(ticker);return;}
-      sec--; if(sec>0) waitEl.textContent=`部屋を検索中... ${sec}s`;
+      sec--; if(sec>0) waitEl.textContent=`リレー接続中... ${sec}s`;
     },1000);
-    data=await gunOnce(gun.get(currentRoomKey),5000);
+    data=await gunOnce(gun.get(currentRoomKey),14000);
     clearInterval(ticker);
   }
 
