@@ -528,7 +528,14 @@ function enterOnlineMode(){
 function initPeer(ms=12000){
   return new Promise((resolve,reject)=>{
     if(myPeer){try{myPeer.destroy();}catch(e){}}
-    myPeer=new Peer({debug:0});
+    myPeer=new Peer({debug:0,config:{iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:openrelay.metered.ca:80'},
+      {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},
+    ]}});
     const t=setTimeout(()=>reject(new Error('timeout')),ms);
     myPeer.on('open',id=>{clearTimeout(t);resolve(id);});
     myPeer.on('error',err=>{clearTimeout(t);reject(err);});
