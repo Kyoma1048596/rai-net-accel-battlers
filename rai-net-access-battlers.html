@@ -538,7 +538,8 @@ function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;ret
 function render(){
   const bd=document.getElementById('board');bd.innerHTML='';
   const myZone=myPN===1?[3,4]:[1,2];
-  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+  const rowOrder=myPN===2?[5,4,3,2,1,0]:[0,1,2,3,4,5];
+  for(const r of rowOrder)for(let c=0;c<COLS;c++){
     const el=document.createElement('div');el.className='cell';
     if(r===0)el.classList.add('goal-top');if(r===5)el.classList.add('goal-bot');
     if(gameMode==='placing'&&myZone.includes(r))el.classList.add('place-zone');
