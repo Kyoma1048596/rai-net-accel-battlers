@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>電ネット・アクセルバトラーズ</title>
 <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
@@ -327,9 +326,9 @@ const ROWS=6,COLS=4,GOAL={1:0,2:5},HOME={1:[3,4],2:[1,2]},CPU_DELAY=950;
 let board,turn,sel,validMoves,over,captured,cpuThinking;
 let thinkTimer=null,tickIv=null,difficulty=2;
 let gameMode='cpu',myRole=null,myPN=1;
-let myPeer=null,gameConn=null,applyingRemote=false;
+let applyingRemote=false;
 let currentPassphrase='',currentRoomKey='';
-let hostConnListener=null;
+let lastMoveTs=0,oppMoveNode=null,guestWatchNode=null,hostStartTs=0;
 let cancelWait=false;
 let myName=localStorage.getItem('dna-name')||'';
 let opponentName='???';
@@ -524,143 +523,89 @@ function enterOnlineMode(){
   show('ov-online');
 }
 
-// ── PeerJS helpers ───────────────────────────────────
-function initPeer(ms=12000){
-  return new Promise((resolve,reject)=>{
-    if(myPeer){try{myPeer.destroy();}catch(e){}}
-    myPeer=new Peer({debug:0,config:{iceServers:[
-      {urls:'stun:stun.l.google.com:19302'},
-      {urls:'stun:stun1.l.google.com:19302'},
-      {urls:'stun:openrelay.metered.ca:80'},
-      {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
-      {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
-      {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},
-    ]}});
-    const t=setTimeout(()=>reject(new Error('timeout')),ms);
-    myPeer.on('open',id=>{clearTimeout(t);resolve(id);});
-    myPeer.on('error',err=>{clearTimeout(t);reject(err);});
-  });
-}
-
-async function tryInitPeer(){
-  try{return await initPeer();}
-  catch(e){
-    hideWaiting();show('ov-online');
-    document.getElementById('match-err').textContent='P2P接続失敗。再試行してください。';
-    return null;
-  }
-}
-
-function wireConn(conn){
-  gameConn=conn;
-  conn.on('data',msg=>{
-    if(msg.type==='move'&&!applyingRemote&&!over){
-      applyingRemote=true;sel=null;validMoves=[];
-      doMove(msg.fr|0,msg.fc|0,msg.tr|0,msg.tc|0);
-      applyingRemote=false;
-    }else if(msg.type==='bye'&&!over){
-      over=true;render();setMsg('相手が切断しました。');
-    }
-  });
-  conn.on('close',()=>{if(!over){over=true;setMsg('切断されました。');render();}});
-  conn.on('error',()=>{if(!over){over=true;setMsg('通信エラー。');render();}});
-}
-
+// ── Gun.js relay helpers ─────────────────────────────
 function ppToKey(pp){
-  return 'dna-room-'+[...pp].map(c=>c.charCodeAt(0).toString(36)).join('').slice(0,24);
+  return 'dna-r-'+[...pp].map(c=>c.charCodeAt(0).toString(36)).join('').slice(0,22);
 }
+function myMvNode(){return gun.get(currentRoomKey+'-m'+myPN);}
+function oppMvNode(){return gun.get(currentRoomKey+'-m'+(myPN===1?2:1));}
 
-function advertiseHost(peerId){
-  gun.get(currentRoomKey).put({peerId,name:myName,ts:Date.now()});
-}
-
-function listenForGuest(){
-  if(hostConnListener){try{myPeer.off('connection',hostConnListener);}catch(e){}}
-  hostConnListener=conn=>{
-    if(cancelWait)return;
-    gun.get(currentRoomKey).put(null);
-    board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
-    [1,2].forEach(placePieces);turn=1;captured={1:[],2:[]};
-    conn.on('open',()=>{
-      conn.send({type:'init',board:JSON.stringify(board),name:myName});
-    });
-    conn.on('data',msg=>{
-      if(msg.type==='hello'){
-        opponentName=msg.name||'???';
-        wireConn(conn);hideWaiting();startOnlineGame();
-      }
-    });
-  };
-  myPeer.on('connection',hostConnListener);
+function startMoveListen(){
+  oppMoveNode=oppMvNode();
+  lastMoveTs=0;
+  oppMoveNode.on(mv=>{
+    if(!mv||!mv.ts||mv.ts<=lastMoveTs||over||applyingRemote)return;
+    lastMoveTs=mv.ts;
+    applyingRemote=true;sel=null;validMoves=[];
+    doMove(mv.fr|0,mv.fc|0,mv.tr|0,mv.tc|0);
+    applyingRemote=false;
+  });
 }
 
 async function startHost(){
   const pp=document.getElementById('pp-input').value.trim().toLowerCase();
   if(!pp){document.getElementById('match-err').textContent='あいことばを入力してください';return;}
-  currentPassphrase=pp;
-  currentRoomKey=ppToKey(pp);
+  currentPassphrase=pp;currentRoomKey=ppToKey(pp);
   hide('ov-online');cancelWait=false;
-  showWaiting(`🏠 HOST — 「${pp}」`);
-  document.getElementById('wait-code').textContent='P2Pサーバーへ接続中...';
-
-  if(!myPeer||myPeer.destroyed){
-    const id=await tryInitPeer();
-    if(!id||cancelWait)return;
-  }
   myPN=1;myRole='host';
-  advertiseHost(myPeer.id);
+  board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  [1,2].forEach(placePieces);turn=1;captured={1:[],2:[]};
+  hostStartTs=Date.now();
+  gun.get(currentRoomKey).put({hostName:myName,board:JSON.stringify(board),ts:hostStartTs,status:'waiting'});
+  gun.get(currentRoomKey+'-g').put(null);
+  myMvNode().put(null);oppMvNode().put(null);
+  showWaiting(`🏠 HOST — 「${pp}」`);
   document.getElementById('wait-code').textContent=`あいことば:「${pp}」で待機中...`;
-  listenForGuest();
+  if(guestWatchNode)guestWatchNode.off();
+  guestWatchNode=gun.get(currentRoomKey+'-g');
+  guestWatchNode.on(data=>{
+    if(!data||!data.guestName||!data.ts||data.ts<hostStartTs||cancelWait)return;
+    opponentName=data.guestName;
+    gun.get(currentRoomKey).get('status').put('playing');
+    hideWaiting();startOnlineGame();
+  });
 }
 
 async function startJoin(){
   const pp=document.getElementById('pp-input').value.trim().toLowerCase();
   if(!pp){document.getElementById('match-err').textContent='あいことばを入力してください';return;}
-  currentPassphrase=pp;
-  currentRoomKey=ppToKey(pp);
+  currentPassphrase=pp;currentRoomKey=ppToKey(pp);
   hide('ov-online');cancelWait=false;
   showWaiting(`🚪 JOIN — 「${pp}」`);
-  document.getElementById('wait-code').textContent='P2Pサーバーへ接続中...';
-
-  const myPeerId=await tryInitPeer();
-  if(!myPeerId||cancelWait)return;
-
   document.getElementById('wait-code').textContent='部屋を検索中...';
   const data=await gunOnce(gun.get(currentRoomKey),6000);
   if(cancelWait)return;
-
-  if(!data||!data.peerId||(Date.now()-data.ts)>300000){
+  if(!data||!data.hostName||data.status!=='waiting'||(Date.now()-data.ts)>300000){
     hideWaiting();show('ov-online');
     document.getElementById('match-err').textContent='部屋が見つかりません。HOSTが待機しているか確認してください。';
     return;
   }
-
-  myPN=2;myRole='guest';opponentName=data.name||'???';
-  document.getElementById('wait-code').textContent=`${data.name||'???'} のサーバーに接続中...`;
-  const conn=myPeer.connect(data.peerId,{reliable:true,serialization:'json'});
-  const tmo=setTimeout(()=>{
-    if(!gameConn||!gameConn.open){hideWaiting();show('ov-online');document.getElementById('match-err').textContent='接続タイムアウト。再試行してください。';}
-  },14000);
-  conn.on('data',msg=>{
-    if(msg.type==='init'){
-      clearTimeout(tmo);
-      board=JSON.parse(msg.board);turn=1;captured={1:[],2:[]};
-      opponentName=msg.name||data.name||'???';
-      conn.send({type:'hello',name:myName});
-      wireConn(conn);hideWaiting();startOnlineGame();
-    }
-  });
+  myPN=2;myRole='guest';opponentName=data.hostName;
+  board=JSON.parse(data.board);turn=1;captured={1:[],2:[]};
+  gun.get(currentRoomKey+'-g').put({guestName:myName,ts:Date.now()});
+  hideWaiting();startOnlineGame();
 }
 
-async function returnToRoom(){
+function returnToRoom(){
   document.getElementById('btn-return-room').style.display='none';
   hide('ov-win');
-  if(gameConn){try{gameConn.close();}catch(e){}gameConn=null;}
-  cancelWait=false;
+  if(oppMoveNode){oppMoveNode.off();oppMoveNode=null;}
+  board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  [1,2].forEach(placePieces);turn=1;captured={1:[],2:[]};
+  hostStartTs=Date.now();
+  gun.get(currentRoomKey).put({hostName:myName,board:JSON.stringify(board),ts:hostStartTs,status:'waiting'});
+  gun.get(currentRoomKey+'-g').put(null);
+  myMvNode().put(null);oppMvNode().put(null);
   showWaiting(`🏠 HOST — 「${currentPassphrase}」`);
-  advertiseHost(myPeer.id);
   document.getElementById('wait-code').textContent=`あいことば:「${currentPassphrase}」で待機中...`;
-  listenForGuest();
+  if(guestWatchNode)guestWatchNode.off();
+  guestWatchNode=gun.get(currentRoomKey+'-g');
+  guestWatchNode.on(data=>{
+    if(!data||!data.guestName||!data.ts||data.ts<hostStartTs||cancelWait)return;
+    opponentName=data.guestName;
+    gun.get(currentRoomKey).get('status').put('playing');
+    hideWaiting();startOnlineGame();
+  });
 }
 
 function showVsMsg(){
@@ -674,20 +619,23 @@ function startOnlineGame(){
   if(!captured)captured={1:[],2:[]};
   document.getElementById('online-badge').classList.add('on');
   document.getElementById('diff-box').style.display='none';
-  updateNameLabel();
-  hide('ov-win');sndOnline();
+  updateNameLabel();hide('ov-win');sndOnline();
   showVsMsg();
+  startMoveListen();
 }
 
 function sendOnlineMove(fr,fc,tr,tc){
-  if(gameConn&&gameConn.open)gameConn.send({type:'move',fr,fc,tr,tc});
+  const ts=Date.now();lastMoveTs=ts;
+  myMvNode().put({fr,fc,tr,tc,ts});
 }
 
 function cleanupOnline(){
-  if(gameConn){try{gameConn.send({type:'bye'});}catch(e){}try{gameConn.close();}catch(e){}gameConn=null;}
-  if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}
-  if(currentRoomKey)gun.get(currentRoomKey).put(null);
-  myRole=null;currentPassphrase='';currentRoomKey='';hostConnListener=null;
+  if(oppMoveNode){oppMoveNode.off();oppMoveNode=null;}
+  if(guestWatchNode){guestWatchNode.off();guestWatchNode=null;}
+  if(currentRoomKey){
+    gun.get(currentRoomKey).get('status').put('abandoned');
+  }
+  myRole=null;currentPassphrase='';currentRoomKey='';
 }
 
 function showWaiting(msg){document.getElementById('wait-msg').textContent=msg;show('ov-waiting');}
