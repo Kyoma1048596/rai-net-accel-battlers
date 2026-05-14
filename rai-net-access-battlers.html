@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>電ネット・アクセルバトラーズ</title>
 <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
@@ -139,7 +140,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
       <div id="name-row">▶ <span id="name-label"></span> <button id="name-edit-btn" onclick="editName()">編集</button></div>
     </div>
 
-    <button onclick="newGame()">// NEW GAME [F2]</button>
+    <button onclick="showTitle()">// TITLE [F2]</button>
     <button class="btn-online" onclick="enterOnlineMode()">// 🌐 オンライン対戦</button>
 
     <div class="box" id="diff-box">
@@ -193,7 +194,64 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 <div class="overlay" id="ov-win">
   <div class="ov-title" id="ov-win-title"></div>
   <div class="ov-sub" id="ov-win-sub">EL PSY KONGROO</div>
-  <button onclick="newGame()">// RETRY</button>
+  <button onclick="showTitle()">// TITLE へ戻る</button>
+</div>
+
+<!-- Title screen overlay -->
+<div class="overlay" id="ov-title">
+  <div class="ov-title" style="color:#00ff41;font-size:clamp(1.1rem,4vw,2rem)">電ネット・アクセルバトラーズ</div>
+  <div class="ov-sub">STEINS;GATE :: DEN-NET ACCEL BATTLERS v1.0</div>
+  <div class="ov-panel" style="width:min(300px,90vw)">
+    <button onclick="selectDifficulty()">// ⚔ CPU 対戦</button>
+    <button class="btn-online" onclick="enterOnlineMode()">// 🌐 オンライン対戦</button>
+    <button onclick="showRules()" style="border-color:#445544;color:#669966;margin-top:4px">// 📖 ルール説明</button>
+  </div>
+  <div style="font-size:.6rem;color:#1a3a1a;margin-top:4px;letter-spacing:1px">[ F2 ] TITLE</div>
+</div>
+
+<!-- Difficulty select overlay -->
+<div class="overlay" id="ov-difficulty">
+  <div class="ov-sub" style="color:#00ff41;letter-spacing:3px;font-size:.9rem">CPU 対戦 — 難易度選択</div>
+  <div class="ov-panel" style="width:min(300px,90vw)">
+    <button onclick="startCpuGame(1)" style="border-color:#224422;color:#668866">// 初級 &nbsp;— ランダム多め</button>
+    <button onclick="startCpuGame(2)" style="border-color:#00ff41;color:#00ff41">// 中級 &nbsp;— バランス型 ★</button>
+    <button onclick="startCpuGame(3)" style="border-color:#ff6600;color:#ff8833">// 上級 &nbsp;— 最強AI</button>
+    <button onclick="showTitle()" style="border-color:#333;color:#555;margin-top:6px">// 戻る</button>
+  </div>
+</div>
+
+<!-- Rules overlay -->
+<div class="overlay" id="ov-rules">
+  <div class="ov-panel" style="width:min(380px,94vw);max-height:85vh;overflow-y:auto">
+    <h3>// RULES — 電ネット・アクセルバトラーズ</h3>
+    <div class="rule-line" style="font-size:.7rem;line-height:2">
+      <b style="color:#00ff41">◆ 勝利条件</b><br>
+      ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行に移動させる<br>
+      ② 相手の <span class="rt lnk">★LINK</span> を撃破する<br>
+      <br>
+      <b style="color:#00ff41">◆ 駒の種類（各8枚）</b><br>
+      <span class="rt lnk">★LINK</span> ×1 &nbsp;最重要駒。ゴールを目指せ<br>
+      <span class="rt prog">P2/P3/P4</span> ×3 &nbsp;数値大＝強い PROGRAM<br>
+      <span class="rt fw">F/W</span> ×2 &nbsp;&nbsp;&nbsp;FIREWALL（盾役）<br>
+      <span class="rt vir">VIRUS</span> ×2 &nbsp;VIRUS（奇襲役）<br>
+      <br>
+      <b style="color:#00ff41">◆ 戦闘ルール</b><br>
+      <span class="rt vir">VIRUS</span> → <span class="rt prog">PROG全種</span>・<span class="rt lnk">★LINK</span> に勝利<br>
+      <span class="rt fw">F/W</span> → <span class="rt vir">VIRUS</span>・<span class="rt prog">P2</span> に勝利<br>
+      <span class="rt prog">P3/P4</span> → <span class="rt fw">F/W</span> を貫通して勝利<br>
+      <span class="rt lnk">★LINK</span> → <span class="rt fw">F/W</span> を通過して勝利<br>
+      PROG同士 → 数値が大きい方が勝利<br>
+      引き分け → 両方の駒が消滅<br>
+      <br>
+      <b style="color:#00ff41">◆ 基本ルール</b><br>
+      • 1ターンに1駒を上下左右1マス移動<br>
+      • 駒は最初裏向き（相手には種類が見えない）<br>
+      • 戦闘発生時に両方の駒が表向きになる<br>
+      • <span class="rt lnk">★LINK</span> は初期配置の後列に固定される<br>
+      • オンライン対戦はあいことばで友達と対局可能
+    </div>
+    <button onclick="showTitle()" style="border-color:#333;color:#555;margin-top:10px">// 戻る</button>
+  </div>
 </div>
 
 <!-- Online menu overlay -->
@@ -208,7 +266,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
       <button onclick="startPassMatch()">入室</button>
     </div>
     <div class="err-msg" id="match-err"></div>
-    <button onclick="hide('ov-online')" style="margin-top:6px;border-color:#333;color:#555">// CANCEL</button>
+    <button onclick="hide('ov-online');showTitle()" style="margin-top:6px;border-color:#333;color:#555">// 戻る</button>
   </div>
 </div>
 
@@ -265,7 +323,7 @@ const ROWS=6,COLS=4,GOAL={1:0,2:5},HOME={1:[3,4],2:[1,2]},CPU_DELAY=950;
 let board,turn,sel,validMoves,over,captured,cpuThinking;
 let thinkTimer=null,tickIv=null,difficulty=2;
 let gameMode='cpu',myRole=null,myPN=1;
-let roomNode=null,lastMoveTs=0,applyingRemote=false;
+let myPeer=null,gameConn=null,applyingRemote=false;
 let cancelWait=false;
 let myName=localStorage.getItem('dna-name')||'';
 let opponentName='???';
@@ -460,13 +518,48 @@ function enterOnlineMode(){
   show('ov-online');
 }
 
-async function scanQueue(){
+// ── PeerJS helpers ───────────────────────────────────
+function initPeer(ms=12000){
+  return new Promise((resolve,reject)=>{
+    if(myPeer){try{myPeer.destroy();}catch(e){}}
+    myPeer=new Peer({debug:0});
+    const t=setTimeout(()=>reject(new Error('timeout')),ms);
+    myPeer.on('open',id=>{clearTimeout(t);resolve(id);});
+    myPeer.on('error',err=>{clearTimeout(t);reject(err);});
+  });
+}
+
+async function tryInitPeer(){
+  try{return await initPeer();}
+  catch(e){
+    hideWaiting();show('ov-online');
+    document.getElementById('match-err').textContent='P2P接続失敗。再試行してください。';
+    return null;
+  }
+}
+
+function wireConn(conn){
+  gameConn=conn;
+  conn.on('data',msg=>{
+    if(msg.type==='move'&&!applyingRemote&&!over){
+      applyingRemote=true;sel=null;validMoves=[];
+      doMove(msg.fr|0,msg.fc|0,msg.tr|0,msg.tc|0);
+      applyingRemote=false;
+    }else if(msg.type==='bye'&&!over){
+      over=true;render();setMsg('相手が切断しました。');
+    }
+  });
+  conn.on('close',()=>{if(!over){over=true;setMsg('切断されました。');render();}});
+  conn.on('error',()=>{if(!over){over=true;setMsg('通信エラー。');render();}});
+}
+
+function scanQueue(){
   return new Promise(resolve=>{
     let best=null;
-    gun.get('dna-q').map().once((data,uid)=>{
+    gun.get('dna-q2').map().once((data,uid)=>{
       if(!data||uid===myUid||uid==='_'||typeof data!=='object')return;
-      if(data.roomId&&data.ts&&(Date.now()-data.ts)<120000){
-        if(!best||data.ts<best.ts)best={uid,roomId:data.roomId,ts:data.ts};
+      if(data.peerId&&data.ts&&(Date.now()-data.ts)<120000){
+        if(!best||data.ts<best.ts)best={uid,peerId:data.peerId,name:data.name||'???',ts:data.ts};
       }
     });
     setTimeout(()=>resolve(best),3000);
@@ -474,172 +567,128 @@ async function scanQueue(){
 }
 
 async function startRandomMatch(){
-  hide('ov-online');
-  cancelWait=false;
-  showWaiting('ランダム対戦中...');
-  document.getElementById('wait-code').textContent='接続中...（最大5秒）';
-
-  await new Promise(r=>setTimeout(r,2500));
-  if(cancelWait)return;
+  hide('ov-online');cancelWait=false;
+  showWaiting('ランダム対戦...');
+  document.getElementById('wait-code').textContent='P2Pサーバーへ接続中...';
+  const myPeerId=await tryInitPeer();
+  if(!myPeerId||cancelWait)return;
 
   document.getElementById('wait-code').textContent='対戦相手を検索中...';
-  let found=await scanQueue();
+  const found=await scanQueue();
   if(cancelWait)return;
 
   if(found){
-    gun.get('dna-q').get(found.uid).put(null);
-    await joinRoom(found.roomId,'guest');
+    gun.get('dna-q2').get(found.uid).put(null);
+    myPN=2;myRole='guest';opponentName=found.name;
+    document.getElementById('wait-code').textContent=`${found.name} に接続中...`;
+    const conn=myPeer.connect(found.peerId,{reliable:true,serialization:'json'});
+    const tmo=setTimeout(()=>{
+      if(!gameConn||!gameConn.open){hideWaiting();show('ov-online');document.getElementById('match-err').textContent='接続タイムアウト';}
+    },12000);
+    conn.on('data',msg=>{
+      if(msg.type==='init'){
+        clearTimeout(tmo);
+        board=JSON.parse(msg.board);turn=1;captured={1:[],2:[]};
+        opponentName=msg.name||found.name;
+        conn.send({type:'hello',name:myName});
+        wireConn(conn);hideWaiting();startOnlineGame();
+      }
+    });
   }else{
-    const rid='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-    await createRoom(rid,'host');
-    gun.get('dna-q').get(myUid).put({ts:Date.now(),roomId:rid,name:myName});
+    myPN=1;myRole='host';
+    board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+    [1,2].forEach(placePieces);turn=1;captured={1:[],2:[]};
+    gun.get('dna-q2').get(myUid).put({ts:Date.now(),peerId:myPeerId,name:myName});
     document.getElementById('wait-code').textContent='対戦相手を待っています...';
-    waitForGuest();
+    myPeer.on('connection',conn=>{
+      if(cancelWait)return;
+      gun.get('dna-q2').get(myUid).put(null);
+      conn.on('open',()=>{conn.send({type:'init',board:JSON.stringify(board),name:myName});});
+      conn.on('data',msg=>{
+        if(msg.type==='hello'){
+          opponentName=msg.name||'???';
+          wireConn(conn);hideWaiting();startOnlineGame();
+        }
+      });
+    });
   }
 }
 
 async function startPassMatch(){
   const pp=document.getElementById('pp-input').value.trim().toLowerCase();
   if(!pp){document.getElementById('match-err').textContent='あいことばを入力してください';return;}
-  hide('ov-online');
-  cancelWait=false;
+  hide('ov-online');cancelWait=false;
   showWaiting(`あいことば: 「${pp}」`);
-  document.getElementById('wait-code').textContent='接続中...';
+  document.getElementById('wait-code').textContent='P2Pサーバーへ接続中...';
+  const myPeerId=await tryInitPeer();
+  if(!myPeerId||cancelWait)return;
 
-  await new Promise(r=>setTimeout(r,2500));
+  const key='dna-pp3-'+[...pp].map(c=>c.charCodeAt(0).toString(36)).join('').slice(0,20);
+  const data=await gunOnce(gun.get(key),5000);
   if(cancelWait)return;
 
-  const rid='pp-'+[...pp].map(c=>c.charCodeAt(0).toString(36)).join('').slice(0,20);
-  const data=await gunOnce(gun.get('dna-room-'+rid),6000);
-
-  if(cancelWait)return;
-
-  const isStale=!data||!data.host||data.status==='done'||data.status==='abandoned';
-  if(isStale){
-    await createRoom(rid,'host');
+  const stale=!data||!data.peerId||!data.ts||(Date.now()-data.ts)>180000;
+  if(stale){
+    myPN=1;myRole='host';
+    board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+    [1,2].forEach(placePieces);turn=1;captured={1:[],2:[]};
+    gun.get(key).put({peerId:myPeerId,name:myName,ts:Date.now()});
     document.getElementById('wait-code').textContent='対戦相手を待っています...';
-    waitForGuest();
-  }else if(data.status==='waiting'&&!data.guest){
-    await joinRoom(rid,'guest');
-  }else{
-    hideWaiting();
-    show('ov-online');
-    setTimeout(()=>document.getElementById('match-err').textContent='このルームは満員か進行中です',50);
-  }
-}
-
-async function createRoom(rid,role){
-  myRole=role;myPN=1;
-  board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
-  [1,2].forEach(placePieces);
-  roomNode=gun.get('dna-room-'+rid);
-  const boardStr=JSON.stringify(board);
-  await new Promise(resolve=>{
-    roomNode.put({host:myUid,guest:null,board:boardStr,turn:1,status:'waiting',lastMove:null,hostName:myName},resolve);
-  });
-}
-
-function waitForGuest(){
-  roomNode.get('status').on(function onStatus(status){
-    if(status==='playing'){
-      roomNode.get('status').off();
-      gun.get('dna-q').get(myUid).put(null);
+    myPeer.on('connection',conn=>{
       if(cancelWait)return;
-      hideWaiting();
-      startOnlineGame();
-    }
-  });
-}
-
-async function joinRoom(rid,role){
-  myRole=role;myPN=2;
-  roomNode=gun.get('dna-room-'+rid);
-  const data=await gunOnce(roomNode,5000);
-  if(!data||!data.board){
-    hideWaiting();show('ov-online');
-    setTimeout(()=>document.getElementById('match-err').textContent='接続に失敗しました。再試行してください',50);
-    return;
+      gun.get(key).put(null);
+      conn.on('open',()=>{conn.send({type:'init',board:JSON.stringify(board),name:myName});});
+      conn.on('data',msg=>{
+        if(msg.type==='hello'){
+          opponentName=msg.name||'???';
+          wireConn(conn);hideWaiting();startOnlineGame();
+        }
+      });
+    });
+  }else{
+    myPN=2;myRole='guest';opponentName=data.name||'???';
+    document.getElementById('wait-code').textContent=`${data.name||'???'} に接続中...`;
+    const conn=myPeer.connect(data.peerId,{reliable:true,serialization:'json'});
+    const tmo=setTimeout(()=>{
+      if(!gameConn||!gameConn.open){hideWaiting();show('ov-online');document.getElementById('match-err').textContent='接続タイムアウト。相手が待機しているか確認してください。';}
+    },12000);
+    conn.on('data',msg=>{
+      if(msg.type==='init'){
+        clearTimeout(tmo);
+        board=JSON.parse(msg.board);turn=1;captured={1:[],2:[]};
+        opponentName=msg.name||data.name||'???';
+        conn.send({type:'hello',name:myName});
+        wireConn(conn);hideWaiting();startOnlineGame();
+      }
+    });
   }
-  board=JSON.parse(data.board);
-  turn=data.turn||1;
-  captured={1:[],2:[]};
-  opponentName=data.hostName||'???';
-  roomNode.get('guest').put(myUid);
-  roomNode.get('guestName').put(myName);
-  roomNode.get('status').put('playing');
-  hideWaiting();
-  startOnlineGame();
 }
 
 function showVsMsg(){
   document.getElementById('badge-role').textContent=`${myName} vs ${opponentName}`;
-  setMsg(`マッチ成立！ ${myName}（あなた / P${myPN}）vs ${opponentName}（相手 / P${myPN===1?2:1}）`);
+  setMsg(`マッチ成立！ ${myName}（P${myPN}）vs ${opponentName}（P${myPN===1?2:1}）`);
   render();
 }
 
 function startOnlineGame(){
-  gameMode='online';over=false;sel=null;validMoves=[];lastMoveTs=0;
+  gameMode='online';over=false;sel=null;validMoves=[];
   if(!captured)captured={1:[],2:[]};
   document.getElementById('online-badge').classList.add('on');
   document.getElementById('diff-box').style.display='none';
   updateNameLabel();
   hide('ov-win');sndOnline();
-  if(myRole==='host'){
-    document.getElementById('badge-role').textContent=`${myName} vs ???`;
-    setMsg(`${myName}（P1）— 相手の接続を待っています...`);
-    let gotName=false;
-    roomNode.get('guestName').on(function cb(n){
-      if(!n||gotName)return;
-      gotName=true;
-      opponentName=n;
-      showVsMsg();
-    });
-  }else{
-    showVsMsg();
-  }
-
-  // Listen for opponent moves
-  roomNode.get('lastMove').on(move=>{
-    if(!move||typeof move!=='object'||!move.ts||!move.by)return;
-    if(move.ts<=lastMoveTs)return;
-    if(move.by===myRole){lastMoveTs=move.ts;return;}
-    if(over||applyingRemote)return;
-    lastMoveTs=move.ts;
-    applyingRemote=true;
-    sel=null;validMoves=[];
-    doMove(move.fr|0,move.fc|0,move.tr|0,move.tc|0);
-    applyingRemote=false;
-  });
-
-  // Listen for disconnect
-  roomNode.get('status').on(status=>{
-    if(status==='abandoned'&&!over){
-      over=true;cleanupOnline();setMsg('相手が切断しました。');render();
-    }
-  });
-
-  render();
+  showVsMsg();
 }
 
 function sendOnlineMove(fr,fc,tr,tc){
-  if(!roomNode)return;
-  const ts=Date.now();
-  lastMoveTs=ts;
-  roomNode.get('lastMove').put({fr,fc,tr,tc,by:myRole,ts});
-  roomNode.get('turn').put(turn);
-  roomNode.get('board').put(JSON.stringify(board));
-  if(over){const w=checkWin();if(w!==0)roomNode.get('status').put('done');}
+  if(gameConn&&gameConn.open)gameConn.send({type:'move',fr,fc,tr,tc});
 }
 
 function cleanupOnline(){
-  if(roomNode){
-    roomNode.get('lastMove').off();
-    roomNode.get('status').off();
-    roomNode.get('guest').off();
-    if(myRole==='host')roomNode.get('status').put('abandoned');
-  }
-  gun.get('dna-q').get(myUid).put(null);
-  roomNode=null;myRole=null;
+  if(gameConn){try{gameConn.send({type:'bye'});}catch(e){}try{gameConn.close();}catch(e){}gameConn=null;}
+  if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}
+  gun.get('dna-q2').get(myUid).put(null);
+  myRole=null;
 }
 
 function showWaiting(msg){document.getElementById('wait-msg').textContent=msg;show('ov-waiting');}
@@ -679,21 +728,41 @@ function confirmName(){
   myName=v||'PLAYER';
   localStorage.setItem('dna-name',myName);
   hide('ov-name');
-  newGame();
+  showTitle();
 }
 function editName(){
   document.getElementById('name-input').value=myName;
   show('ov-name');
 }
+function showTitle(){
+  ['ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win'].forEach(hide);
+  if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
+  if(tickIv){clearInterval(tickIv);tickIv=null;}
+  cleanupOnline();
+  show('ov-title');
+}
+function selectDifficulty(){
+  hide('ov-title');
+  show('ov-difficulty');
+}
+function showRules(){
+  hide('ov-title');
+  show('ov-rules');
+}
+function startCpuGame(d){
+  setDiff(d);
+  hide('ov-difficulty');
+  newGame();
+}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='F2')newGame();
+  if(e.key==='F2')showTitle();
   if(e.key==='Escape'){sel=null;validMoves=[];sndDesel();render();}
 });
 
 if(myName){
   hide('ov-name');
-  newGame();
+  showTitle();
 }else{
   document.getElementById('name-input').focus();
 }
