@@ -89,6 +89,15 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 .cap-chip.cf { background:#001a0d; border:1px solid #005522; color:#44cc77; }
 .cap-chip.cv { background:#111100; border:1px solid #555500; color:#aaaa22; }
 .cap-chip.cl { background:#1a0d00; border:1px solid #664400; color:#cc8822; }
+.cap-chip.cm { background:#001a18; border:1px solid #005544; color:#33ccaa; }
+.piece.t-medic { background:linear-gradient(145deg,#001a18,#003330); border:2px solid #00ccaa; color:#44ffdd; box-shadow:0 0 10px rgba(0,200,170,.5); animation:mp 2s ease-in-out infinite; }
+.piece.t-medic.p2 { border-color:#cc44aa; box-shadow:0 0 10px rgba(200,68,170,.5); animation:mp2 2s ease-in-out infinite; }
+@keyframes mp  { 0%,100%{box-shadow:0 0 8px rgba(0,200,170,.4);}50%{box-shadow:0 0 20px rgba(0,200,170,.9);} }
+@keyframes mp2 { 0%,100%{box-shadow:0 0 8px rgba(200,68,170,.4);}50%{box-shadow:0 0 20px rgba(200,68,170,.9);} }
+.rt.med { background:#001a18; border:1px solid #00ccaa; color:#44ffdd; }
+.cell.center-line { border-top:2px solid #226633!important; border-bottom:2px solid #226633!important; background:#050e05; }
+.mode-btn { padding:7px 4px; font-size:.7rem; letter-spacing:1px; border-color:#004400; color:#446644; background:#050e05; }
+.mode-btn.on { border-color:#00ff41; color:#00ff41; background:#0a1e0a; }
 
 /* Overlays */
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); flex-direction:column; align-items:center; justify-content:center; z-index:200; gap:14px; padding:20px; }
@@ -275,6 +284,13 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 <div class="overlay" id="ov-online">
   <div class="ov-panel" style="width:min(320px,90vw)">
     <h3>// オンライン対戦</h3>
+    <div style="margin-bottom:10px">
+      <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE (HOSTが選択)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        <button id="mode-btn-classic" class="mode-btn on" onclick="setOnlineMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6 ／ 8駒</span></button>
+        <button id="mode-btn-extended" class="mode-btn" onclick="setOnlineMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒＋MEDIC</span></button>
+      </div>
+    </div>
     <div style="font-size:.68rem;color:#446644;margin-bottom:10px;line-height:1.7">
       <b style="color:#00cc33">HOST</b>：あいことばを決めて部屋を作り待機<br>
       <b style="color:#0099cc">JOIN</b>：あいことばを入力して部屋に参加
@@ -288,6 +304,13 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
     <div class="err-msg" id="match-err"></div>
     <button onclick="hide('ov-online');showTitle()" style="margin-top:8px;border-color:#333;color:#555">// 戻る</button>
   </div>
+</div>
+
+<!-- MEDIC transform overlay -->
+<div class="overlay" id="ov-transform">
+  <div class="ov-title" style="color:#00ccaa;font-size:clamp(1rem,3vw,1.5rem)">✚ MEDIC TRANSFORM</div>
+  <div class="ov-sub" style="color:#00aa88">VIRUSを撃破！変身先を選べ</div>
+  <div id="transform-btns" style="width:min(280px,90vw);display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
 </div>
 
 <!-- Waiting overlay -->
@@ -361,6 +384,10 @@ if(bc) {
     if(msg.type==='placement' && msg.key===currentRoomKey && msg.player!==myPN && gameMode==='placing') {
       applyOppPlacement(msg.d);
     }
+    // MEDIC transform from opponent (same device)
+    if(msg.type==='transform' && msg.key===currentRoomKey && msg.player!==myPN) {
+      applyOppTransform(msg);
+    }
     // Move from opponent
     if(msg.type==='move' && msg.key===currentRoomKey && msg.player!==myPN && gameMode==='online') {
       if(!msg.ts || msg.ts<=lastMoveTs || over || applyingRemote) return;
@@ -373,7 +400,19 @@ if(bc) {
 }
 
 // ── Constants ────────────────────────────────────────
-const ROWS=6,COLS=4,GOAL={1:0,2:5},HOME={1:[3,4],2:[1,2]},CPU_DELAY=950;
+let ROWS=6,COLS=4,GOAL={1:0,2:5},HOME={1:[3,4],2:[1,2]};
+const CPU_DELAY=950;
+let gameVariant='classic',selectedOnlineMode='classic';
+function applyVariant(v){
+  gameVariant=v;
+  if(v==='extended'){ROWS=7;COLS=5;GOAL={1:0,2:6};HOME={1:[4,5],2:[1,2]};}
+  else{ROWS=6;COLS=4;GOAL={1:0,2:5};HOME={1:[3,4],2:[1,2]};}
+}
+function setOnlineMode(m){
+  selectedOnlineMode=m;
+  document.getElementById('mode-btn-classic').classList.toggle('on',m==='classic');
+  document.getElementById('mode-btn-extended').classList.toggle('on',m==='extended');
+}
 
 // ── State ────────────────────────────────────────────
 let board,turn,sel,validMoves,over,captured,cpuThinking;
@@ -412,8 +451,30 @@ function placePieces(player){
   for(let c=0;c<COLS;c++)board[backRow][c]=back[c];
 }
 
+function placePiecesExt(player){
+  const pieces=sh([
+    {player,type:'firewall',value:null,revealed:false},
+    {player,type:'firewall',value:null,revealed:false},
+    {player,type:'virus',value:null,revealed:false},
+    {player,type:'virus',value:null,revealed:false},
+    {player,type:'program',value:4,revealed:false},
+    {player,type:'program',value:3,revealed:false},
+    {player,type:'program',value:3,revealed:false},
+    {player,type:'program',value:2,revealed:false},
+    {player,type:'medic',value:null,revealed:false},
+    {player,type:'linker',value:null,revealed:false},
+  ]);
+  const frontRow=player===1?HOME[1][0]:HOME[2][0];
+  const backRow=player===1?HOME[1][1]:HOME[2][1];
+  for(let c=0;c<COLS;c++)board[frontRow][c]=pieces[c];
+  for(let c=0;c<COLS;c++)board[backRow][c]=pieces[COLS+c];
+}
+function placeFn(player){return gameVariant==='extended'?placePiecesExt(player):placePieces(player);}
+
 // ── Battle ───────────────────────────────────────────
 function beats(a,b){
+  if(a.type==='medic')return b.type==='virus';
+  if(b.type==='medic')return a.type!=='virus';
   if(a.type==='virus')return b.type==='program'||b.type==='linker';
   if(a.type==='firewall')return b.type==='virus'||(b.type==='program'&&b.value<=2);
   if(a.type==='program'){if(b.type==='program')return a.value>b.value;if(b.type==='firewall')return a.value>=3;if(b.type==='linker')return true;return false;}
@@ -421,7 +482,7 @@ function beats(a,b){
   return false;
 }
 function resolveBattle(att,def){const aw=beats(att,def),dw=beats(def,att);if(aw&&!dw)return'att';if(dw&&!aw)return'def';return'both';}
-function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'★LNK'}[p.type]||'?';}
+function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'★LNK',medic:'MED'}[p.type]||'?';}
 
 // ── Move ─────────────────────────────────────────────
 function getMoves(r,c){
@@ -442,10 +503,18 @@ function doMove(fr,fc,tr,tc){
     const winner=turn,loser=turn===1?2:1;
     sndBattle();
     let msg=`⚔ ${pLabel(mover)} vs ${pLabel(target)} `;
-    if(res==='att'){board[tr][tc]=mover;board[fr][fc]=null;captured[winner].push({...target});msg+=`→ ${pLabel(mover)} 勝利！`;setTimeout(()=>isMine?sndWin():sndLose(),120);}
+    let medicBeat=false;
+    if(res==='att'){board[tr][tc]=mover;board[fr][fc]=null;captured[winner].push({...target});msg+=`→ ${pLabel(mover)} 勝利！`;setTimeout(()=>isMine?sndWin():sndLose(),120);if(mover.type==='medic'&&target.type==='virus')medicBeat=true;}
     else if(res==='def'){board[fr][fc]=null;captured[loser].push({...mover});msg+=`→ ${pLabel(target)} 防御！`;setTimeout(()=>isMine?sndLose():sndWin(),120);}
     else{board[tr][tc]=null;board[fr][fc]=null;captured[winner].push({...mover});captured[loser].push({...target});msg+=`→ 相打ち！`;setTimeout(sndDraw,120);}
     setMsg(msg);
+    if(medicBeat){
+      render();
+      if(applyingRemote){startTransformListen();return;}
+      if(gameMode==='online'){sendOnlineMove(fr,fc,tr,tc);showTransformPicker(tr,tc);return;}
+      if(gameMode==='cpu'&&turn===2){cpuMedicTransform(tr,tc);return;}
+      showTransformPicker(tr,tc);return;
+    }
   }
   const w=checkWin();
   if(w!==0){over=true;if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);render();showWin(w);return;}
@@ -460,9 +529,87 @@ function checkWin(){
     if(board[GOAL[1]][c]?.type==='linker'&&board[GOAL[1]][c].player===1)return 1;
     if(board[GOAL[2]][c]?.type==='linker'&&board[GOAL[2]][c].player===2)return 2;
   }
-  let lnk={1:false,2:false};
-  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p?.type==='linker')lnk[p.player]=true;}
-  if(!lnk[1]&&!lnk[2])return'draw';if(!lnk[1])return 2;if(!lnk[2])return 1;return 0;
+  let lnk={1:0,2:0};
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p?.type==='linker')lnk[p.player]++;}
+  if(lnk[1]===0&&lnk[2]===0)return'draw';if(lnk[1]===0)return 2;if(lnk[2]===0)return 1;return 0;
+}
+
+// ── MEDIC Transform ──────────────────────────────────
+let lastTransformTs=0;
+
+function showTransformPicker(r,c){
+  const btns=document.getElementById('transform-btns');btns.innerHTML='';
+  const choices=[
+    {type:'program',value:4,label:'PROG 4',cls:'prog'},
+    {type:'program',value:3,label:'PROG 3',cls:'prog'},
+    {type:'program',value:2,label:'PROG 2',cls:'prog'},
+    {type:'firewall',value:null,label:'F/W',cls:'fw'},
+    {type:'virus',value:null,label:'VIRUS',cls:'vir'},
+    {type:'linker',value:null,label:'★ LINKER',cls:'lnk'},
+  ];
+  choices.forEach(({type,value,label,cls})=>{
+    const btn=document.createElement('button');
+    btn.innerHTML=`<span class="rt ${cls}">${label}</span> に変身`;
+    btn.onclick=()=>chooseMedicTransform(r,c,type,value);
+    btns.appendChild(btn);
+  });
+  show('ov-transform');
+}
+
+function chooseMedicTransform(r,c,type,value){
+  hide('ov-transform');
+  board[r][c]={...board[r][c],type,value,revealed:true};
+  if(gameMode==='online')sendOnlineTransform(r,c,type,value);
+  const w=checkWin();
+  if(w!==0){over=true;render();showWin(w);return;}
+  turn=turn===1?2:1;sel=null;validMoves=[];render();
+  if(gameMode==='cpu'&&turn===2)scheduleCpu();
+}
+
+function cpuMedicTransform(r,c){
+  const type='linker',value=null;
+  board[r][c]={...board[r][c],type,value,revealed:true};
+  setMsg('CPU MEDIC → ★LINKERに変身！');
+  const w=checkWin();
+  if(w!==0){over=true;render();showWin(w);return;}
+  turn=1;sel=null;validMoves=[];render();
+}
+
+function sendOnlineTransform(r,c,type,value){
+  const ts=Date.now();lastTransformTs=ts;
+  const tf={r,c,type,value,ts};
+  fbPut(currentRoomKey+'tf'+myPN,tf);
+  lrPut(currentRoomKey+'-tf'+myPN,tf);
+  if(bc)bc.postMessage({type:'transform',key:currentRoomKey,player:myPN,...tf});
+}
+
+function startTransformListen(){
+  const oppPN=myPN===1?2:1;
+  if(window._tfIv)clearInterval(window._tfIv);
+  if(window._tfLrIv)clearInterval(window._tfLrIv);
+  window._tfIv=setInterval(async()=>{
+    if(!currentRoomKey){clearInterval(window._tfIv);return;}
+    const d=await fbGet(currentRoomKey+'tf'+oppPN);
+    if(d&&d.ts&&d.ts>lastTransformTs){clearInterval(window._tfIv);window._tfIv=null;applyOppTransform(d);}
+  },500);
+  if(localRelayBase){
+    window._tfLrIv=setInterval(async()=>{
+      if(!currentRoomKey){clearInterval(window._tfLrIv);return;}
+      const d=await lrGet(currentRoomKey+'-tf'+oppPN);
+      if(d&&d.ts&&d.ts>lastTransformTs){clearInterval(window._tfLrIv);window._tfLrIv=null;applyOppTransform(d);}
+    },500);
+  }
+}
+
+function applyOppTransform(d){
+  if(d.ts<=lastTransformTs)return;
+  lastTransformTs=d.ts;
+  if(window._tfIv){clearInterval(window._tfIv);window._tfIv=null;}
+  if(window._tfLrIv){clearInterval(window._tfLrIv);window._tfLrIv=null;}
+  board[d.r][d.c]={...board[d.r][d.c],type:d.type,value:d.value,revealed:true};
+  const w=checkWin();
+  if(w!==0){over=true;render();showWin(w);return;}
+  turn=turn===1?2:1;sel=null;validMoves=[];render();
 }
 
 // ── CPU AI ───────────────────────────────────────────
@@ -503,7 +650,7 @@ function scoreMove(fr,fc,tr,tc,piece){
 function clickCell(r,c){
   if(over)return;
   if(gameMode==='placing'){
-    const myZone=myPN===1?[3,4]:[1,2];
+    const myZone=HOME[myPN];
     if(!myZone.includes(r)){sel=null;validMoves=[];render();return;}
     if(sel){
       const tmp=board[sel[0]][sel[1]];
@@ -531,25 +678,31 @@ function clickCell(r,c){
 function pieceInfo(p){
   const visible=p.player===myPN||p.revealed;
   if(!visible)return['?','???'];
-  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK']}[p.type];
+  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC']}[p.type];
 }
 function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type} p${p.player}`;}
 
 function render(){
   const bd=document.getElementById('board');bd.innerHTML='';
-  const myZone=myPN===1?[3,4]:[1,2];
-  const rowOrder=myPN===2?[5,4,3,2,1,0]:[0,1,2,3,4,5];
+  bd.style.gridTemplateColumns=`repeat(${COLS},72px)`;
+  bd.style.gridTemplateRows=`repeat(${ROWS},72px)`;
+  const myZone=HOME[myPN];
+  const baseRows=Array.from({length:ROWS},(_,i)=>i);
+  const rowOrder=myPN===2?[...baseRows].reverse():baseRows;
+  const centerRow=gameVariant==='extended'?3:-1;
   for(const r of rowOrder)for(let c=0;c<COLS;c++){
     const el=document.createElement('div');el.className='cell';
-    if(r===0)el.classList.add('goal-top');if(r===5)el.classList.add('goal-bot');
+    if(r===GOAL[1])el.classList.add('goal-top');
+    if(r===GOAL[2])el.classList.add('goal-bot');
+    if(r===centerRow)el.classList.add('center-line');
     if(gameMode==='placing'&&myZone.includes(r))el.classList.add('place-zone');
-    if(gameMode==='placing'&&!myZone.includes(r)&&r!==0&&r!==5)el.classList.add('cpu-block');
+    if(gameMode==='placing'&&!myZone.includes(r)&&r!==GOAL[1]&&r!==GOAL[2])el.classList.add('cpu-block');
     if((gameMode==='cpu'&&cpuThinking)||over)el.classList.add('cpu-block');
     if(sel&&sel[0]===r&&sel[1]===c)el.classList.add('selected');
     if(validMoves.some(([mr,mc])=>mr===r&&mc===c))el.classList.add('moveable');
     const corner=document.createElement('span');corner.className='corner';
-    if(r===0&&c===0)corner.textContent='P1 GOAL';
-    else if(r===5&&c===0)corner.textContent='P2 GOAL';
+    if(r===GOAL[1]&&c===0)corner.textContent='P1 GOAL';
+    else if(r===GOAL[2]&&c===0)corner.textContent='P2 GOAL';
     else corner.textContent=`${c+1}:${r+1}`;
     el.appendChild(corner);
     const p=board[r][c];
@@ -563,7 +716,7 @@ function render(){
   else{const isMyTurn=turn===myPN;tl.innerHTML=isMyTurn?`<span class="c1">▶ ${myName} のターン</span>`:`<span class="c2">▶ ${gameMode==='cpu'?'CPU':opponentName} のターン</span>`;}
   renderCaptured();
 }
-function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl'}[p.type]||'cp';}
+function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl',medic:'cm'}[p.type]||'cp';}
 function renderCaptured(){
   [1,2].forEach(pl=>{
     const el=document.getElementById(`cap${pl}`);const list=captured[pl];
@@ -577,6 +730,7 @@ function setThinkBar(p){document.getElementById('think-fill').style.width=p+'%';
 
 // ── Game start ───────────────────────────────────────
 function newGame(){
+  applyVariant('classic');
   if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
   if(tickIv){clearInterval(tickIv);tickIv=null;}
   cleanupOnline();
@@ -636,20 +790,25 @@ async function startHost(){
   currentPassphrase=pp;currentRoomKey=ppToKey(pp);
   hide('ov-online');cancelWait=false;
   myPN=1;myRole='host';
+  applyVariant(selectedOnlineMode);
   hostStartTs=Date.now();
-  const hostRoomData={hostName:myName,ts:hostStartTs,status:'waiting'};
+  const hostRoomData={hostName:myName,ts:hostStartTs,status:'waiting',mode:selectedOnlineMode};
   fbPut(currentRoomKey,hostRoomData);
   fbPut(currentRoomKey+'g',null);
   fbPut(currentRoomKey+'m1',null);
   fbPut(currentRoomKey+'m2',null);
   fbPut(currentRoomKey+'p1',null);
   fbPut(currentRoomKey+'p2',null);
+  fbPut(currentRoomKey+'tf1',null);
+  fbPut(currentRoomKey+'tf2',null);
   lrPut(currentRoomKey,hostRoomData);
   lrPut(currentRoomKey+'-g',null);
   lrPut(currentRoomKey+'-m1',null);
   lrPut(currentRoomKey+'-m2',null);
   lrPut(currentRoomKey+'-p1',null);
   lrPut(currentRoomKey+'-p2',null);
+  lrPut(currentRoomKey+'-tf1',null);
+  lrPut(currentRoomKey+'-tf2',null);
   showWaiting(`🏠 HOST — 「${pp}」`);
   document.getElementById('wait-code').textContent=`あいことば:「${pp}」で待機中...`;
   if(window._hostHB)clearInterval(window._hostHB);
@@ -734,6 +893,7 @@ async function startJoin(){
     return;
   }
   myPN=2;myRole='guest';opponentName=data.hostName;
+  applyVariant(data.mode||'classic');
   turn=1;
   const guestData={guestName:myName,ts:Date.now()};
   if(bc) bc.postMessage({type:'guest-join',key:currentRoomKey,...guestData});
@@ -801,7 +961,7 @@ function startPlacementPhase(){
   _placementSubmitted=false;_oppPlacementApplied=false;
   captured={1:[],2:[]};turn=1;
   board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
-  placePieces(myPN);
+  placeFn(myPN);
   ['ov-title','ov-online','ov-waiting','ov-win','ov-difficulty','ov-rules'].forEach(hide);
   document.getElementById('online-badge').classList.add('on');
   document.getElementById('diff-box').style.display='none';
@@ -834,7 +994,7 @@ async function placementOK(){
     return;
   }
   setMsg('相手の準備を待っています...');
-  const myRowInds=myPN===1?[3,4]:[1,2];
+  const myRowInds=HOME[myPN];
   const rowData={};
   myRowInds.forEach(r=>{rowData['r'+r]=board[r];});
   const payload={d:JSON.stringify(rowData),ts:Date.now()};
@@ -903,7 +1063,11 @@ function cleanupOnline(){
   if(window._placePollIv){clearInterval(window._placePollIv);window._placePollIv=null;}
   if(window._placeLrIv){clearInterval(window._placeLrIv);window._placeLrIv=null;}
   if(window._placeTimeout){clearTimeout(window._placeTimeout);window._placeTimeout=null;}
+  if(window._tfIv){clearInterval(window._tfIv);window._tfIv=null;}
+  if(window._tfLrIv){clearInterval(window._tfLrIv);window._tfLrIv=null;}
   document.getElementById('btn-place-ok').style.display='none';
+  hide('ov-transform');
+  lastTransformTs=0;
   myRole=null;currentPassphrase='';currentRoomKey='';
 }
 
@@ -1071,12 +1235,13 @@ function startCpuGame(d){
   startCpuPlacementPhase();
 }
 function startCpuPlacementPhase(){
+  applyVariant('classic');
   gameMode='placing';myPN=1;
   over=false;sel=null;validMoves=[];cpuThinking=false;
   captured={1:[],2:[]};turn=1;
   _placementSubmitted=false;_oppPlacementApplied=false;
   board=Array.from({length:ROWS},()=>Array(COLS).fill(null));
-  [1,2].forEach(placePieces);
+  [1,2].forEach(p=>placeFn(p));
   document.getElementById('online-badge').classList.remove('on');
   document.getElementById('diff-box').style.display='none';
   document.getElementById('btn-place-ok').style.display='';
