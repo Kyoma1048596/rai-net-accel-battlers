@@ -546,8 +546,7 @@ function doMove(fr,fc,tr,tc){
   if(!target){
     board[tr][tc]=mover;board[fr][fc]=null;
     isMine?sndMove():sndCpuMove();
-    const moveLabel=isMine||mover.revealed?pLabel(mover):'???';
-    setMsg(`${pname(turn)}: ${moveLabel} 移動`);
+    if(isMine)setMsg(`${pname(turn)}: ${pLabel(mover)} 移動`);
   }else{
     mover.revealed=true;target.revealed=true;
     const res=resolveBattle(mover,target);
