@@ -237,8 +237,13 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 
 <!-- Difficulty select overlay -->
 <div class="overlay" id="ov-difficulty">
-  <div class="ov-sub" style="color:#00ff41;letter-spacing:3px;font-size:.9rem">CPU 対戦 — 難易度選択</div>
+  <div class="ov-sub" style="color:#00ff41;letter-spacing:3px;font-size:.9rem">CPU 対戦 — モード／難易度選択</div>
   <div class="ov-panel" style="width:min(300px,90vw)">
+    <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px">
+      <button id="cpu-mode-btn-classic" class="mode-btn on" onclick="setCpuMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6 ／ 8駒</span></button>
+      <button id="cpu-mode-btn-extended" class="mode-btn" onclick="setCpuMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒＋MEDIC</span></button>
+    </div>
     <button onclick="startCpuGame(1)" style="border-color:#224422;color:#668866">// 初級 &nbsp;— ランダム多め</button>
     <button onclick="startCpuGame(2)" style="border-color:#00ff41;color:#00ff41">// 中級 &nbsp;— バランス型 ★</button>
     <button onclick="startCpuGame(3)" style="border-color:#ff6600;color:#ff8833">// 上級 &nbsp;— 最強AI</button>
@@ -452,6 +457,12 @@ function setOnlineMode(m){
   document.getElementById('mode-btn-classic').classList.toggle('on',m==='classic');
   document.getElementById('mode-btn-extended').classList.toggle('on',m==='extended');
 }
+let selectedCpuMode='classic';
+function setCpuMode(m){
+  selectedCpuMode=m;
+  document.getElementById('cpu-mode-btn-classic').classList.toggle('on',m==='classic');
+  document.getElementById('cpu-mode-btn-extended').classList.toggle('on',m==='extended');
+}
 
 // ── State ────────────────────────────────────────────
 let board,turn,sel,validMoves,over,captured,cpuThinking;
@@ -535,7 +546,8 @@ function doMove(fr,fc,tr,tc){
   if(!target){
     board[tr][tc]=mover;board[fr][fc]=null;
     isMine?sndMove():sndCpuMove();
-    setMsg(`${pname(turn)}: ${pLabel(mover)} 移動`);
+    const moveLabel=isMine||mover.revealed?pLabel(mover):'???';
+    setMsg(`${pname(turn)}: ${moveLabel} 移動`);
   }else{
     mover.revealed=true;target.revealed=true;
     const res=resolveBattle(mover,target);
@@ -1274,7 +1286,7 @@ function startCpuGame(d){
   startCpuPlacementPhase();
 }
 function startCpuPlacementPhase(){
-  applyVariant('classic');
+  applyVariant(selectedCpuMode);
   gameMode='placing';myPN=1;
   over=false;sel=null;validMoves=[];cpuThinking=false;
   captured={1:[],2:[]};turn=1;
