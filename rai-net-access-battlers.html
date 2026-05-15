@@ -248,42 +248,72 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 
 <!-- Rules overlay -->
 <div class="overlay" id="ov-rules">
-  <div class="ov-panel" style="width:min(380px,94vw);max-height:85vh;overflow-y:auto">
+  <div class="ov-panel" style="width:min(400px,96vw);max-height:88vh;overflow-y:auto">
     <h3>// RULES — 電ネット・アクセルバトラーズ</h3>
-    <div class="rule-line" style="font-size:.7rem;line-height:2">
-      <b style="color:#00ff41">◆ 勝利条件</b><br>
-      ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行に移動させる<br>
-      ② 相手の <span class="rt lnk">★LINK</span> を撃破する<br>
-      <br>
-      <b style="color:#00ff41">◆ 駒の種類【CLASSIC 8枚】</b><br>
-      <span class="rt lnk">★LINK</span> ×1 &nbsp;最重要駒。ゴールを目指せ<br>
-      <span class="rt prog">P2/P3/P4</span> ×3 &nbsp;数値大＝強い PROGRAM<br>
-      <span class="rt fw">F/W</span> ×2 &nbsp;&nbsp;&nbsp;FIREWALL（盾役）<br>
-      <span class="rt vir">VIRUS</span> ×2 &nbsp;VIRUS（奇襲役）<br>
-      <br>
-      <b style="color:#00ff41">◆ 駒の種類【EXTENDED 10枚】</b><br>
-      <span class="rt lnk">★LINK</span> ×1 &nbsp;<span class="rt prog">P2/P3/P3/P4</span> ×4<br>
-      <span class="rt fw">F/W</span> ×2 &nbsp;<span class="rt vir">VIRUS</span> ×2 &nbsp;<span class="rt med">✚MED</span> ×1<br>
-      <br>
-      <b style="color:#00ff41">◆ MEDIC（EXTENDEDのみ）</b><br>
-      <span class="rt med">✚MED</span> → <span class="rt vir">VIRUS</span> にのみ勝利、他全てに敗北<br>
-      VIRUS撃破後、好きな駒に<b style="color:#00ccaa">変身</b>できる<br>
-      <span class="rt lnk">★LINK</span> に変身した場合LINKERが2枚になる<br>
-      &nbsp;&nbsp;→ 2枚とも失うと敗北<br>
-      <br>
-      <b style="color:#00ff41">◆ 戦闘ルール</b><br>
-      <span class="rt vir">VIRUS</span> → <span class="rt prog">PROG全種</span>・<span class="rt lnk">★LINK</span> に勝利<br>
-      <span class="rt fw">F/W</span> → <span class="rt vir">VIRUS</span>・<span class="rt prog">P2</span> に勝利<br>
-      <span class="rt prog">P3/P4</span> → <span class="rt fw">F/W</span> を貫通して勝利<br>
-      <span class="rt lnk">★LINK</span> → <span class="rt fw">F/W</span> を通過して勝利<br>
-      PROG同士 → 数値が大きい方が勝利<br>
-      引き分け → 両方の駒が消滅<br>
-      <br>
-      <b style="color:#00ff41">◆ 基本ルール</b><br>
+    <div class="rule-line" style="font-size:.68rem;line-height:1.9">
+
+      <b style="color:#00ff41">◆ 共通ルール</b><br>
       • 1ターンに1駒を上下左右1マス移動<br>
-      • 駒は最初裏向き（相手には種類が見えない）<br>
-      • 戦闘発生時に両方の駒が表向きになる<br>
-      • オンライン対戦はあいことばで友達と対局可能
+      • 駒は最初<b>裏向き</b>（相手には種類が見えない）<br>
+      • 戦闘発生時に両方の駒が<b>表向き</b>になる<br>
+      • 引き分け → 両方の駒が消滅<br>
+      <br>
+
+      <div style="border:1px solid #1a4a1a;padding:8px;margin-bottom:10px">
+        <b style="color:#00ff41;letter-spacing:2px">[ CLASSIC モード — 4列×6行 ]</b><br>
+        <br>
+        <b style="color:#aaffaa">● 勝利条件</b><br>
+        ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行へ<br>
+        ② 相手の <span class="rt lnk">★LINK</span> を撃破する<br>
+        <br>
+        <b style="color:#aaffaa">● 駒（全8枚）</b><br>
+        <span class="rt lnk">★LINK</span> ×1　最重要駒。ゴールを目指せ<br>
+        <span class="rt prog">P4</span> ×1　<span class="rt prog">P3</span> ×1　<span class="rt prog">P2</span> ×1　強さ＝数値順<br>
+        <span class="rt fw">F/W</span> ×2　FIREWALL — 盾役<br>
+        <span class="rt vir">VIRUS</span> ×2　VIRUS — 奇襲役<br>
+        <br>
+        <b style="color:#aaffaa">● カード相性</b><br>
+        <span class="rt vir">VIRUS</span> &gt; <span class="rt prog">P2</span> <span class="rt prog">P3</span> <span class="rt prog">P4</span> <span class="rt lnk">★LINK</span><br>
+        <span class="rt fw">F/W</span> &gt; <span class="rt vir">VIRUS</span> ・ <span class="rt prog">P2</span><br>
+        <span class="rt prog">P3</span> <span class="rt prog">P4</span> &gt; <span class="rt fw">F/W</span> （貫通）<br>
+        <span class="rt lnk">★LINK</span> &gt; <span class="rt fw">F/W</span> （通過）<br>
+        PROG同士 → 数値が大きい方が勝利<br>
+        ※それ以外の組み合わせは引き分け
+      </div>
+
+      <div style="border:1px solid #1a4a4a;padding:8px">
+        <b style="color:#00ccaa;letter-spacing:2px">[ EXTENDED モード — 5列×7行 ]</b><br>
+        <span style="font-size:.62rem;color:#447766">中央行にセンターライン（通常マスと同じ）</span><br>
+        <br>
+        <b style="color:#88ffdd">● 勝利条件</b><br>
+        ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行へ<br>
+        ② 相手の <span class="rt lnk">★LINK</span> を<b>全て</b>撃破する<br>
+        &nbsp;&nbsp;（MEDICがLINKERに変身すると2枚になる）<br>
+        <br>
+        <b style="color:#88ffdd">● 駒（全10枚）</b><br>
+        <span class="rt lnk">★LINK</span> ×1　最重要駒<br>
+        <span class="rt prog">P4</span> ×1　<span class="rt prog">P3</span> ×2　<span class="rt prog">P2</span> ×1　強さ＝数値順<br>
+        <span class="rt fw">F/W</span> ×2　FIREWALL — 盾役<br>
+        <span class="rt vir">VIRUS</span> ×2　VIRUS — 奇襲役<br>
+        <span class="rt med">✚MED</span> ×1　MEDIC — 変身役（下記参照）<br>
+        <br>
+        <b style="color:#88ffdd">● カード相性</b><br>
+        <span class="rt vir">VIRUS</span> &gt; <span class="rt prog">P2</span> <span class="rt prog">P3</span> <span class="rt prog">P4</span> <span class="rt lnk">★LINK</span><br>
+        <span class="rt fw">F/W</span> &gt; <span class="rt vir">VIRUS</span> ・ <span class="rt prog">P2</span><br>
+        <span class="rt prog">P3</span> <span class="rt prog">P4</span> &gt; <span class="rt fw">F/W</span> （貫通）<br>
+        <span class="rt lnk">★LINK</span> &gt; <span class="rt fw">F/W</span> （通過）<br>
+        <span class="rt med">✚MED</span> &gt; <span class="rt vir">VIRUS</span> のみ勝利<br>
+        その他全駒 &gt; <span class="rt med">✚MED</span>（MEDICは他全てに負ける）<br>
+        PROG同士 → 数値が大きい方が勝利<br>
+        ※それ以外の組み合わせは引き分け<br>
+        <br>
+        <b style="color:#88ffdd">● MEDICの変身</b><br>
+        <span class="rt med">✚MED</span> が <span class="rt vir">VIRUS</span> を撃破すると変身画面が出現<br>
+        好きな駒を選んで変身（効果もその駒と同じ）<br>
+        <span class="rt lnk">★LINK</span> に変身 → LINKERが2枚に！<br>
+        &nbsp;&nbsp;2枚とも失って初めて敗北
+      </div>
+
     </div>
     <button onclick="closeRules()" style="border-color:#333;color:#555;margin-top:10px">// 閉じる</button>
   </div>
