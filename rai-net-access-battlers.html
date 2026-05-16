@@ -1270,16 +1270,21 @@ let _bgmGain=null,_bgmPlaying=false;
 let _bgmVol=(v=>v!==null?+v:0.15)(localStorage.getItem('dna-bgm-vol'));
 let _seVol=(v=>v!==null?+v:1.0)(localStorage.getItem('dna-se-vol'));
 function _stopAudio(id){const au=document.getElementById(id);if(au){au.pause();au.currentTime=0;}}
-function _playAudio(id){const au=document.getElementById(id);if(!au)return false;au.volume=_bgmVol;au.play().catch(()=>{});return true;}
+function _playAudioBGM(id,onFail){
+  const au=document.getElementById(id);
+  if(!au){onFail();return;}
+  au.volume=_bgmVol;
+  au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{onFail();});
+}
 function startTitleBGM(){
   _stopAudio('bgm-battle');
   if(_bgmGain){try{_bgmGain.disconnect();}catch(e){}}_bgmGain=null;_bgmPlaying=false;
-  if(_playAudio('bgm-title'))_bgmPlaying=true;else _startSynthBGM();
+  _playAudioBGM('bgm-title',()=>_startSynthBGM());
 }
 function startBattleBGM(){
   _stopAudio('bgm-title');
   if(_bgmGain){try{_bgmGain.disconnect();}catch(e){}}_bgmGain=null;_bgmPlaying=false;
-  if(_playAudio('bgm-battle'))_bgmPlaying=true;else _startSynthBGM();
+  _playAudioBGM('bgm-battle',()=>_startSynthBGM());
 }
 function startBGM(){startTitleBGM();}
 function _startSynthBGM(){
