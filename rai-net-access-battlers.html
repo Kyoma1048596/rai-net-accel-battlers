@@ -476,8 +476,6 @@ function _unlockAudio(){
       src.buffer=buf;src.connect(_ac.destination);src.start(0);
     }catch(e){}
     _audioUnlocked=true;
-    // BGMがまだ鳴っていなければ再起動
-    if(!_bgmPlaying)_startSynthBGM();
   };
   if(_ac.state==='running'){resume();}
   else{_ac.resume().then(resume).catch(()=>{});}
@@ -1266,76 +1264,26 @@ function updateNameLabel(){document.getElementById('name-label').textContent=myN
 function updateCapLabels(){document.getElementById('cap-label1').textContent=pname(1);document.getElementById('cap-label2').textContent=pname(2);}
 
 // ── BGM ──────────────────────────────────────────────
-let _bgmGain=null,_bgmPlaying=false;
+let _bgmPlaying=false;
 let _bgmVol=(v=>v!==null?+v:0.15)(localStorage.getItem('dna-bgm-vol'));
 let _seVol=(v=>v!==null?+v:1.0)(localStorage.getItem('dna-se-vol'));
 function _stopAudio(id){const au=document.getElementById(id);if(au){au.pause();au.currentTime=0;}}
-function _playAudioBGM(id,onFail){
-  const au=document.getElementById(id);
-  if(!au){onFail();return;}
-  au.volume=_bgmVol;
-  au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{onFail();});
-}
 function startTitleBGM(){
   _stopAudio('bgm-battle');
-  if(_bgmGain){try{_bgmGain.disconnect();}catch(e){}}_bgmGain=null;_bgmPlaying=false;
-  _playAudioBGM('bgm-title',()=>_startSynthBGM());
+  _bgmPlaying=false;
+  const au=document.getElementById('bgm-title');
+  if(au){au.volume=_bgmVol;au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{});}
 }
 function startBattleBGM(){
   _stopAudio('bgm-title');
-  if(_bgmGain){try{_bgmGain.disconnect();}catch(e){}}_bgmGain=null;_bgmPlaying=false;
-  _playAudioBGM('bgm-battle',()=>_startSynthBGM());
+  _bgmPlaying=false;
+  const au=document.getElementById('bgm-battle');
+  if(au){au.volume=_bgmVol;au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{});}
 }
 function startBGM(){startTitleBGM();}
-function _startSynthBGM(){
-  if(_bgmPlaying)return;
-  try{
-    const ctx=getAC();
-    const _doStart=()=>{
-      if(_bgmPlaying)return;
-      _bgmGain=ctx.createGain();_bgmGain.gain.value=_bgmVol*0.27;
-      _bgmGain.connect(ctx.destination);
-      _bgmPlaying=true;
-      _bgmLoop(ctx.currentTime);
-    };
-    if(ctx.state==='running'){_doStart();}
-    else{ctx.resume().then(_doStart).catch(()=>{});}
-  }catch(e){}
-}
 function stopBGM(){
   _bgmPlaying=false;
   _stopAudio('bgm-title');_stopAudio('bgm-battle');
-  if(_bgmGain){try{_bgmGain.disconnect();}catch(e){}}_bgmGain=null;
-}
-function _bgmNote(f,s,d,v,type){
-  if(!_bgmPlaying||!_bgmGain)return;
-  const ctx=getAC(),o=ctx.createOscillator(),g=ctx.createGain();
-  o.type=type||'square';o.frequency.value=f;
-  g.gain.setValueAtTime(0,s);
-  g.gain.linearRampToValueAtTime(v,s+0.01);
-  g.gain.setValueAtTime(v,s+d*0.75);
-  g.gain.linearRampToValueAtTime(0,s+d);
-  o.connect(g);g.connect(_bgmGain);
-  o.start(s);o.stop(s+d+0.05);
-}
-function _bgmLoop(t){
-  if(!_bgmPlaying||!_bgmGain)return;
-  const b=60/125;
-  // Lead melody: A minor, square wave
-  [[440,0,.5],[494,.5,.5],[440,1,1],[392,2,1],[329.6,3,1],
-   [349.2,4,.5],[392,4.5,.5],[440,5,2],[329.6,7,1],
-   [293.7,8,.5],[329.6,8.5,.5],[349.2,9,1],[392,10,1],[440,11,1],
-   [494,12,.5],[523.25,12.5,.5],[587.3,13,2],[440,15,1]
-  ].forEach(([f,s,d])=>_bgmNote(f,t+s*b,d*b,0.7));
-  // Bass: sawtooth
-  [[110,0,.75],[110,1,.75],[98,2,.75],[87.3,3,.75],
-   [98,4,.75],[110,5,.75],[130.8,6,.75],[110,7,.75],
-   [110,8,.75],[110,9,.75],[98,10,.75],[87.3,11,.75],
-   [98,12,.75],[110,13,.75],[130.8,14,.75],[110,15,.75]
-  ].forEach(([f,s,d])=>_bgmNote(f,t+s*b,d*b,0.45,'sawtooth'));
-  // Kick pulse: sine
-  [0,2,4,6,8,10,12,14].forEach(s=>_bgmNote(55,t+s*b,0.1,0.9,'sine'));
-  setTimeout(()=>_bgmLoop(t+16*b),(16*b-0.15)*1000);
 }
 function setMsg(m){document.getElementById('msg').textContent=m;}
 function show(id){document.getElementById(id).classList.add('on');}
@@ -1534,7 +1482,6 @@ function closeSettings(){hide('ov-settings');}
 function onBGMSlider(v){
   _bgmVol=+v;
   ['bgm-title','bgm-battle'].forEach(id=>{const au=document.getElementById(id);if(au)au.volume=_bgmVol;});
-  if(_bgmGain)_bgmGain.gain.value=_bgmVol*0.27;
   document.getElementById('lbl-bgm').textContent=Math.round(_bgmVol*100)+'%';
   localStorage.setItem('dna-bgm-vol',_bgmVol);
 }
