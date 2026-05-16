@@ -1265,7 +1265,7 @@ function updateCapLabels(){document.getElementById('cap-label1').textContent=pna
 
 // ── BGM ──────────────────────────────────────────────
 let _bgmPlaying=false;
-let _bgmVol=(v=>v!==null?+v:0.15)(localStorage.getItem('dna-bgm-vol'));
+let _bgmVol=(v=>v!==null?+v:0.05)(localStorage.getItem('dna-bgm-vol'));
 let _seVol=(v=>v!==null?+v:1.0)(localStorage.getItem('dna-se-vol'));
 function _stopAudio(id){const au=document.getElementById(id);if(au){au.pause();au.currentTime=0;}}
 function startTitleBGM(){
