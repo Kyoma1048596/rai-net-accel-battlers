@@ -1535,4 +1535,21 @@ function onBGMSlider(v){
 }
 function onSESlider(v){
   _seVol=+v;
-  do
+  document.getElementById('lbl-se').textContent=Math.round(_seVol*100)+'%';
+  localStorage.setItem('dna-se-vol',_seVol);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='F2')showTitle();
+  if(e.key==='Escape'){
+    ['ov-piece','ov-tutorial','ov-settings'].forEach(id=>{
+      if(document.getElementById(id).classList.contains('on'))hide(id);
+    });
+    sel=null;validMoves=[];sndDesel();render();
+  }
+});
+
+// 常にスプラッシュから開始（ov-splash は HTML で on クラス付き）
+</script>
+</body>
+</html>
