@@ -462,12 +462,27 @@ document.querySelectorAll('.ver-sub,#ver-label').forEach(el=>el.textContent='v'+
 let _ac=null;
 function getAC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();if(_ac.state==='suspended')_ac.resume();return _ac;}
 
-// iOS/Android: 最初のタッチでAudioContextをアンロック
+// iOS/Android: 最初のタッチで無音バッファを再生してAudioContextをアンロック
+let _audioUnlocked=false;
 function _unlockAudio(){
+  if(_audioUnlocked)return;
   if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();
-  if(_ac.state==='suspended')_ac.resume();
+  const resume=()=>{
+    if(_ac.state==='suspended')_ac.resume();
+    // iOS用：無音バッファを再生して強制アンロック
+    try{
+      const buf=_ac.createBuffer(1,1,22050);
+      const src=_ac.createBufferSource();
+      src.buffer=buf;src.connect(_ac.destination);src.start(0);
+    }catch(e){}
+    _audioUnlocked=true;
+    // BGMがまだ鳴っていなければ再起動
+    if(!_bgmPlaying)_startSynthBGM();
+  };
+  if(_ac.state==='running'){resume();}
+  else{_ac.resume().then(resume).catch(()=>{});}
 }
-['touchstart','touchend','mousedown','pointerdown'].forEach(ev=>
+['touchstart','mousedown','pointerdown'].forEach(ev=>
   document.addEventListener(ev,_unlockAudio,{passive:true})
 );
 function tone(freq,dur,type='square',vol=0.1,delay=0){try{const ctx=getAC(),t=ctx.currentTime+delay,osc=ctx.createOscillator(),g=ctx.createGain();osc.connect(g);g.connect(ctx.destination);osc.type=type;osc.frequency.setValueAtTime(freq,t);const sv=Math.max(0.0001,vol*_seVol);g.gain.setValueAtTime(sv,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);osc.start(t);osc.stop(t+dur+0.02);}catch(e){}}
@@ -1368,6 +1383,7 @@ function showWin(w){
 }
 
 function startFromSplash(){
+  _unlockAudio();
   sndSelect();
   startBGM();
   hide('ov-splash');
@@ -1519,21 +1535,4 @@ function onBGMSlider(v){
 }
 function onSESlider(v){
   _seVol=+v;
-  document.getElementById('lbl-se').textContent=Math.round(_seVol*100)+'%';
-  localStorage.setItem('dna-se-vol',_seVol);
-}
-
-document.addEventListener('keydown',e=>{
-  if(e.key==='F2')showTitle();
-  if(e.key==='Escape'){
-    ['ov-piece','ov-tutorial','ov-settings'].forEach(id=>{
-      if(document.getElementById(id).classList.contains('on'))hide(id);
-    });
-    sel=null;validMoves=[];sndDesel();render();
-  }
-});
-
-// 常にスプラッシュから開始（ov-splash は HTML で on クラス付き）
-</script>
-</body>
-</html>
+  do
