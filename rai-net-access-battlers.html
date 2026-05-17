@@ -141,6 +141,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 
 /* Name edit */
 #name-row { font-size:.68rem; color:#446644; margin-top:5px; display:flex; align-items:center; gap:6px; }
+#rating-row { font-size:.6rem; color:#446644; margin-top:2px; letter-spacing:1px; }
 #name-row span { color:#00cc33; }
 #name-edit-btn { background:none; border:1px solid #1a3a1a; color:#335533; padding:1px 5px; font-size:.58rem; width:auto; display:inline-block; cursor:pointer; letter-spacing:0; }
 #name-edit-btn:hover { background:#0a1e0a; color:#00ff41; }
@@ -187,6 +188,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <div id="msg"></div>
       <div id="think-bar"><div id="think-fill"></div></div>
       <div id="name-row">▶ <span id="name-label"></span> <button id="name-edit-btn" onclick="editName()">編集</button></div>
+      <div id="rating-row"></div>
     </div>
 
     <button id="btn-place-ok" onclick="placementOK()" style="display:none;border-color:#00cc44;color:#00ff66;letter-spacing:2px;font-size:.85rem">// ✓ 準備OK！</button>
@@ -260,6 +262,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 <div class="overlay" id="ov-win">
   <div class="ov-title" id="ov-win-title"></div>
   <div class="ov-sub" id="ov-win-sub">EL PSY KONGROO</div>
+  <div id="rating-change" style="font-size:.75rem;text-align:center;min-height:1.2em"></div>
   <div id="win-count"></div>
   <button id="btn-return-room" onclick="returnToRoom()" style="display:none;border-color:#00aa44;color:#00cc44">// 🏠 部屋に戻る</button>
   <button onclick="showTitle()">// TITLE へ戻る</button>
@@ -376,6 +379,13 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-panel" style="width:min(320px,90vw)">
     <h3>// オンライン対戦</h3>
     <div style="margin-bottom:10px">
+      <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// MATCH TYPE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        <button id="mtype-normal" class="mode-btn on" onclick="setOnlineMatchType('normal')">通常対戦<br><span style="font-size:.58rem;opacity:.7">レート変動なし</span></button>
+        <button id="mtype-ranked" class="mode-btn" onclick="setOnlineMatchType('ranked')">ガチ対戦<br><span style="font-size:.58rem;opacity:.7">⚔ ELOレーティング</span></button>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
       <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE (HOSTが選択)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
         <button id="mode-btn-classic" class="mode-btn on" onclick="setOnlineMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6 ／ 8駒</span></button>
@@ -476,6 +486,7 @@ function _unlockAudio(){
       src.buffer=buf;src.connect(_ac.destination);src.start(0);
     }catch(e){}
     _audioUnlocked=true;
+    if(_bgmTarget&&!_bgmPlaying){_bgmTarget==='title'?startTitleBGM():startBattleBGM();}
   };
   if(_ac.state==='running'){resume();}
   else{_ac.resume().then(resume).catch(()=>{});}
@@ -549,6 +560,7 @@ if(bc) {
       if(!msg.ts || msg.ts<hostStartTs || cancelWait) return;
       clearInterval(window._hostHB);clearInterval(window._fbGuestIv);clearInterval(window._lrGuestIv);
       opponentName=msg.guestName;
+      if(_onlineMatchType==='ranked')_oppRating=msg.rating||1500;
       hideWaiting(); startPlacementPhase();
     }
     // Placement data from opponent (same device)
@@ -601,6 +613,32 @@ let lastMoveTs=0,oppMoveNode=null,guestWatchNode=null,hostStartTs=0;
 let cancelWait=false;
 let myName=localStorage.getItem('dna-name')||'';
 let opponentName='???';
+let _myRating=(v=>v!==null?+v:1500)(localStorage.getItem('dna-rating'));
+let _oppRating=1500;
+let _onlineMatchType='normal';
+function setOnlineMatchType(t){
+  _onlineMatchType=t;
+  const nb=document.getElementById('mtype-normal'),rb=document.getElementById('mtype-ranked');
+  if(nb)nb.classList.toggle('on',t==='normal');
+  if(rb){rb.classList.toggle('on',t==='ranked');rb.style.borderColor=t==='ranked'?'#ff9900':'';rb.style.color=t==='ranked'?'#ffaa33':'';}
+}
+
+function calcELO(myR,oppR,result,k=32){
+  const exp=1/(1+Math.pow(10,(oppR-myR)/400));
+  return Math.round(myR+k*(result-exp));
+}
+function getTitle(r){
+  if(r<1200)return{name:'実験体',color:'#888888'};
+  if(r<1500)return{name:'ラボメン',color:'#4488ff'};
+  if(r<1800)return{name:'世界線観測者',color:'#00ff41'};
+  if(r<2100)return{name:'機関',color:'#ff4444'};
+  return{name:'鳳凰院凶真',color:'#ffaa00'};
+}
+function renderRating(){
+  const t=getTitle(_myRating);
+  const el=document.getElementById('rating-row');
+  if(el)el.innerHTML=`RATE <span style="color:${t.color};font-weight:bold">${_myRating}</span> <span style="color:${t.color}">[${t.name}]</span>`;
+}
 
 const myUid=(()=>{
   let u=localStorage.getItem('dna-uid');
@@ -969,7 +1007,7 @@ async function startHost(){
   myPN=1;myRole='host';
   applyVariant(selectedOnlineMode);
   hostStartTs=Date.now();
-  const hostRoomData={hostName:myName,ts:hostStartTs,status:'waiting',mode:selectedOnlineMode};
+  const hostRoomData={hostName:myName,ts:hostStartTs,status:'waiting',mode:selectedOnlineMode,matchType:_onlineMatchType,rating:_myRating};
   fbPut(currentRoomKey,hostRoomData);
   fbPut(currentRoomKey+'g',null);
   fbPut(currentRoomKey+'m1',null);
@@ -1001,6 +1039,7 @@ async function startHost(){
     if(!d||!d.guestName||!d.ts||d.ts<hostStartTs||cancelWait)return false;
     clearInterval(window._hostHB);clearInterval(window._fbGuestIv);clearInterval(window._lrGuestIv);
     opponentName=d.guestName;
+    if(_onlineMatchType==='ranked')_oppRating=d.rating||1500;
     fbPut(currentRoomKey,{...hostRoomData,status:'playing'});
     hideWaiting();startPlacementPhase();
     return true;
@@ -1071,8 +1110,10 @@ async function startJoin(){
   }
   myPN=2;myRole='guest';opponentName=data.hostName;
   applyVariant(data.mode||'classic');
+  _onlineMatchType=data.matchType||'normal';
+  if(_onlineMatchType==='ranked')_oppRating=data.rating||1500;
   turn=1;
-  const guestData={guestName:myName,ts:Date.now()};
+  const guestData={guestName:myName,ts:Date.now(),rating:_myRating};
   if(bc) bc.postMessage({type:'guest-join',key:currentRoomKey,...guestData});
   fbPut(currentRoomKey+'g',guestData);
   lrPut(currentRoomKey+'-g',guestData);
@@ -1109,6 +1150,7 @@ function returnToRoom(){
     if(!d||!d.guestName||!d.ts||d.ts<hostStartTs||cancelWait)return;
     clearInterval(window._hostHB);clearInterval(window._fbGuestIv);clearInterval(window._lrGuestIv);
     opponentName=d.guestName;
+    if(_onlineMatchType==='ranked')_oppRating=d.rating||1500;
     fbPut(currentRoomKey,{...rData,status:'playing'});
     hideWaiting();startPlacementPhase();
   };
@@ -1260,29 +1302,40 @@ async function cancelWaiting(){
 
 // ── Helpers ──────────────────────────────────────────
 function pname(pl){if(gameMode==='cpu')return pl===1?myName:'CPU';return pl===myPN?myName:opponentName;}
-function updateNameLabel(){document.getElementById('name-label').textContent=myName;}
+function updateNameLabel(){document.getElementById('name-label').textContent=myName;renderRating();}
 function updateCapLabels(){document.getElementById('cap-label1').textContent=pname(1);document.getElementById('cap-label2').textContent=pname(2);}
 
 // ── BGM ──────────────────────────────────────────────
-let _bgmPlaying=false;
+let _bgmPlaying=false,_bgmTarget=null;
+let _bgmGainNode=null,_titleMediaSrc=null,_battleMediaSrc=null,_hiddenBGMId=null;
 let _bgmVol=(v=>v!==null?+v:0.05)(localStorage.getItem('dna-bgm-vol'));
 let _seVol=(v=>v!==null?+v:1.0)(localStorage.getItem('dna-se-vol'));
 function _stopAudio(id){const au=document.getElementById(id);if(au){au.pause();au.currentTime=0;}}
+function _getBGMGain(){
+  if(!_bgmGainNode){const ctx=getAC();_bgmGainNode=ctx.createGain();_bgmGainNode.gain.value=_bgmVol;_bgmGainNode.connect(ctx.destination);}
+  return _bgmGainNode;
+}
+function _connectBGMAudio(id){
+  const au=document.getElementById(id);if(!au)return null;
+  try{const ctx=getAC(),g=_getBGMGain();
+    if(id==='bgm-title'&&!_titleMediaSrc){_titleMediaSrc=ctx.createMediaElementSource(au);_titleMediaSrc.connect(g);}
+    else if(id==='bgm-battle'&&!_battleMediaSrc){_battleMediaSrc=ctx.createMediaElementSource(au);_battleMediaSrc.connect(g);}
+  }catch(e){}
+  return au;
+}
 function startTitleBGM(){
-  _stopAudio('bgm-battle');
-  _bgmPlaying=false;
-  const au=document.getElementById('bgm-title');
-  if(au){au.volume=_bgmVol;au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{});}
+  _stopAudio('bgm-battle');_bgmPlaying=false;_bgmTarget='title';
+  const au=_connectBGMAudio('bgm-title');
+  if(au)au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{});
 }
 function startBattleBGM(){
-  _stopAudio('bgm-title');
-  _bgmPlaying=false;
-  const au=document.getElementById('bgm-battle');
-  if(au){au.volume=_bgmVol;au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{});}
+  _stopAudio('bgm-title');_bgmPlaying=false;_bgmTarget='battle';
+  const au=_connectBGMAudio('bgm-battle');
+  if(au)au.play().then(()=>{_bgmPlaying=true;}).catch(()=>{});
 }
 function startBGM(){startTitleBGM();}
 function stopBGM(){
-  _bgmPlaying=false;
+  _bgmPlaying=false;_bgmTarget=null;
   _stopAudio('bgm-title');_stopAudio('bgm-battle');
 }
 function setMsg(m){document.getElementById('msg').textContent=m;}
@@ -1322,6 +1375,20 @@ function showWin(w){
     setTimeout(iWin?sndVictory:sndDefeat,200);
     flashScreen(iWin?'rgba(0,80,255,.35)':'rgba(200,0,0,.35)');
     el.classList.add(iWin?'win-anim':'lose-anim');
+  }
+  const rChEl=document.getElementById('rating-change');
+  if(_onlineMatchType==='ranked'&&isOnline){
+    const result=w==='draw'?0.5:((w===myPN)?1:0);
+    const newR=calcELO(_myRating,_oppRating,result);
+    const diff=newR-_myRating;
+    _myRating=newR;
+    localStorage.setItem('dna-rating',_myRating);
+    renderRating();
+    const t=getTitle(_myRating);
+    const sign=diff>=0?'+':'';
+    if(rChEl)rChEl.innerHTML=`RATE <span style="color:${diff>=0?'#00ff41':'#ff4444'}">${sign}${diff}</span> → <b style="color:${t.color}">${_myRating}</b> <span style="color:${t.color}">[${t.name}]</span>`;
+  }else{
+    if(rChEl)rChEl.textContent='';
   }
   document.getElementById('btn-return-room').style.display=(isOnline&&isHost)?'':'none';
   show('ov-win');
@@ -1481,7 +1548,7 @@ function showSettings(){
 function closeSettings(){hide('ov-settings');}
 function onBGMSlider(v){
   _bgmVol=+v;
-  ['bgm-title','bgm-battle'].forEach(id=>{const au=document.getElementById(id);if(au)au.volume=_bgmVol;});
+  if(_bgmGainNode)_bgmGainNode.gain.value=_bgmVol;
   document.getElementById('lbl-bgm').textContent=Math.round(_bgmVol*100)+'%';
   localStorage.setItem('dna-bgm-vol',_bgmVol);
 }
@@ -1491,6 +1558,15 @@ function onSESlider(v){
   localStorage.setItem('dna-se-vol',_seVol);
 }
 
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    ['bgm-title','bgm-battle'].forEach(id=>{const au=document.getElementById(id);if(au&&!au.paused){au.pause();_hiddenBGMId=id;}});
+  }else if(_hiddenBGMId){
+    const au=document.getElementById(_hiddenBGMId);
+    if(au){if(getAC().state==='suspended')getAC().resume();au.play().catch(()=>{});}
+    _hiddenBGMId=null;
+  }
+});
 document.addEventListener('keydown',e=>{
   if(e.key==='F2')showTitle();
   if(e.key==='Escape'){
@@ -1502,6 +1578,7 @@ document.addEventListener('keydown',e=>{
 });
 
 // 常にスプラッシュから開始（ov-splash は HTML で on クラス付き）
+renderRating();
 </script>
 </body>
 </html>
