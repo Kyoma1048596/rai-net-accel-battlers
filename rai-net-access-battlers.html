@@ -251,10 +251,11 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <h3 style="text-align:center;letter-spacing:3px">// PLAYER NAME</h3>
     <div class="pp-row" style="margin-top:8px">
       <input id="name-input" type="text" placeholder="名前を入力..." maxlength="12"
-        onkeydown="if(event.key==='Enter')confirmName()">
+        onkeydown="if(event.key==='Enter')confirmName()" oninput="document.getElementById('name-error').textContent=''">
       <button onclick="confirmName()" style="width:80px">OK</button>
     </div>
-    <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:8px">// ⬅ タイトルに戻る</button>
+    <div id="name-error" style="color:#ff4444;font-size:.65rem;min-height:1.2em;margin-top:4px;text-align:center"></div>
+    <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:4px">// ⬅ タイトルに戻る</button>
   </div>
 </div>
 
@@ -272,6 +273,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 <div class="overlay" id="ov-title">
   <div class="ov-title" style="color:#00ff41;font-size:clamp(1.1rem,4vw,2rem)">雷ネット・アクセルバトラーズ</div>
   <div class="ov-sub">STEINS;GATE :: RAI-NET ACCEL BATTLERS <span class="ver-sub"></span></div>
+  <div id="title-rating-display" style="font-size:.72rem;letter-spacing:2px;margin:4px 0 8px"></div>
   <div class="ov-panel" style="width:min(300px,90vw)">
     <button onclick="selectDifficulty()">// ⚔ CPU 対戦</button>
     <button class="btn-online" onclick="enterOnlineMode()">// 🌐 オンライン対戦</button>
@@ -378,6 +380,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 <div class="overlay" id="ov-online">
   <div class="ov-panel" style="width:min(320px,90vw)">
     <h3>// オンライン対戦</h3>
+    <div id="online-rating-display" style="font-size:.68rem;letter-spacing:1px;margin:-6px 0 10px;text-align:right"></div>
     <div style="margin-bottom:10px">
       <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// MATCH TYPE</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
@@ -613,9 +616,23 @@ let lastMoveTs=0,oppMoveNode=null,guestWatchNode=null,hostStartTs=0;
 let cancelWait=false;
 let myName=localStorage.getItem('dna-name')||'';
 let opponentName='???';
-let _myRating=(v=>v!==null?+v:1500)(localStorage.getItem('dna-rating'));
+let _myRating=1500;
 let _oppRating=1500;
 let _onlineMatchType='normal';
+function _playerKey(n){return'dna-player-'+n;}
+function loadPlayerData(n){
+  if(!n)return;
+  const raw=localStorage.getItem(_playerKey(n));
+  if(raw){try{const d=JSON.parse(raw);_myRating=typeof d.rating==='number'?d.rating:1500;}catch(e){_myRating=1500;}}
+  else{const old=localStorage.getItem('dna-rating');_myRating=old!==null?+old:1500;}
+}
+function savePlayerData(){
+  if(!myName)return;
+  let d={};try{const r=localStorage.getItem(_playerKey(myName));if(r)d=JSON.parse(r);}catch(e){}
+  d.rating=_myRating;
+  localStorage.setItem(_playerKey(myName),JSON.stringify(d));
+}
+if(myName)loadPlayerData(myName);
 function setOnlineMatchType(t){
   _onlineMatchType=t;
   const nb=document.getElementById('mtype-normal'),rb=document.getElementById('mtype-ranked');
@@ -636,8 +653,9 @@ function getTitle(r){
 }
 function renderRating(){
   const t=getTitle(_myRating);
-  const el=document.getElementById('rating-row');
-  if(el)el.innerHTML=`RATE <span style="color:${t.color};font-weight:bold">${_myRating}</span> <span style="color:${t.color}">[${t.name}]</span>`;
+  const html=`RATE <span style="color:${t.color};font-weight:bold">${_myRating}</span> <span style="color:${t.color}">[${t.name}]</span>`;
+  const ids=['rating-row','title-rating-display','online-rating-display'];
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
 }
 
 const myUid=(()=>{
@@ -1382,7 +1400,7 @@ function showWin(w){
     const newR=calcELO(_myRating,_oppRating,result);
     const diff=newR-_myRating;
     _myRating=newR;
-    localStorage.setItem('dna-rating',_myRating);
+    savePlayerData();
     renderRating();
     const t=getTitle(_myRating);
     const sign=diff>=0?'+':'';
@@ -1413,8 +1431,15 @@ function startFromSplash(){
 }
 function confirmName(){
   const v=document.getElementById('name-input').value.trim();
-  myName=v||'PLAYER';
+  const name=v||'PLAYER';
+  if(name!==myName&&localStorage.getItem(_playerKey(name))){
+    document.getElementById('name-error').textContent='その名前は既に使われています';
+    return;
+  }
+  myName=name;
   localStorage.setItem('dna-name',myName);
+  loadPlayerData(myName);
+  renderRating();
   sndSelect();
   hide('ov-name');
   if(!localStorage.getItem('dna-tut-done')){showTutorial();}
@@ -1430,6 +1455,7 @@ function showTitle(){
   if(tickIv){clearInterval(tickIv);tickIv=null;}
   if(_winTimer){clearInterval(_winTimer);_winTimer=null;}
   const countEl=document.getElementById('win-count');if(countEl)countEl.textContent='';
+  renderRating();
   cleanupOnline();
   startTitleBGM();
   show('ov-title');
