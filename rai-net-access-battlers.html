@@ -367,6 +367,20 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       </div>
 
     </div>
+      <div style="border:1px solid #2a2a1a;padding:8px;margin-top:10px">
+        <b style="color:#ffaa00;letter-spacing:2px">[ ランク称号 ]</b><br><br>
+        <table style="width:100%;border-collapse:collapse;font-size:.65rem">
+          <tr><th style="background:#1a1a00;color:#ffaa00;padding:4px 8px;text-align:left;border:1px solid #333300">レート</th><th style="background:#1a1a00;color:#ffaa00;padding:4px 8px;text-align:left;border:1px solid #333300">称号</th></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#888888">～1199</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#888888">ゼリーマン</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#4488ff">1200～1499</td><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#4488ff">ラボメン</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#00ff41">1500～1799</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#00ff41">世界線観測者</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#ff4444">1800～2099</td><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#ff4444">鳳凰院凶真</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#ffaa00">2100～</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#ffaa00">Steins;Gate</td></tr>
+        </table>
+        <div style="font-size:.6rem;color:#446644;margin-top:5px">初期レート：1400（ラボメン）</div>
+      </div>
+
+    </div>
     <div style="display:flex;gap:6px;margin-top:10px">
       <button onclick="closeRules()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ⬅ BACK</button>
     </div>
@@ -800,7 +814,7 @@ let lastMoveTs=0,oppMoveNode=null,guestWatchNode=null,hostStartTs=0;
 let cancelWait=false;
 let myName=localStorage.getItem('dna-name')||'';
 let opponentName='???';
-let _myRating=1500;
+let _myRating=1400;
 let _oppRating=1500;
 let _onlineMatchType='normal';
 function _playerKey(n){return'dna-player-'+n;}
@@ -808,7 +822,7 @@ function loadPlayerData(n){
   if(!n)return;
   const raw=localStorage.getItem(_playerKey(n));
   if(raw){try{const d=JSON.parse(raw);_myRating=typeof d.rating==='number'?d.rating:1500;}catch(e){_myRating=1500;}}
-  else{const old=localStorage.getItem('dna-rating');_myRating=old!==null?+old:1500;}
+  else{const old=localStorage.getItem('dna-rating');_myRating=old!==null?+old:1400;}
 }
 function savePlayerData(){
   if(!myName)return;
@@ -830,11 +844,11 @@ function calcELO(myR,oppR,result,k=32){
   return Math.round(myR+k*(result-exp));
 }
 function getTitle(r){
-  if(r<1200)return{name:'実験体',color:'#888888'};
+  if(r<1200)return{name:'ゼリーマン',color:'#888888'};
   if(r<1500)return{name:'ラボメン',color:'#4488ff'};
   if(r<1800)return{name:'世界線観測者',color:'#00ff41'};
-  if(r<2100)return{name:'機関',color:'#ff4444'};
-  return{name:'鳳凰院凶真',color:'#ffaa00'};
+  if(r<2100)return{name:'鳳凰院凶真',color:'#ff4444'};
+  return{name:'Steins;Gate',color:'#ffaa00'};
 }
 function renderRating(){
   const t=getTitle(_myRating);
