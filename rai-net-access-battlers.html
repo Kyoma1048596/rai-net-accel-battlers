@@ -1297,7 +1297,7 @@ function showGameStart(callback){
   document.getElementById('gs-my-name').textContent=myName;
   document.getElementById('gs-my-rating').innerHTML=`RATE <span style="color:${myT.color};font-weight:bold">${_myRating}</span> <span style="color:${myT.color}">[${myT.name}]</span>`;
   show('ov-gamestart');
-  setTimeout(()=>{hide('ov-gamestart');callback();},2000);
+  setTimeout(()=>{hide('ov-gamestart');callback();},3000);
 }
 function startOnlineGame(){
   gameMode='online';over=false;sel=null;validMoves=[];
