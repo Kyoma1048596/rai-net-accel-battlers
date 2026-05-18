@@ -187,7 +187,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <div id="turn-label"></div>
       <div id="msg"></div>
       <div id="think-bar"><div id="think-fill"></div></div>
-      <div id="name-row">▶ <span id="name-label"></span> <button id="name-edit-btn" onclick="editName()">編集</button></div>
+      <div id="name-row">▶ <span id="name-label"></span></div>
       <div id="rating-row"></div>
     </div>
 
@@ -255,7 +255,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <button onclick="confirmName()" style="width:80px">OK</button>
     </div>
     <div id="name-error" style="color:#ff4444;font-size:.65rem;min-height:1.2em;margin-top:4px;text-align:center"></div>
-    <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:4px">// ⬅ タイトルに戻る</button>
+    <button onclick="hide('ov-name');show('ov-splash')" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:4px">// ⬅ BACK</button>
   </div>
 </div>
 
@@ -296,7 +296,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <button onclick="startCpuGame(1)" style="border-color:#224422;color:#668866">// 初級 &nbsp;— ランダム多め</button>
     <button onclick="startCpuGame(2)" style="border-color:#00ff41;color:#00ff41">// 中級 &nbsp;— バランス型 ★</button>
     <button onclick="startCpuGame(3)" style="border-color:#ff6600;color:#ff8833">// 上級 &nbsp;— 最強AI</button>
-    <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:6px">// ⬅ タイトルに戻る</button>
+    <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:6px">// ⬅ BACK</button>
   </div>
 </div>
 
@@ -370,8 +370,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 
     </div>
     <div style="display:flex;gap:6px;margin-top:10px">
-      <button onclick="closeRules()" style="border-color:#333;color:#555;flex:1">// 閉じる</button>
-      <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ⬅ タイトル</button>
+      <button onclick="closeRules()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ⬅ BACK</button>
     </div>
   </div>
 </div>
@@ -406,7 +405,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <button onclick="startHost()" style="border-color:#00aa44;color:#00cc44">// 🏠 HOST — 部屋を作る</button>
     <button onclick="startJoin()" style="margin-top:5px;border-color:#005577;color:#0099cc">// 🚪 JOIN &nbsp;— 部屋に入る</button>
     <div class="err-msg" id="match-err"></div>
-    <button onclick="hide('ov-online');showTitle()" style="margin-top:8px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ タイトルに戻る</button>
+    <button onclick="hide('ov-online');showTitle()" style="margin-top:8px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
   </div>
 </div>
 
@@ -422,8 +421,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-panel" style="width:min(300px,92vw)">
     <div id="piece-modal-content"></div>
     <div style="display:flex;gap:6px;margin-top:10px">
-      <button onclick="hide('ov-piece')" style="border-color:#333;color:#555;flex:1">// 閉じる</button>
-      <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ⬅ タイトル</button>
+      <button onclick="hide('ov-piece')" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ⬅ BACK</button>
     </div>
   </div>
 </div>
@@ -437,7 +435,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <button id="tut-prev-btn" onclick="tutNav(-1)" style="border-color:#333;color:#555">◀ 戻る</button>
       <button id="tut-next-btn" onclick="tutNav(1)">次へ ▶</button>
     </div>
-    <button onclick="endTutorial()" style="margin-top:6px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ タイトルに戻る</button>
+    <button onclick="hide('ov-tutorial');showTitle()" style="margin-top:6px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
   </div>
 </div>
 
@@ -447,7 +445,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="wait-msg" id="wait-msg">対戦相手を探しています...</div>
   <div class="wait-code" id="wait-code"></div>
   <button onclick="cancelWaiting()" style="margin-top:8px;width:160px;border-color:#333;color:#555">// CANCEL</button>
-  <button onclick="cancelWaiting();showTitle()" style="margin-top:4px;width:160px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ タイトルに戻る</button>
+  <button onclick="cancelWaiting();show('ov-online')" style="margin-top:4px;width:160px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
 </div>
 
 <!-- Game Start overlay -->
@@ -1455,7 +1453,8 @@ function startFromSplash(){
   sndSelect();
   startBGM();
   hide('ov-splash');
-  document.getElementById('name-input').value=myName||'';
+  if(myName){showTitle();return;}
+  document.getElementById('name-input').value='';
   show('ov-name');
   setTimeout(()=>document.getElementById('name-input').focus(),100);
 }
