@@ -450,6 +450,26 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <button onclick="cancelWaiting();showTitle()" style="margin-top:4px;width:160px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ タイトルに戻る</button>
 </div>
 
+<!-- Game Start overlay -->
+<div class="overlay" id="ov-gamestart">
+  <div style="width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div style="width:100%;text-align:center;padding:14px 16px;border:1px solid #4a1a1a;background:#0e0808;border-radius:4px">
+      <div style="font-size:.58rem;color:#884444;letter-spacing:2px;margin-bottom:6px">// OPPONENT</div>
+      <div id="gs-opp-name" style="font-size:1.1rem;color:#ff6633;letter-spacing:3px;text-shadow:0 0 10px #ff3300"></div>
+      <div id="gs-opp-rating" style="font-size:.72rem;margin-top:5px;letter-spacing:1px"></div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:clamp(1.6rem,7vw,2.8rem);letter-spacing:6px;color:#00ff41;text-shadow:0 0 24px #00ff41,0 0 48px #00aa2a;font-weight:bold">GAME START</div>
+      <div style="font-size:.6rem;color:#446644;letter-spacing:3px;margin-top:6px">EL PSY KONGROO</div>
+    </div>
+    <div style="width:100%;text-align:center;padding:14px 16px;border:1px solid #1a3a4a;background:#08100e;border-radius:4px">
+      <div style="font-size:.58rem;color:#446688;letter-spacing:2px;margin-bottom:6px">// YOU</div>
+      <div id="gs-my-name" style="font-size:1.1rem;color:#44aaff;letter-spacing:3px;text-shadow:0 0 10px #0088ff"></div>
+      <div id="gs-my-rating" style="font-size:.72rem;margin-top:5px;letter-spacing:1px"></div>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="ov-settings">
   <div class="ov-panel" style="width:min(320px,90vw)">
     <h3>// ⚙ SETTINGS</h3>
@@ -563,7 +583,7 @@ if(bc) {
       if(!msg.ts || msg.ts<hostStartTs || cancelWait) return;
       clearInterval(window._hostHB);clearInterval(window._fbGuestIv);clearInterval(window._lrGuestIv);
       opponentName=msg.guestName;
-      if(_onlineMatchType==='ranked')_oppRating=msg.rating||1500;
+      _oppRating=msg.rating||1500;
       hideWaiting(); startPlacementPhase();
     }
     // Placement data from opponent (same device)
@@ -1057,7 +1077,7 @@ async function startHost(){
     if(!d||!d.guestName||!d.ts||d.ts<hostStartTs||cancelWait)return false;
     clearInterval(window._hostHB);clearInterval(window._fbGuestIv);clearInterval(window._lrGuestIv);
     opponentName=d.guestName;
-    if(_onlineMatchType==='ranked')_oppRating=d.rating||1500;
+    _oppRating=d.rating||1500;
     fbPut(currentRoomKey,{...hostRoomData,status:'playing'});
     hideWaiting();startPlacementPhase();
     return true;
@@ -1129,7 +1149,7 @@ async function startJoin(){
   myPN=2;myRole='guest';opponentName=data.hostName;
   applyVariant(data.mode||'classic');
   _onlineMatchType=data.matchType||'normal';
-  if(_onlineMatchType==='ranked')_oppRating=data.rating||1500;
+  _oppRating=data.rating||1500;
   turn=1;
   const guestData={guestName:myName,ts:Date.now(),rating:_myRating};
   if(bc) bc.postMessage({type:'guest-join',key:currentRoomKey,...guestData});
@@ -1168,7 +1188,7 @@ function returnToRoom(){
     if(!d||!d.guestName||!d.ts||d.ts<hostStartTs||cancelWait)return;
     clearInterval(window._hostHB);clearInterval(window._fbGuestIv);clearInterval(window._lrGuestIv);
     opponentName=d.guestName;
-    if(_onlineMatchType==='ranked')_oppRating=d.rating||1500;
+    _oppRating=d.rating||1500;
     fbPut(currentRoomKey,{...rData,status:'playing'});
     hideWaiting();startPlacementPhase();
   };
@@ -1266,9 +1286,19 @@ function applyOppPlacement(rowDataStr){
   if(window._placeTimeout){clearTimeout(window._placeTimeout);window._placeTimeout=null;}
   const rowData=JSON.parse(rowDataStr);
   Object.entries(rowData).forEach(([key,row])=>{board[parseInt(key.slice(1))]=row;});
-  startOnlineGame();
+  showGameStart(startOnlineGame);
 }
 
+function showGameStart(callback){
+  const oppT=getTitle(_oppRating);
+  const myT=getTitle(_myRating);
+  document.getElementById('gs-opp-name').textContent=opponentName;
+  document.getElementById('gs-opp-rating').innerHTML=`RATE <span style="color:${oppT.color};font-weight:bold">${_oppRating}</span> <span style="color:${oppT.color}">[${oppT.name}]</span>`;
+  document.getElementById('gs-my-name').textContent=myName;
+  document.getElementById('gs-my-rating').innerHTML=`RATE <span style="color:${myT.color};font-weight:bold">${_myRating}</span> <span style="color:${myT.color}">[${myT.name}]</span>`;
+  show('ov-gamestart');
+  setTimeout(()=>{hide('ov-gamestart');callback();},2000);
+}
 function startOnlineGame(){
   gameMode='online';over=false;sel=null;validMoves=[];
   if(!captured)captured={1:[],2:[]};
@@ -1450,7 +1480,7 @@ function editName(){
   show('ov-name');
 }
 function showTitle(){
-  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win'].forEach(hide);
+  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win','ov-gamestart'].forEach(hide);
   if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
   if(tickIv){clearInterval(tickIv);tickIv=null;}
   if(_winTimer){clearInterval(_winTimer);_winTimer=null;}
