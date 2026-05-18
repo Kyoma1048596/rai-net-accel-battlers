@@ -154,6 +154,13 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 .box { box-shadow:0 0 12px rgba(0,255,65,.05),inset 0 0 8px rgba(0,0,0,.25); }
 .overlay { backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
 
+/* ── Opponent selection highlight ────────────────── */
+.cell.opp-sel { border-color:#ff6633!important; box-shadow:inset 0 0 14px rgba(255,100,50,.45)!important; }
+.cell.opp-sel .piece { animation:opp-float .9s ease-in-out infinite; filter:brightness(1.4); }
+@keyframes opp-float { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-5px) scale(1.06);} }
+.cell.opp-flash { animation:opp-flash-anim .55s ease-out forwards; }
+@keyframes opp-flash-anim { 0%{box-shadow:inset 0 0 22px rgba(255,80,30,.75);} 100%{box-shadow:none;} }
+
 /* ── Piece cards ──────────────────────────────────── */
 .piece-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:5px; }
 .piece-card { background:#050e05; border:1px solid #1a2e1a; border-radius:4px; padding:7px 3px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; font-family:'Courier New',monospace; transition:all .12s; }
@@ -650,6 +657,10 @@ if(bc) {
       doMove(msg.fr|0, msg.fc|0, msg.tr|0, msg.tc|0);
       applyingRemote=false;
     }
+    // Opponent selection (same device)
+    if(msg.type==='sel' && msg.key===currentRoomKey && msg.player!==myPN && gameMode==='online'){
+      _oppSel=(msg.r>=0&&msg.c>=0)?{r:msg.r,c:msg.c}:null;render();
+    }
   };
 }
 
@@ -773,13 +784,30 @@ function doRestore(){
   document.getElementById('online-badge').classList.add('on');
   document.getElementById('diff-box').style.display='none';
   updateNameLabel();updateCapLabels();sndOnline();showVsMsg();
-  startMoveListen();startBattleBGM();calcCellSize();render();
+  startMoveListen();startSelListen();startBattleBGM();calcCellSize();render();
 }
 async function clearAndContinue(){
   localStorage.removeItem('dna-game-snap');_pendingSnap=null;hide('ov-recover');
   if(isAuthValid()){await loadCloudData();afterAuth();}
   else if(localStorage.getItem('dna-auth-refresh')){const ok=await refreshAuth();if(ok)await loadCloudData();afterAuth();}
   else show('ov-auth');
+}
+
+// ── Opponent selection broadcast ──────────────────────
+function sendOppSel(r,c){
+  const d={r,c,ts:Date.now()};
+  if(bc)bc.postMessage({type:'sel',key:currentRoomKey,player:myPN,...d});
+  fbPut(currentRoomKey+'sel'+myPN,d);
+}
+function startSelListen(){
+  const oppPN=myPN===1?2:1;
+  if(window._fbSelIv)clearInterval(window._fbSelIv);
+  let _lastSelTs=0;
+  window._fbSelIv=setInterval(async()=>{
+    if(over||!currentRoomKey){clearInterval(window._fbSelIv);window._fbSelIv=null;return;}
+    const d=await fbGet(currentRoomKey+'sel'+oppPN);
+    if(d&&d.ts&&d.ts>_lastSelTs){_lastSelTs=d.ts;_oppSel=(d.r>=0&&d.c>=0)?{r:d.r,c:d.c}:null;render();}
+  },400);
 }
 
 // ── Constants ────────────────────────────────────────
@@ -816,6 +844,7 @@ let myName=localStorage.getItem('dna-name')||'';
 let opponentName='???';
 let _myRating=1400;
 let _oppRating=1500;
+let _oppSel=null,_oppMoveFlash=null;
 let _onlineMatchType='normal';
 function _playerKey(n){return'dna-player-'+n;}
 function loadPlayerData(n){
@@ -1104,6 +1133,7 @@ function clickCell(r,c){
   if(cell?.player===turn){if(sel&&sel[0]===r&&sel[1]===c){sel=null;validMoves=[];sndDesel();}else{sel=[r,c];validMoves=getMoves(r,c);sndSelect();}}
   else{sel=null;validMoves=[];}
   render();
+  if(gameMode==='online')sendOppSel(sel?sel[0]:-1,sel?sel[1]:-1);
 }
 
 // ── Render ───────────────────────────────────────────
@@ -1132,6 +1162,8 @@ function render(){
     if((gameMode==='cpu'&&cpuThinking)||over)el.classList.add('cpu-block');
     if(sel&&sel[0]===r&&sel[1]===c)el.classList.add('selected');
     if(validMoves.some(([mr,mc])=>mr===r&&mc===c))el.classList.add('moveable');
+    if(_oppSel&&r===_oppSel.r&&c===_oppSel.c)el.classList.add('opp-sel');
+    if(_oppMoveFlash&&r===_oppMoveFlash.r&&c===_oppMoveFlash.c)el.classList.add('opp-flash');
     const corner=document.createElement('span');corner.className='corner';
     if(r===GOAL[1]&&c===0)corner.textContent='P1 GOAL';
     else if(r===GOAL[2]&&c===0)corner.textContent='P2 GOAL';
@@ -1194,9 +1226,12 @@ function applyOppMove(mv){
   if(!mv||!mv.ts||mv.ts<=lastMoveTs||over||applyingRemote)return;
   lastMoveTs=mv.ts;
   applyingRemote=true;sel=null;validMoves=[];
+  _oppSel=null;
+  _oppMoveFlash={r:mv.tr,c:mv.tc};
   doMove(mv.fr|0,mv.fc|0,mv.tr|0,mv.tc|0);
   applyingRemote=false;
   saveGameSnap();
+  setTimeout(()=>{_oppMoveFlash=null;if(!over)render();},550);
 }
 function startMoveListen(){
   lastMoveTs=0;
@@ -1234,6 +1269,8 @@ async function startHost(){
   fbPut(currentRoomKey+'p2',null);
   fbPut(currentRoomKey+'tf1',null);
   fbPut(currentRoomKey+'tf2',null);
+  fbPut(currentRoomKey+'sel1',null);
+  fbPut(currentRoomKey+'sel2',null);
   lrPut(currentRoomKey,hostRoomData);
   lrPut(currentRoomKey+'-g',null);
   lrPut(currentRoomKey+'-m1',null);
@@ -1488,6 +1525,7 @@ function startOnlineGame(){
   updateNameLabel();updateCapLabels();sndOnline();
   showVsMsg();
   startMoveListen();
+  startSelListen();
   startBattleBGM();
   render();
 }
@@ -1513,6 +1551,8 @@ function cleanupOnline(){
   if(window._placeTimeout){clearTimeout(window._placeTimeout);window._placeTimeout=null;}
   if(window._tfIv){clearInterval(window._tfIv);window._tfIv=null;}
   if(window._tfLrIv){clearInterval(window._tfLrIv);window._tfLrIv=null;}
+  if(window._fbSelIv){clearInterval(window._fbSelIv);window._fbSelIv=null;}
+  _oppSel=null;_oppMoveFlash=null;
   document.getElementById('btn-place-ok').style.display='none';
   hide('ov-transform');
   lastTransformTs=0;
