@@ -21,8 +21,8 @@ h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:#00ff41; text-s
 #game-wrap { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
 
 /* Board */
-#board { display:grid; grid-template-columns:repeat(4,72px); grid-template-rows:repeat(6,72px); gap:3px; padding:8px; background:#0a0f0a; border:1px solid #00ff41; box-shadow:0 0 24px rgba(0,255,65,.2),inset 0 0 20px rgba(0,0,0,.5); }
-.cell { width:72px; height:72px; background:#0c130c; border:1px solid #1a2e1a; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:background .12s; }
+#board { display:grid; grid-template-columns:repeat(4,var(--cell,72px)); grid-template-rows:repeat(6,var(--cell,72px)); gap:3px; padding:8px; background:#0a0f0a; border:1px solid #00ff41; box-shadow:0 0 24px rgba(0,255,65,.2),inset 0 0 20px rgba(0,0,0,.5); }
+.cell { width:var(--cell,72px); height:var(--cell,72px); background:#0c130c; border:1px solid #1a2e1a; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:background .12s; }
 .cell:hover { background:#162416; }
 .cell.goal-top { background:#060d1a; border-color:#1a4080; }
 .cell.goal-bot { background:#1a0606; border-color:#801a1a; }
@@ -36,7 +36,7 @@ h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:#00ff41; text-s
 .cell.goal-bot .corner { color:#cc2222; }
 
 /* Pieces */
-.piece { width:58px; height:58px; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; user-select:none; gap:1px; }
+.piece { width:calc(var(--cell,72px) - 14px); height:calc(var(--cell,72px) - 14px); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; user-select:none; gap:1px; }
 .piece.hidden { background:linear-gradient(145deg,#111,#1e1e1e)!important; color:#555!important; box-shadow:none!important; }
 .piece.hidden.p1 { border:2px solid #224466; }
 .piece.hidden.p2 { border:2px solid #442222; }
@@ -50,8 +50,8 @@ h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:#00ff41; text-s
 .piece.t-linker.p2 { border-color:#ff4400; box-shadow:0 0 16px rgba(255,68,0,.7); animation:lp2 1.8s ease-in-out infinite; }
 @keyframes lp2 { 0%,100%{box-shadow:0 0 14px rgba(255,68,0,.6);}50%{box-shadow:0 0 26px rgba(255,68,0,.95);} }
 @keyframes lp { 0%,100%{box-shadow:0 0 14px rgba(255,170,0,.6);}50%{box-shadow:0 0 26px rgba(255,170,0,.95);} }
-.piece .pi { font-size:20px; line-height:1; }
-.piece .pl { font-size:8px; letter-spacing:1px; opacity:.85; text-transform:uppercase; }
+.piece .pi { font-size:clamp(14px,calc(var(--cell,72px)*.3),20px); line-height:1; }
+.piece .pl { font-size:clamp(5px,calc(var(--cell,72px)*.12),8px); letter-spacing:1px; opacity:.85; text-transform:uppercase; }
 
 /* Panel */
 #panel { width:210px; min-width:190px; display:flex; flex-direction:column; gap:10px; }
@@ -466,6 +466,43 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   </div>
 </div>
 
+<!-- Auth overlay -->
+<div class="overlay" id="ov-auth">
+  <div class="ov-panel" style="width:min(320px,90vw)">
+    <h3 style="text-align:center;letter-spacing:3px">// ACCOUNT</h3>
+    <div style="font-size:.62rem;color:#446644;margin-bottom:10px;text-align:center;letter-spacing:1px">レーティングをクラウドに保存します</div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:.58rem;color:#446644;margin-bottom:3px;letter-spacing:1px">// EMAIL</div>
+      <input id="auth-email" type="email" placeholder="email@example.com" maxlength="64"
+        style="width:100%;background:#0a0f0a;border:1px solid #1a3a1a;color:#00ff41;padding:7px;font-family:'Courier New',monospace;font-size:.8rem;outline:none;box-sizing:border-box"
+        onfocus="this.style.borderColor='#00ff41'" onblur="this.style.borderColor='#1a3a1a'"
+        onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()">
+    </div>
+    <div style="margin-bottom:6px">
+      <div style="font-size:.58rem;color:#446644;margin-bottom:3px;letter-spacing:1px">// PASSWORD</div>
+      <input id="auth-pass" type="password" placeholder="パスワード（6文字以上）" maxlength="64"
+        style="width:100%;background:#0a0f0a;border:1px solid #1a3a1a;color:#00ff41;padding:7px;font-family:'Courier New',monospace;font-size:.8rem;outline:none;box-sizing:border-box"
+        onfocus="this.style.borderColor='#00ff41'" onblur="this.style.borderColor='#1a3a1a'"
+        onkeydown="if(event.key==='Enter')authLogin()">
+    </div>
+    <div id="auth-err" style="color:#ff4444;font-size:.65rem;min-height:1.2em;margin-bottom:8px;text-align:center"></div>
+    <button onclick="authLogin()" style="border-color:#00aa44;color:#00cc44">// ▶ ログイン</button>
+    <button onclick="authRegister()" style="margin-top:5px;border-color:#005577;color:#0099cc">// ✚ 新規登録</button>
+    <div style="text-align:center;font-size:.58rem;color:#334433;margin:8px 0 4px;letter-spacing:1px">── または ──</div>
+    <button onclick="authGuest()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// 👤 ゲストモードで続行</button>
+  </div>
+</div>
+
+<!-- Recovery overlay -->
+<div class="overlay" id="ov-recover">
+  <div class="ov-panel" style="width:min(320px,90vw)">
+    <h3 style="text-align:center;color:#ffaa00;letter-spacing:3px">// 対戦途中です</h3>
+    <div id="recover-info" style="font-size:.72rem;color:#669966;margin:8px 0 14px;text-align:center;line-height:1.9"></div>
+    <button onclick="doRestore()" style="border-color:#00aa44;color:#00cc44">// ▶ 続きから再開</button>
+    <button onclick="clearAndContinue()" style="margin-top:5px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ✕ 新しく始める</button>
+  </div>
+</div>
+
 <div class="overlay" id="ov-settings">
   <div class="ov-panel" style="width:min(320px,90vw)">
     <h3>// ⚙ SETTINGS</h3>
@@ -484,7 +521,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 <audio id="bgm-battle" src="bgm.mp3"              loop preload="auto"></audio>
 <script>
 // ── Version ──────────────────────────────────────────
-const GAME_VERSION='2.45';
+const GAME_VERSION='3.0';
 document.querySelectorAll('.ver-sub,#ver-label').forEach(el=>el.textContent='v'+GAME_VERSION);
 
 // ── Audio ───────────────────────────────────────────
@@ -543,7 +580,8 @@ const sndDefeat=()=>{[540,420,330,250,170].forEach((f,i)=>tone(f,.17,'sawtooth',
 const sndOnline=()=>{tone(480,.048,'sine',.07);tone(780,.048,'square',.06,.09);tone(1100,.1,'sine',.07,.18);noiseBlip(.022,.05,.16);};
 
 // ── Firebase Realtime Database relay ─────────────────
-const FB='https://operation-arc-light-default-rtdb.firebaseio.com/g';
+const FB_DB='https://rai-net-d9143-default-rtdb.firebaseio.com';
+const FB=FB_DB+'/g';
 async function fbPut(key,data){
   try{await fetch(`${FB}/${key}.json`,{method:'PUT',body:JSON.stringify(data)});}catch(e){}
 }
@@ -601,6 +639,135 @@ if(bc) {
   };
 }
 
+// ── Firebase Auth ────────────────────────────────────
+const FB_API_KEY='AIzaSyATwIe3tKgqpWDkQleevFitqv-0E2QKEh4';
+let _authToken=localStorage.getItem('dna-auth-token')||null;
+let _authUid=localStorage.getItem('dna-auth-uid')||null;
+let _authExpiry=+(localStorage.getItem('dna-auth-expiry')||0);
+function isAuthValid(){return!!(_authToken&&_authUid&&Date.now()<_authExpiry);}
+async function _fbAuthFetch(ep,body){
+  try{const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:${ep}?key=${FB_API_KEY}`,
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    return r.json();}catch(e){return{error:{message:'NETWORK_ERROR'}};}
+}
+function _authErrMsg(c){
+  return({'EMAIL_NOT_FOUND':'メールが見つかりません','INVALID_PASSWORD':'パスワードが違います',
+    'EMAIL_EXISTS':'このメールは既に登録済み','INVALID_LOGIN_CREDENTIALS':'メールまたはパスワードが違います',
+    'WEAK_PASSWORD : Password should be at least 6 characters':'パスワードは6文字以上',
+    'TOO_MANY_ATTEMPTS_TRY_LATER':'しばらく後に再試行','NETWORK_ERROR':'通信エラー'}[c]||c);
+}
+function _authSetErr(m){document.getElementById('auth-err').textContent=m;}
+async function _onAuthSuccess(d){
+  _authToken=d.idToken;_authUid=d.localId;
+  _authExpiry=Date.now()+(+d.expiresIn)*1000;
+  localStorage.setItem('dna-auth-token',_authToken);
+  localStorage.setItem('dna-auth-uid',_authUid);
+  localStorage.setItem('dna-auth-expiry',String(_authExpiry));
+  if(d.refreshToken)localStorage.setItem('dna-auth-refresh',d.refreshToken);
+  hide('ov-auth');
+  await loadCloudData();
+  afterAuth();
+}
+async function authLogin(){
+  const em=document.getElementById('auth-email').value.trim();
+  const pw=document.getElementById('auth-pass').value;
+  if(!em||!pw){_authSetErr('メールとパスワードを入力');return;}
+  _authSetErr('接続中...');
+  const d=await _fbAuthFetch('signInWithPassword',{email:em,password:pw,returnSecureToken:true});
+  if(d.error){_authSetErr(_authErrMsg(d.error.message));return;}
+  await _onAuthSuccess(d);
+}
+async function authRegister(){
+  const em=document.getElementById('auth-email').value.trim();
+  const pw=document.getElementById('auth-pass').value;
+  if(!em||!pw){_authSetErr('メールとパスワードを入力');return;}
+  if(pw.length<6){_authSetErr('パスワードは6文字以上');return;}
+  _authSetErr('登録中...');
+  const d=await _fbAuthFetch('signUp',{email:em,password:pw,returnSecureToken:true});
+  if(d.error){_authSetErr(_authErrMsg(d.error.message));return;}
+  await _onAuthSuccess(d);
+}
+async function authGuest(){hide('ov-auth');afterAuth();}
+async function loadCloudData(){
+  if(!_authUid||!_authToken)return;
+  try{
+    const r=await fetch(`${FB_DB}/users/${_authUid}/data.json?auth=${_authToken}`);
+    const d=await r.json();
+    if(d&&d.name){myName=d.name;localStorage.setItem('dna-name',myName);}
+    if(d&&typeof d.rating==='number'){
+      _myRating=d.rating;
+      let ld={};try{const rd=localStorage.getItem(_playerKey(myName));if(rd)ld=JSON.parse(rd);}catch(e){}
+      ld.rating=_myRating;localStorage.setItem(_playerKey(myName),JSON.stringify(ld));
+    }
+  }catch(e){}
+}
+async function saveCloudData(){
+  if(!_authUid||!_authToken||!myName)return;
+  try{await fetch(`${FB_DB}/users/${_authUid}/data.json?auth=${_authToken}`,
+    {method:'PUT',body:JSON.stringify({name:myName,rating:_myRating,ts:Date.now()})});}catch(e){}
+}
+async function refreshAuth(){
+  const rt=localStorage.getItem('dna-auth-refresh');if(!rt)return false;
+  try{const r=await fetch(`https://securetoken.googleapis.com/v1/token?key=${FB_API_KEY}`,
+    {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+     body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(rt)});
+    const d=await r.json();
+    if(d.id_token){
+      _authToken=d.id_token;_authUid=d.user_id;
+      _authExpiry=Date.now()+parseInt(d.expires_in)*1000;
+      localStorage.setItem('dna-auth-token',_authToken);
+      localStorage.setItem('dna-auth-uid',_authUid);
+      localStorage.setItem('dna-auth-expiry',String(_authExpiry));
+      if(d.refresh_token)localStorage.setItem('dna-auth-refresh',d.refresh_token);
+      return true;}}catch(e){}return false;
+}
+function afterAuth(){
+  if(!myName){document.getElementById('name-input').value='';show('ov-name');
+    setTimeout(()=>document.getElementById('name-input').focus(),100);}
+  else if(!localStorage.getItem('dna-tut-done')){showTutorial();}
+  else showTitle();
+}
+
+// ── Disconnect recovery ───────────────────────────────
+function saveGameSnap(){
+  if(!currentRoomKey||gameMode!=='online'||over)return;
+  const snap={board:JSON.stringify(board),turn,captured:JSON.stringify(captured),
+    myPN,gameVariant,roomKey:currentRoomKey,passphrase:currentPassphrase,
+    oppName:opponentName,oppRating:_oppRating,matchType:_onlineMatchType,
+    myRole,lastMoveTs,ts:Date.now()};
+  localStorage.setItem('dna-game-snap',JSON.stringify(snap));
+  fbPut(currentRoomKey+'snap'+myPN,{ts:snap.ts});
+}
+function loadGameSnap(){
+  const raw=localStorage.getItem('dna-game-snap');if(!raw)return null;
+  try{const s=JSON.parse(raw);
+    if(!s.ts||Date.now()-s.ts>300000){localStorage.removeItem('dna-game-snap');return null;}
+    return s;}catch(e){return null;}
+}
+let _pendingSnap=null;
+function doRestore(){
+  const snap=_pendingSnap;_pendingSnap=null;if(!snap)return;
+  localStorage.removeItem('dna-game-snap');
+  applyVariant(snap.gameVariant||'classic');
+  currentRoomKey=snap.roomKey;currentPassphrase=snap.passphrase||'';
+  myPN=snap.myPN;myRole=snap.myRole;
+  opponentName=snap.oppName||'???';_oppRating=snap.oppRating||1500;
+  _onlineMatchType=snap.matchType||'normal';lastMoveTs=snap.lastMoveTs||0;
+  board=JSON.parse(snap.board);turn=snap.turn;captured=JSON.parse(snap.captured);
+  gameMode='online';over=false;sel=null;validMoves=[];
+  hide('ov-recover');
+  document.getElementById('online-badge').classList.add('on');
+  document.getElementById('diff-box').style.display='none';
+  updateNameLabel();updateCapLabels();sndOnline();showVsMsg();
+  startMoveListen();startBattleBGM();calcCellSize();render();
+}
+async function clearAndContinue(){
+  localStorage.removeItem('dna-game-snap');_pendingSnap=null;hide('ov-recover');
+  if(isAuthValid()){await loadCloudData();afterAuth();}
+  else if(localStorage.getItem('dna-auth-refresh')){const ok=await refreshAuth();if(ok)await loadCloudData();afterAuth();}
+  else show('ov-auth');
+}
+
 // ── Constants ────────────────────────────────────────
 let ROWS=6,COLS=4,GOAL={1:0,2:5},HOME={1:[3,4],2:[1,2]};
 const CPU_DELAY=950;
@@ -609,6 +776,7 @@ function applyVariant(v){
   gameVariant=v;
   if(v==='extended'){ROWS=7;COLS=5;GOAL={1:0,2:6};HOME={1:[4,5],2:[1,2]};}
   else{ROWS=6;COLS=4;GOAL={1:0,2:5};HOME={1:[3,4],2:[1,2]};}
+  if(typeof calcCellSize==='function')calcCellSize();
 }
 function setOnlineMode(m){
   selectedOnlineMode=m;
@@ -647,6 +815,7 @@ function savePlayerData(){
   let d={};try{const r=localStorage.getItem(_playerKey(myName));if(r)d=JSON.parse(r);}catch(e){}
   d.rating=_myRating;
   localStorage.setItem(_playerKey(myName),JSON.stringify(d));
+  saveCloudData();
 }
 if(myName)loadPlayerData(myName);
 function setOnlineMatchType(t){
@@ -933,8 +1102,8 @@ function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;ret
 
 function render(){
   const bd=document.getElementById('board');bd.innerHTML='';
-  bd.style.gridTemplateColumns=`repeat(${COLS},72px)`;
-  bd.style.gridTemplateRows=`repeat(${ROWS},72px)`;
+  bd.style.gridTemplateColumns=`repeat(${COLS},var(--cell,72px))`;
+  bd.style.gridTemplateRows=`repeat(${ROWS},var(--cell,72px))`;
   const myZone=HOME[myPN];
   const baseRows=Array.from({length:ROWS},(_,i)=>i);
   const rowOrder=myPN===2?[...baseRows].reverse():baseRows;
@@ -1013,6 +1182,7 @@ function applyOppMove(mv){
   applyingRemote=true;sel=null;validMoves=[];
   doMove(mv.fr|0,mv.fc|0,mv.tr|0,mv.tc|0);
   applyingRemote=false;
+  saveGameSnap();
 }
 function startMoveListen(){
   lastMoveTs=0;
@@ -1314,6 +1484,7 @@ function sendOnlineMove(fr,fc,tr,tc){
   if(bc) bc.postMessage({type:'move',key:currentRoomKey,player:myPN,...mv});
   fbPut(currentRoomKey+'m'+myPN,mv);
   lrPut(currentRoomKey+'-m'+myPN,mv);
+  saveGameSnap();
 }
 
 function cleanupOnline(){
@@ -1404,6 +1575,7 @@ function showWin(w){
     cleanupOnline();
   }
   stopBGM();
+  if(isOnline)localStorage.removeItem('dna-game-snap');
   const el=document.getElementById('ov-win-title'),sub=document.getElementById('ov-win-sub');
   el.className='ov-title';
   void el.offsetWidth;
@@ -1446,15 +1618,23 @@ function showWin(w){
   },1000);
 }
 
-function startFromSplash(){
+async function startFromSplash(){
   _unlockAudio();
   sndSelect();
   startBGM();
   hide('ov-splash');
-  if(myName){showTitle();return;}
-  document.getElementById('name-input').value='';
-  show('ov-name');
-  setTimeout(()=>document.getElementById('name-input').focus(),100);
+  const snap=loadGameSnap();
+  if(snap){
+    _pendingSnap=snap;
+    document.getElementById('recover-info').innerHTML=
+      `<b style="color:#ffaa00">${snap.oppName}</b> との対戦途中<br>`+
+      `<span style="font-size:.62rem;color:#446644">${new Date(snap.ts).toLocaleTimeString()}</span>`;
+    show('ov-recover');
+    return;
+  }
+  if(isAuthValid()){await loadCloudData();afterAuth();}
+  else if(localStorage.getItem('dna-auth-refresh')){const ok=await refreshAuth();if(ok)await loadCloudData();afterAuth();}
+  else show('ov-auth');
 }
 function confirmName(){
   const v=document.getElementById('name-input').value.trim();
@@ -1469,6 +1649,7 @@ function confirmName(){
   renderRating();
   sndSelect();
   hide('ov-name');
+  saveCloudData();
   if(!localStorage.getItem('dna-tut-done')){showTutorial();}
   else showTitle();
 }
@@ -1477,7 +1658,7 @@ function editName(){
   show('ov-name');
 }
 function showTitle(){
-  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win','ov-gamestart'].forEach(hide);
+  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win','ov-gamestart','ov-auth','ov-recover'].forEach(hide);
   if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
   if(tickIv){clearInterval(tickIv);tickIv=null;}
   if(_winTimer){clearInterval(_winTimer);_winTimer=null;}
@@ -1629,6 +1810,16 @@ document.addEventListener('keydown',e=>{
     sel=null;validMoves=[];sndDesel();render();
   }
 });
+
+// ── Mobile: responsive cell size ─────────────────────
+function calcCellSize(){
+  const w=Math.min(window.innerWidth-32,420);
+  const gapPad=(COLS-1)*3+16;
+  const sz=Math.max(44,Math.min(72,Math.floor((w-gapPad)/COLS)));
+  document.documentElement.style.setProperty('--cell',sz+'px');
+}
+window.addEventListener('resize',()=>{calcCellSize();if(board)render();});
+calcCellSize();
 
 // 常にスプラッシュから開始（ov-splash は HTML で on クラス付き）
 renderRating();
