@@ -1787,13 +1787,7 @@ function showWin(w){
   document.getElementById('btn-replay').style.display=_gameLog.length>1?'':'none';
   show('ov-win');
   if(_winTimer){clearTimeout(_winTimer);_winTimer=null;}
-  let n=4;const countEl=document.getElementById('win-count');
-  countEl.textContent=`-- TITLE へ ${n}秒後 --`;
-  _winTimer=setInterval(()=>{
-    n--;
-    if(n<=0){clearInterval(_winTimer);_winTimer=null;showTitle();}
-    else countEl.textContent=`-- TITLE へ ${n}秒後 --`;
-  },1000);
+  document.getElementById('win-count').textContent='';
 }
 
 async function startFromSplash(){
