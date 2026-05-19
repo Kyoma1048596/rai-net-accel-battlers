@@ -110,7 +110,6 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 @keyframes lose-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
 .win-anim { animation:win-pop .45s cubic-bezier(.2,1.5,.4,1) both; }
 .lose-anim { animation:lose-shake .4s ease both; }
-#win-count { font-size:.68rem; color:#336633; letter-spacing:2px; margin-top:4px; }
 .push-start:hover { color:#66ff88; }
 .overlay button { width:220px; margin:0 auto; }
 .ov-panel { background:#080e08; border:1px solid #1a3a1a; padding:16px; width:min(320px,90vw); }
@@ -174,6 +173,13 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 @keyframes battle-flash { 0%{box-shadow:inset 0 0 28px rgba(255,200,0,.85);} 100%{box-shadow:none;} }
 .piece.move-pop { animation:move-pop .26s cubic-bezier(.2,1.4,.4,1) both; }
 .cell.battle-cell { animation:battle-flash .42s ease-out forwards; }
+
+/* ── My Page ──────────────────────────────────────── */
+.mp-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:bold; flex-shrink:0; border:2px solid currentColor; }
+.mp-stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:10px 0; }
+.mp-stat { background:#080e08; border:1px solid #1a3a1a; border-radius:4px; padding:8px 4px; text-align:center; }
+.mp-stat-num { font-size:1.1rem; font-weight:bold; letter-spacing:1px; }
+.mp-stat-lbl { font-size:.55rem; color:#446644; letter-spacing:1px; margin-top:2px; }
 
 /* ── Piece cards ──────────────────────────────────── */
 .piece-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:5px; }
@@ -287,7 +293,6 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-title" id="ov-win-title"></div>
   <div class="ov-sub" id="ov-win-sub">EL PSY KONGROO</div>
   <div id="rating-change" style="font-size:.75rem;text-align:center;min-height:1.2em"></div>
-  <div id="win-count"></div>
   <button id="btn-return-room" onclick="returnToRoom()" style="display:none;border-color:#00aa44;color:#00cc44">// 🏠 部屋に戻る</button>
   <button id="btn-replay" onclick="showReplay()" style="display:none;border-color:#334455;color:#5577aa;font-size:.72rem">// 🎬 棋譜リプレイ</button>
   <button onclick="showTitle()">// TITLE へ戻る</button>
@@ -304,6 +309,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <button onclick="showRules()" style="border-color:#445544;color:#669966;margin-top:4px">// 📖 ルール説明</button>
     <button onclick="showTutorial()" style="border-color:#223322;color:#445544;font-size:.7rem;margin-top:2px">// 🎓 チュートリアル</button>
     <button onclick="showSettings()" style="border-color:#1a2e1a;color:#334433;font-size:.7rem;margin-top:2px">// ⚙ 設定</button>
+    <button onclick="showMyPage()" style="border-color:#1a2e1a;color:#336644;font-size:.7rem;margin-top:2px">// 👤 マイページ</button>
     <button onclick="showLeaderboard()" style="border-color:#1a1a2e;color:#334466;font-size:.7rem;margin-top:2px">// 🏆 リーダーボード</button>
   </div>
   <div style="font-size:.6rem;color:#1a3a1a;margin-top:4px;letter-spacing:1px">[ F2 ] TITLE</div>
@@ -529,6 +535,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <div id="auth-err" style="color:#ff4444;font-size:.65rem;min-height:1.2em;margin-bottom:8px;text-align:center"></div>
     <button onclick="authLogin()" style="border-color:#00aa44;color:#00cc44">// ▶ ログイン</button>
     <button onclick="authRegister()" style="margin-top:5px;border-color:#005577;color:#0099cc">// ✚ 新規登録</button>
+    <button onclick="authResetPassword()" style="margin-top:5px;border-color:#1a2a3a;color:#446688;font-size:.65rem">// 🔑 パスワードを忘れた方</button>
     <div style="text-align:center;font-size:.58rem;color:#334433;margin:8px 0 4px;letter-spacing:1px">── または ──</div>
     <button onclick="authGuest()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// 👤 ゲストモードで続行</button>
   </div>
@@ -541,6 +548,59 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <div id="recover-info" style="font-size:.72rem;color:#669966;margin:8px 0 14px;text-align:center;line-height:1.9"></div>
     <button onclick="doRestore()" style="border-color:#00aa44;color:#00cc44">// ▶ 続きから再開</button>
     <button onclick="clearAndContinue()" style="margin-top:5px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ✕ 新しく始める</button>
+  </div>
+</div>
+
+<!-- My Page overlay -->
+<div class="overlay" id="ov-mypage">
+  <div class="ov-panel" style="width:min(320px,92vw)">
+    <h3>// 👤 MY PAGE</h3>
+
+    <!-- Avatar + Name + Email -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="mp-avatar" id="mp-avatar">?</div>
+      <div style="flex:1;min-width:0">
+        <div id="mp-name" style="font-size:1rem;color:#00ff41;letter-spacing:2px;margin-bottom:2px"></div>
+        <div id="mp-email" style="font-size:.58rem;color:#446644;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+    </div>
+
+    <!-- Rating -->
+    <div style="background:#080e08;border:1px solid #1a3a1a;padding:10px 12px;margin-bottom:10px;text-align:center">
+      <div id="mp-rating" style="font-size:.85rem;letter-spacing:2px"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mp-stat-grid">
+      <div class="mp-stat">
+        <div class="mp-stat-num" id="mp-wins" style="color:#00ff41">0</div>
+        <div class="mp-stat-lbl">WIN</div>
+      </div>
+      <div class="mp-stat">
+        <div class="mp-stat-num" id="mp-losses" style="color:#ff4444">0</div>
+        <div class="mp-stat-lbl">LOSE</div>
+      </div>
+      <div class="mp-stat">
+        <div class="mp-stat-num" id="mp-draws" style="color:#aaaaaa">0</div>
+        <div class="mp-stat-lbl">DRAW</div>
+      </div>
+    </div>
+
+    <!-- Name edit -->
+    <div style="margin-bottom:8px">
+      <div style="font-size:.58rem;color:#446644;margin-bottom:3px;letter-spacing:1px">// NAME</div>
+      <div class="pp-row">
+        <input id="mp-name-input" type="text" placeholder="新しい名前..." maxlength="12"
+          style="background:#0a0f0a;border:1px solid #1a3a1a;color:#00ff41;padding:7px;font-family:'Courier New',monospace;font-size:.8rem;outline:none;"
+          onfocus="this.style.borderColor='#00ff41'" onblur="this.style.borderColor='#1a3a1a'"
+          onkeydown="if(event.key==='Enter')mpChangeName()">
+        <button onclick="mpChangeName()" style="width:60px;font-size:.7rem;padding:7px 4px">変更</button>
+      </div>
+      <div id="mp-name-err" style="font-size:.62rem;color:#ff4444;min-height:1.1em;margin-top:3px"></div>
+    </div>
+
+    <button onclick="logout()" style="border-color:#3a1a1a;color:#884444;font-size:.72rem;margin-bottom:4px">// 🚪 ログアウト</button>
+    <button onclick="hide('ov-mypage');showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
   </div>
 </div>
 
@@ -738,6 +798,7 @@ async function _onAuthSuccess(d){
   localStorage.setItem('dna-auth-uid',_authUid);
   localStorage.setItem('dna-auth-expiry',String(_authExpiry));
   if(d.refreshToken)localStorage.setItem('dna-auth-refresh',d.refreshToken);
+  if(d.email){_authEmail=d.email;localStorage.setItem('dna-auth-email',d.email);}
   hide('ov-auth');
   await loadCloudData();
   afterAuth();
@@ -761,6 +822,16 @@ async function authRegister(){
   if(d.error){_authSetErr(_authErrMsg(d.error.message));return;}
   await _onAuthSuccess(d);
 }
+async function authResetPassword(){
+  const em=document.getElementById('auth-email').value.trim();
+  if(!em){_authSetErr('メールアドレスを入力してください');return;}
+  _authSetErr('送信中...');
+  const d=await _fbAuthFetch('sendOobCode',{requestType:'PASSWORD_RESET',email:em});
+  if(d.error){_authSetErr(_authErrMsg(d.error.message));return;}
+  _authSetErr('');
+  document.getElementById('auth-err').style.color='#00cc44';
+  document.getElementById('auth-err').textContent='リセットメールを送信しました。メールをご確認ください。';
+}
 async function authGuest(){hide('ov-auth');afterAuth();}
 async function loadCloudData(){
   if(!_authUid||!_authToken)return;
@@ -770,14 +841,16 @@ async function loadCloudData(){
     if(d&&d.name){myName=d.name;localStorage.setItem('dna-name',myName);}
     if(d&&typeof d.rating==='number'){
       _myRating=d.rating;
+      if(typeof d.wins==='number'){_wins=d.wins;_losses=d.losses||0;_draws=d.draws||0;}
       let ld={};try{const rd=localStorage.getItem(_playerKey(myName));if(rd)ld=JSON.parse(rd);}catch(e){}
-      ld.rating=_myRating;localStorage.setItem(_playerKey(myName),JSON.stringify(ld));
+      ld.rating=_myRating;ld.wins=_wins;ld.losses=_losses;ld.draws=_draws;
+      localStorage.setItem(_playerKey(myName),JSON.stringify(ld));
     }
   }catch(e){}
 }
 async function saveCloudData(){
   if(!_authUid||!_authToken||!myName)return;
-  const payload={name:myName,rating:_myRating,ts:Date.now()};
+  const payload={name:myName,rating:_myRating,wins:_wins,losses:_losses,draws:_draws,ts:Date.now()};
   try{await fetch(`${FB_DB}/users/${_authUid}/data.json?auth=${_authToken}`,
     {method:'PUT',body:JSON.stringify(payload)});}catch(e){}
   try{await fetch(`${FB_DB}/leaderboard/${_authUid}.json?auth=${_authToken}`,
@@ -944,6 +1017,8 @@ let myName=localStorage.getItem('dna-name')||'';
 let opponentName='???';
 let _myRating=1400;
 let _oppRating=1500;
+let _wins=0,_losses=0,_draws=0;
+let _authEmail=localStorage.getItem('dna-auth-email')||'';
 let _oppSel=null,_oppMoveFlash=null;
 let _gameLog=[],_replayStep=0;
 let _moveAnimCell=null,_battleCell=null;
@@ -954,13 +1029,16 @@ function _playerKey(n){return'dna-player-'+n;}
 function loadPlayerData(n){
   if(!n)return;
   const raw=localStorage.getItem(_playerKey(n));
-  if(raw){try{const d=JSON.parse(raw);_myRating=typeof d.rating==='number'?d.rating:1500;}catch(e){_myRating=1500;}}
+  if(raw){try{const d=JSON.parse(raw);
+    _myRating=typeof d.rating==='number'?d.rating:1500;
+    _wins=d.wins||0;_losses=d.losses||0;_draws=d.draws||0;
+  }catch(e){_myRating=1500;}}
   else{const old=localStorage.getItem('dna-rating');_myRating=old!==null?+old:1400;}
 }
 function savePlayerData(){
   if(!myName)return;
   let d={};try{const r=localStorage.getItem(_playerKey(myName));if(r)d=JSON.parse(r);}catch(e){}
-  d.rating=_myRating;
+  d.rating=_myRating;d.wins=_wins;d.losses=_losses;d.draws=_draws;
   localStorage.setItem(_playerKey(myName),JSON.stringify(d));
   saveCloudData();
 }
@@ -1093,7 +1171,7 @@ function doMove(fr,fc,tr,tc){
   if(w!==0){over=true;if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);render();showWin(w);return;}
   turn=turn===1?2:1;sel=null;validMoves=[];
   render();
-  startTurnTimer(turn===myPN);
+  if(gameMode==='online')startTurnTimer(turn===myPN);
   if(gameMode==='cpu'&&turn===2)scheduleCpu();
   else if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);
 }
@@ -1137,7 +1215,7 @@ function chooseMedicTransform(r,c,type,value){
   const w=checkWin();
   if(w!==0){over=true;render();showWin(w);return;}
   turn=turn===1?2:1;sel=null;validMoves=[];render();
-  startTurnTimer(turn===myPN);
+  if(gameMode==='online')startTurnTimer(turn===myPN);
   if(gameMode==='cpu'&&turn===2)scheduleCpu();
 }
 
@@ -1583,7 +1661,6 @@ async function placementOK(){
     setMsg(`${myName} のターンです（PLAYER 1 / 青）`);
     sndBoot();startBattleBGM();render();
     _initGameLog();
-    startTurnTimer(true);
     return;
   }
   setMsg('相手の準備を待っています...');
@@ -1734,7 +1811,6 @@ function show(id){document.getElementById(id).classList.add('on');}
 function hide(id){document.getElementById(id).classList.remove('on');}
 function setDiff(d){difficulty=d;[1,2,3].forEach(i=>document.getElementById(`d${i}`).classList.toggle('on',i===d));}
 
-let _winTimer=null;
 function flashScreen(color){
   const d=document.createElement('div');
   d.style.cssText=`position:fixed;inset:0;background:${color};opacity:.5;z-index:500;pointer-events:none;`;
@@ -1769,6 +1845,9 @@ function showWin(w){
     flashScreen(iWin?'rgba(0,80,255,.35)':'rgba(200,0,0,.35)');
     el.classList.add(iWin?'win-anim':'lose-anim');
   }
+  if(w==='draw')_draws++;
+  else if((gameMode==='cpu'&&w===1)||(gameMode==='online'&&w===myPN))_wins++;
+  else _losses++;
   const rChEl=document.getElementById('rating-change');
   if(_onlineMatchType==='ranked'&&isOnline){
     const result=w==='draw'?0.5:((w===myPN)?1:0);
@@ -1782,12 +1861,11 @@ function showWin(w){
     if(rChEl)rChEl.innerHTML=`RATE <span style="color:${diff>=0?'#00ff41':'#ff4444'}">${sign}${diff}</span> → <b style="color:${t.color}">${_myRating}</b> <span style="color:${t.color}">[${t.name}]</span>`;
   }else{
     if(rChEl)rChEl.textContent='';
+    savePlayerData();
   }
   document.getElementById('btn-return-room').style.display=(isOnline&&isHost)?'':'none';
   document.getElementById('btn-replay').style.display=_gameLog.length>1?'':'none';
   show('ov-win');
-  if(_winTimer){clearTimeout(_winTimer);_winTimer=null;}
-  document.getElementById('win-count').textContent='';
 }
 
 async function startFromSplash(){
@@ -1831,11 +1909,9 @@ function editName(){
 }
 function showTitle(){
   stopTurnTimer();
-  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win','ov-gamestart','ov-auth','ov-recover','ov-lb','ov-replay'].forEach(hide);
+  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win','ov-gamestart','ov-auth','ov-recover','ov-lb','ov-replay','ov-mypage'].forEach(hide);
   if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
   if(tickIv){clearInterval(tickIv);tickIv=null;}
-  if(_winTimer){clearInterval(_winTimer);_winTimer=null;}
-  const countEl=document.getElementById('win-count');if(countEl)countEl.textContent='';
   renderRating();
   cleanupOnline();
   startTitleBGM();
@@ -1945,9 +2021,57 @@ function endTutorial(){
   showTitle();
 }
 
+// ── My Page ──────────────────────────────────────────
+function showMyPage(){
+  hide('ov-title');
+  const t=getTitle(_myRating);
+  const initial=(myName||'?')[0].toUpperCase();
+  const av=document.getElementById('mp-avatar');
+  av.textContent=initial;av.style.color=t.color;av.style.borderColor=t.color;
+  document.getElementById('mp-name').textContent=myName||'---';
+  document.getElementById('mp-email').textContent=_authEmail||(isAuthValid()?'ログイン中':'ゲストモード');
+  document.getElementById('mp-rating').innerHTML=`RATE <span style="color:${t.color};font-weight:bold">${_myRating}</span> <span style="color:${t.color}">[${t.name}]</span>`;
+  document.getElementById('mp-wins').textContent=_wins;
+  document.getElementById('mp-losses').textContent=_losses;
+  document.getElementById('mp-draws').textContent=_draws;
+  document.getElementById('mp-name-input').value=myName||'';
+  document.getElementById('mp-name-err').textContent='';
+  show('ov-mypage');
+}
+function mpChangeName(){
+  const v=document.getElementById('mp-name-input').value.trim();
+  const errEl=document.getElementById('mp-name-err');
+  if(!v){errEl.textContent='名前を入力してください';return;}
+  if(v!==myName&&localStorage.getItem(_playerKey(v))){errEl.textContent='その名前は既に使われています';return;}
+  const old=myName;
+  myName=v;
+  localStorage.setItem('dna-name',myName);
+  if(old&&old!==myName)localStorage.removeItem(_playerKey(old));
+  savePlayerData();
+  errEl.style.color='#00cc44';errEl.textContent='変更しました！';
+  document.getElementById('mp-name').textContent=myName;
+  const av=document.getElementById('mp-avatar');
+  av.textContent=myName[0].toUpperCase();
+  updateNameLabel();
+  setTimeout(()=>{errEl.textContent='';errEl.style.color='#ff4444';},1800);
+}
+function logout(){
+  _authToken=null;_authUid=null;_authExpiry=0;_authEmail='';
+  localStorage.removeItem('dna-auth-token');
+  localStorage.removeItem('dna-auth-uid');
+  localStorage.removeItem('dna-auth-expiry');
+  localStorage.removeItem('dna-auth-refresh');
+  localStorage.removeItem('dna-auth-email');
+  hide('ov-mypage');
+  show('ov-auth');
+}
+
 // ── Replay ───────────────────────────────────────────
 function _initGameLog(){
+  const p1n=gameMode==='online'?(myPN===1?myName:opponentName):myName;
+  const p2n=gameMode==='online'?(myPN===2?myName:opponentName):'CPU';
   _gameLog=[{step:0,fr:-1,fc:-1,tr:-1,tc:-1,movedBy:0,
+    p1name:p1n,p2name:p2n,
     board:JSON.stringify(board),captured:JSON.stringify(captured)}];
   _replayStep=0;
 }
@@ -2000,7 +2124,9 @@ function renderReplayStep(){
   boardEl.innerHTML='';
   boardEl.appendChild(grid);
   const totalMoves=_gameLog.length-1;
-  const who=entry.movedBy===0?'—':pname(entry.movedBy);
+  const p1n=_gameLog[0]?.p1name||'P1';
+  const p2n=_gameLog[0]?.p2name||'P2';
+  const who=entry.movedBy===0?'—':(entry.movedBy===1?p1n:p2n);
   const moveStr=entry.fr>=0?`(${entry.fc+1},${entry.fr+1})→(${entry.tc+1},${entry.tr+1})`:'開始時';
   infoEl.textContent=`STEP ${_replayStep}/${totalMoves}　${who}　${moveStr}`;
 }
