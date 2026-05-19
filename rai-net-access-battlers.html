@@ -161,6 +161,20 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 .cell.opp-flash { animation:opp-flash-anim .55s ease-out forwards; }
 @keyframes opp-flash-anim { 0%{box-shadow:inset 0 0 22px rgba(255,80,30,.75);} 100%{box-shadow:none;} }
 
+/* ── Turn timer bar ───────────────────────────────────────── */
+#timer-wrap { margin-top:6px; }
+#timer-label { display:flex; justify-content:space-between; font-size:.57rem; color:#446644; letter-spacing:1px; margin-bottom:2px; }
+#timer-bar { height:4px; background:#0f1f0f; border-radius:2px; overflow:hidden; }
+#timer-fill { height:100%; background:#00ff41; box-shadow:0 0 5px #00ff41; border-radius:2px; transition:background .4s,box-shadow .4s; }
+.timer-urgent #timer-fill { background:#ff4444!important; box-shadow:0 0 8px #ff4444!important; }
+.timer-urgent #timer-label { color:#ff4444!important; }
+
+/* ── Piece move & battle animations ──────────────────────── */
+@keyframes move-pop { 0%{transform:scale(.7) translateY(5px);filter:brightness(2.5);} 65%{transform:scale(1.14) translateY(-2px);filter:brightness(1.4);} 100%{transform:scale(1) translateY(0);filter:brightness(1);} }
+@keyframes battle-flash { 0%{box-shadow:inset 0 0 28px rgba(255,200,0,.85);} 100%{box-shadow:none;} }
+.piece.move-pop { animation:move-pop .26s cubic-bezier(.2,1.4,.4,1) both; }
+.cell.battle-cell { animation:battle-flash .42s ease-out forwards; }
+
 /* ── Piece cards ──────────────────────────────────── */
 .piece-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:5px; }
 .piece-card { background:#050e05; border:1px solid #1a2e1a; border-radius:4px; padding:7px 3px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; font-family:'Courier New',monospace; transition:all .12s; }
@@ -196,6 +210,10 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <div id="think-bar"><div id="think-fill"></div></div>
       <div id="name-row">▶ <span id="name-label"></span></div>
       <div id="rating-row"></div>
+      <div id="timer-wrap" style="display:none">
+        <div id="timer-label"><span id="timer-who"></span><span id="timer-sec"></span></div>
+        <div id="timer-bar"><div id="timer-fill" style="width:100%"></div></div>
+      </div>
     </div>
 
     <button id="btn-place-ok" onclick="placementOK()" style="display:none;border-color:#00cc44;color:#00ff66;letter-spacing:2px;font-size:.85rem">// ✓ 準備OK！</button>
@@ -271,6 +289,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div id="rating-change" style="font-size:.75rem;text-align:center;min-height:1.2em"></div>
   <div id="win-count"></div>
   <button id="btn-return-room" onclick="returnToRoom()" style="display:none;border-color:#00aa44;color:#00cc44">// 🏠 部屋に戻る</button>
+  <button id="btn-replay" onclick="showReplay()" style="display:none;border-color:#334455;color:#5577aa;font-size:.72rem">// 🎬 棋譜リプレイ</button>
   <button onclick="showTitle()">// TITLE へ戻る</button>
 </div>
 
@@ -285,6 +304,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <button onclick="showRules()" style="border-color:#445544;color:#669966;margin-top:4px">// 📖 ルール説明</button>
     <button onclick="showTutorial()" style="border-color:#223322;color:#445544;font-size:.7rem;margin-top:2px">// 🎓 チュートリアル</button>
     <button onclick="showSettings()" style="border-color:#1a2e1a;color:#334433;font-size:.7rem;margin-top:2px">// ⚙ 設定</button>
+    <button onclick="showLeaderboard()" style="border-color:#1a1a2e;color:#334466;font-size:.7rem;margin-top:2px">// 🏆 リーダーボード</button>
   </div>
   <div style="font-size:.6rem;color:#1a3a1a;margin-top:4px;letter-spacing:1px">[ F2 ] TITLE</div>
 </div>
@@ -524,6 +544,32 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   </div>
 </div>
 
+<!-- Leaderboard overlay -->
+<div class="overlay" id="ov-lb">
+  <div class="ov-panel" style="width:min(360px,96vw);max-height:88vh;overflow-y:auto">
+    <h3>// 🏆 GLOBAL LEADERBOARD — TOP 100</h3>
+    <div id="lb-loading" style="text-align:center;padding:16px;font-size:.72rem;color:#446644">読み込み中...</div>
+    <div id="lb-body"></div>
+    <button onclick="hide('ov-lb');showTitle()" style="margin-top:10px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
+  </div>
+</div>
+
+<!-- Replay overlay -->
+<div class="overlay" id="ov-replay">
+  <div class="ov-panel" style="width:min(380px,96vw);max-height:92vh;overflow-y:auto;text-align:center">
+    <h3 style="text-align:left">// 🎬 棋譜リプレイ</h3>
+    <div id="replay-board" style="margin:8px auto;display:inline-block"></div>
+    <div id="replay-info" style="font-size:.6rem;color:#446644;letter-spacing:1px;margin:4px 0 6px"></div>
+    <div style="display:flex;gap:5px;margin-top:4px">
+      <button onclick="replayNav(-9999)" style="flex:.5;font-size:.75rem;padding:6px 2px;border-color:#1a3a1a;color:#335533">⟪</button>
+      <button onclick="replayNav(-1)" style="flex:1;font-size:.75rem;padding:6px 4px">◀ 前</button>
+      <button onclick="replayNav(1)" style="flex:1;font-size:.75rem;padding:6px 4px">次 ▶</button>
+      <button onclick="replayNav(9999)" style="flex:.5;font-size:.75rem;padding:6px 2px;border-color:#1a3a1a;color:#335533">⟫</button>
+    </div>
+    <button onclick="hide('ov-replay')" style="margin-top:8px;width:100%;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ✕ 閉じる</button>
+  </div>
+</div>
+
 <div class="overlay" id="ov-settings">
   <div class="ov-panel" style="width:min(320px,90vw)">
     <h3>// ⚙ SETTINGS</h3>
@@ -542,7 +588,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 <audio id="bgm-battle" src="bgm.mp3"              loop preload="auto"></audio>
 <script>
 // ── Version ──────────────────────────────────────────
-const GAME_VERSION='3.0';
+const GAME_VERSION='4.0';
 document.querySelectorAll('.ver-sub,#ver-label').forEach(el=>el.textContent='v'+GAME_VERSION);
 
 // ── Audio ───────────────────────────────────────────
@@ -608,6 +654,9 @@ async function fbPut(key,data){
 }
 async function fbGet(key){
   try{const r=await fetch(`${FB}/${key}.json`);return await r.json();}catch(e){return null;}
+}
+async function fbDbGet(path){
+  try{const r=await fetch(`${FB_DB}/${path}.json`);return await r.json();}catch(e){return null;}
 }
 
 // ── Local relay (same-WiFi HTTP relay via PC server) ──
@@ -728,8 +777,11 @@ async function loadCloudData(){
 }
 async function saveCloudData(){
   if(!_authUid||!_authToken||!myName)return;
+  const payload={name:myName,rating:_myRating,ts:Date.now()};
   try{await fetch(`${FB_DB}/users/${_authUid}/data.json?auth=${_authToken}`,
-    {method:'PUT',body:JSON.stringify({name:myName,rating:_myRating,ts:Date.now()})});}catch(e){}
+    {method:'PUT',body:JSON.stringify(payload)});}catch(e){}
+  try{await fetch(`${FB_DB}/leaderboard/${_authUid}.json?auth=${_authToken}`,
+    {method:'PUT',body:JSON.stringify(payload)});}catch(e){}
 }
 async function refreshAuth(){
   const rt=localStorage.getItem('dna-auth-refresh');if(!rt)return false;
@@ -784,7 +836,9 @@ function doRestore(){
   document.getElementById('online-badge').classList.add('on');
   document.getElementById('diff-box').style.display='none';
   updateNameLabel();updateCapLabels();sndOnline();showVsMsg();
+  _initGameLog();
   startMoveListen();startSelListen();startBattleBGM();calcCellSize();render();
+  startTurnTimer(turn===myPN);
 }
 async function clearAndContinue(){
   localStorage.removeItem('dna-game-snap');_pendingSnap=null;hide('ov-recover');
@@ -808,6 +862,52 @@ function startSelListen(){
     const d=await fbGet(currentRoomKey+'sel'+oppPN);
     if(d&&d.ts&&d.ts>_lastSelTs){_lastSelTs=d.ts;_oppSel=(d.r>=0&&d.c>=0)?{r:d.r,c:d.c}:null;render();}
   },400);
+}
+
+// ── Turn timer ───────────────────────────────────────
+function startTurnTimer(isMyTurn){
+  stopTurnTimer();
+  if(over||gameMode==='placing')return;
+  if(!isMyTurn)return;
+  const wrap=document.getElementById('timer-wrap');
+  if(wrap)wrap.style.display='';
+  _timerLeft=TURN_SEC;
+  _updateTimerUI();
+  _timerIv=setInterval(()=>{
+    _timerLeft--;
+    _updateTimerUI();
+    if(_timerLeft<=0){stopTurnTimer();autoTimeoutMove();}
+  },1000);
+}
+function stopTurnTimer(){
+  if(_timerIv){clearInterval(_timerIv);_timerIv=null;}
+  const wrap=document.getElementById('timer-wrap');
+  if(wrap){wrap.style.display='none';wrap.classList.remove('timer-urgent');}
+}
+function _updateTimerUI(){
+  const secEl=document.getElementById('timer-sec');
+  const fillEl=document.getElementById('timer-fill');
+  const wrap=document.getElementById('timer-wrap');
+  if(!fillEl||!wrap)return;
+  fillEl.style.width=((_timerLeft/TURN_SEC)*100)+'%';
+  if(secEl)secEl.textContent=_timerLeft+'s';
+  const who=document.getElementById('timer-who');
+  if(who)who.textContent='▶ あなたのターン';
+  const urgent=_timerLeft<=10;
+  wrap.classList.toggle('timer-urgent',urgent);
+  if(urgent&&_timerLeft>0&&_timerLeft%2===0)sndTick();
+}
+function autoTimeoutMove(){
+  if(over)return;
+  const moves=[];
+  const myPlayer=gameMode==='online'?myPN:1;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(board[r][c]?.player===myPlayer)getMoves(r,c).forEach(([tr,tc])=>moves.push({fr:r,fc:c,tr,tc}));
+  }
+  if(!moves.length)return;
+  const mv=moves[Math.floor(Math.random()*moves.length)];
+  sel=null;validMoves=[];
+  doMove(mv.fr,mv.fc,mv.tr,mv.tc);
 }
 
 // ── Constants ────────────────────────────────────────
@@ -845,6 +945,10 @@ let opponentName='???';
 let _myRating=1400;
 let _oppRating=1500;
 let _oppSel=null,_oppMoveFlash=null;
+let _gameLog=[],_replayStep=0;
+let _moveAnimCell=null,_battleCell=null;
+const TURN_SEC=30;
+let _timerLeft=0,_timerIv=null;
 let _onlineMatchType='normal';
 function _playerKey(n){return'dna-player-'+n;}
 function loadPlayerData(n){
@@ -952,24 +1056,31 @@ function getMoves(r,c){
 }
 
 function doMove(fr,fc,tr,tc){
+  const movedBy=turn;
+  stopTurnTimer();
   const mover=board[fr][fc],target=board[tr][tc];
   const isMine=mover.player===myPN;
   if(!target){
     board[tr][tc]=mover;board[fr][fc]=null;
     isMine?sndMove():sndCpuMove();
     if(isMine)setMsg(`${pname(turn)}: ${pLabel(mover)} 移動`);
+    _moveAnimCell={r:tr,c:tc};setTimeout(()=>{_moveAnimCell=null;},350);
   }else{
     mover.revealed=true;target.revealed=true;
     const res=resolveBattle(mover,target);
     const winner=turn,loser=turn===1?2:1;
     sndBattle();
+    _battleCell={r:tr,c:tc};setTimeout(()=>{_battleCell=null;},480);
     let msg=`⚔ ${pLabel(mover)} vs ${pLabel(target)} `;
     let medicBeat=false;
-    if(res==='att'){board[tr][tc]=mover;board[fr][fc]=null;captured[winner].push({...target});msg+=`→ ${pLabel(mover)} 勝利！`;setTimeout(()=>isMine?sndWin():sndLose(),120);if(mover.type==='medic'&&target.type==='virus')medicBeat=true;}
+    if(res==='att'){board[tr][tc]=mover;board[fr][fc]=null;captured[winner].push({...target});msg+=`→ ${pLabel(mover)} 勝利！`;setTimeout(()=>isMine?sndWin():sndLose(),120);
+      _moveAnimCell={r:tr,c:tc};setTimeout(()=>{_moveAnimCell=null;},400);
+      if(mover.type==='medic'&&target.type==='virus')medicBeat=true;}
     else if(res==='def'){board[fr][fc]=null;captured[loser].push({...mover});msg+=`→ ${pLabel(target)} 防御！`;setTimeout(()=>isMine?sndLose():sndWin(),120);}
     else{board[tr][tc]=null;board[fr][fc]=null;captured[winner].push({...mover});captured[loser].push({...target});msg+=`→ 相打ち！`;setTimeout(sndDraw,120);}
     setMsg(msg);
     if(medicBeat){
+      if(gameMode!=='placing')_pushGameLog(fr,fc,tr,tc,movedBy);
       render();
       if(applyingRemote){startTransformListen();return;}
       if(gameMode==='online'){sendOnlineMove(fr,fc,tr,tc);showTransformPicker(tr,tc);return;}
@@ -977,10 +1088,12 @@ function doMove(fr,fc,tr,tc){
       showTransformPicker(tr,tc);return;
     }
   }
+  if(gameMode!=='placing')_pushGameLog(fr,fc,tr,tc,movedBy);
   const w=checkWin();
   if(w!==0){over=true;if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);render();showWin(w);return;}
   turn=turn===1?2:1;sel=null;validMoves=[];
   render();
+  startTurnTimer(turn===myPN);
   if(gameMode==='cpu'&&turn===2)scheduleCpu();
   else if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);
 }
@@ -1024,6 +1137,7 @@ function chooseMedicTransform(r,c,type,value){
   const w=checkWin();
   if(w!==0){over=true;render();showWin(w);return;}
   turn=turn===1?2:1;sel=null;validMoves=[];render();
+  startTurnTimer(turn===myPN);
   if(gameMode==='cpu'&&turn===2)scheduleCpu();
 }
 
@@ -1164,6 +1278,7 @@ function render(){
     if(validMoves.some(([mr,mc])=>mr===r&&mc===c))el.classList.add('moveable');
     if(_oppSel&&r===_oppSel.r&&c===_oppSel.c)el.classList.add('opp-sel');
     if(_oppMoveFlash&&r===_oppMoveFlash.r&&c===_oppMoveFlash.c)el.classList.add('opp-flash');
+    if(_battleCell&&r===_battleCell.r&&c===_battleCell.c)el.classList.add('battle-cell');
     const corner=document.createElement('span');corner.className='corner';
     if(r===GOAL[1]&&c===0)corner.textContent='P1 GOAL';
     else if(r===GOAL[2]&&c===0)corner.textContent='P2 GOAL';
@@ -1171,7 +1286,9 @@ function render(){
     el.appendChild(corner);
     const p=board[r][c];
     const visible=(gameMode==='placing'&&p?.player===myPN)||p?.player===myPN||p?.revealed;
-    if(p){const[ic,lb]=visible?pieceInfo(p):['?','???'];const pe=document.createElement('div');pe.className=pieceClass(p,visible);pe.innerHTML=`<div class="pi">${ic}</div><div class="pl">${lb}</div>`;el.appendChild(pe);}
+    if(p){const[ic,lb]=visible?pieceInfo(p):['?','???'];const pe=document.createElement('div');pe.className=pieceClass(p,visible);pe.innerHTML=`<div class="pi">${ic}</div><div class="pl">${lb}</div>`;
+      if(_moveAnimCell&&r===_moveAnimCell.r&&c===_moveAnimCell.c)pe.classList.add('move-pop');
+      el.appendChild(pe);}
     el.onclick=()=>clickCell(r,c);bd.appendChild(el);
   }
   const tl=document.getElementById('turn-label');
@@ -1465,6 +1582,8 @@ async function placementOK(){
     updateNameLabel();updateCapLabels();
     setMsg(`${myName} のターンです（PLAYER 1 / 青）`);
     sndBoot();startBattleBGM();render();
+    _initGameLog();
+    startTurnTimer(true);
     return;
   }
   setMsg('相手の準備を待っています...');
@@ -1523,11 +1642,13 @@ function startOnlineGame(){
   document.getElementById('online-badge').classList.add('on');
   document.getElementById('diff-box').style.display='none';
   updateNameLabel();updateCapLabels();sndOnline();
+  _initGameLog();
   showVsMsg();
   startMoveListen();
   startSelListen();
   startBattleBGM();
   render();
+  startTurnTimer(myPN===1);
 }
 
 function sendOnlineMove(fr,fc,tr,tc){
@@ -1540,6 +1661,7 @@ function sendOnlineMove(fr,fc,tr,tc){
 }
 
 function cleanupOnline(){
+  stopTurnTimer();
   if(window._fbMoveIv){clearInterval(window._fbMoveIv);window._fbMoveIv=null;}
   if(window._fbGuestIv){clearInterval(window._fbGuestIv);window._fbGuestIv=null;}
   if(window._lrMoveIv){clearInterval(window._lrMoveIv);window._lrMoveIv=null;}
@@ -1621,6 +1743,7 @@ function flashScreen(color){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),600);}));
 }
 function showWin(w){
+  stopTurnTimer();
   const isOnline=gameMode==='online';
   const isHost=myRole==='host';
   if(isOnline){
@@ -1661,6 +1784,7 @@ function showWin(w){
     if(rChEl)rChEl.textContent='';
   }
   document.getElementById('btn-return-room').style.display=(isOnline&&isHost)?'':'none';
+  document.getElementById('btn-replay').style.display=_gameLog.length>1?'':'none';
   show('ov-win');
   if(_winTimer){clearTimeout(_winTimer);_winTimer=null;}
   let n=4;const countEl=document.getElementById('win-count');
@@ -1712,7 +1836,8 @@ function editName(){
   show('ov-name');
 }
 function showTitle(){
-  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win','ov-gamestart','ov-auth','ov-recover'].forEach(hide);
+  stopTurnTimer();
+  ['ov-splash','ov-name','ov-difficulty','ov-rules','ov-online','ov-waiting','ov-win','ov-gamestart','ov-auth','ov-recover','ov-lb','ov-replay'].forEach(hide);
   if(thinkTimer){clearTimeout(thinkTimer);thinkTimer=null;}
   if(tickIv){clearInterval(tickIv);tickIv=null;}
   if(_winTimer){clearInterval(_winTimer);_winTimer=null;}
@@ -1824,6 +1949,103 @@ function endTutorial(){
   localStorage.setItem('dna-tut-done','1');
   hide('ov-tutorial');
   showTitle();
+}
+
+// ── Replay ───────────────────────────────────────────
+function _initGameLog(){
+  _gameLog=[{step:0,fr:-1,fc:-1,tr:-1,tc:-1,movedBy:0,
+    board:JSON.stringify(board),captured:JSON.stringify(captured)}];
+  _replayStep=0;
+}
+function _pushGameLog(fr,fc,tr,tc,movedBy){
+  _gameLog.push({step:_gameLog.length,fr,fc,tr,tc,movedBy,
+    board:JSON.stringify(board),captured:JSON.stringify(captured)});
+}
+function showReplay(){
+  if(_gameLog.length<2){return;}
+  _replayStep=_gameLog.length-1;
+  show('ov-replay');
+  renderReplayStep();
+}
+function replayNav(d){
+  _replayStep=Math.max(0,Math.min(_gameLog.length-1,_replayStep+d));
+  renderReplayStep();
+}
+function renderReplayStep(){
+  const boardEl=document.getElementById('replay-board');
+  const infoEl=document.getElementById('replay-info');
+  if(!boardEl)return;
+  const entry=_gameLog[_replayStep];
+  if(!entry){boardEl.innerHTML='';return;}
+  const brd=JSON.parse(entry.board);
+  const rows=brd.length,cols=brd[0].length;
+  const goal2=rows-1;
+  const sz=Math.max(34,Math.min(52,Math.floor((Math.min(window.innerWidth-100,340)-cols*2)/cols)));
+  const grid=document.createElement('div');
+  grid.style.cssText=`display:grid;grid-template-columns:repeat(${cols},${sz}px);grid-template-rows:repeat(${rows},${sz}px);gap:2px;background:#0a0f0a;border:1px solid rgba(0,255,65,.4);padding:4px;`;
+  const rowOrder=myPN===2?[...Array(rows).keys()].reverse():[...Array(rows).keys()];
+  for(const r of rowOrder){
+    for(let c=0;c<cols;c++){
+      const cel=document.createElement('div');
+      let bg='#0c130c',bc='#1a2e1a';
+      if(r===0)bg='#060d1a',bc='#1a4080';
+      if(r===goal2)bg='#1a0606',bc='#801a1a';
+      if(entry.fr>=0&&r===entry.fr&&c===entry.fc)bc='#ffaa00';
+      if(entry.fr>=0&&r===entry.tr&&c===entry.tc)bc='#00ff41';
+      cel.style.cssText=`width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${bc};display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:${Math.round(sz*.26)}px;box-sizing:border-box;`;
+      const p=brd[r][c];
+      if(p){
+        const ico={program:p.value,firewall:'⊘',virus:'V',linker:'★',medic:'✚'}[p.type]||'?';
+        cel.style.color=p.player===1?'#44aaff':'#ff6633';
+        cel.style.background=p.player===1?'rgba(0,40,100,.5)':'rgba(100,20,0,.5)';
+        cel.textContent=p.revealed?ico:'?';
+      }
+      grid.appendChild(cel);
+    }
+  }
+  boardEl.innerHTML='';
+  boardEl.appendChild(grid);
+  const totalMoves=_gameLog.length-1;
+  const who=entry.movedBy===0?'—':pname(entry.movedBy);
+  const moveStr=entry.fr>=0?`(${entry.fc+1},${entry.fr+1})→(${entry.tc+1},${entry.tr+1})`:'開始時';
+  infoEl.textContent=`STEP ${_replayStep}/${totalMoves}　${who}　${moveStr}`;
+}
+
+// ── Leaderboard ──────────────────────────────────────
+async function showLeaderboard(){
+  show('ov-lb');
+  hide('ov-title');
+  document.getElementById('lb-loading').style.display='';
+  document.getElementById('lb-body').innerHTML='';
+  const data=await fbDbGet('leaderboard');
+  document.getElementById('lb-loading').style.display='none';
+  if(!data||typeof data!=='object'){
+    document.getElementById('lb-body').innerHTML='<div style="color:#ff4444;text-align:center;padding:10px;font-size:.7rem">データ取得失敗</div>';
+    return;
+  }
+  const entries=Object.values(data)
+    .filter(e=>e&&e.name&&typeof e.rating==='number')
+    .sort((a,b)=>b.rating-a.rating)
+    .slice(0,100);
+  if(!entries.length){
+    document.getElementById('lb-body').innerHTML='<div style="color:#446644;text-align:center;padding:10px;font-size:.7rem">データなし</div>';
+    return;
+  }
+  let html='<table style="width:100%;border-collapse:collapse">';
+  html+='<tr style="border-bottom:1px solid #1a3a1a"><th style="padding:3px 6px;text-align:center;color:#00ff41;font-size:.58rem">#</th><th style="padding:3px 6px;text-align:left;color:#00ff41;font-size:.58rem">NAME</th><th style="padding:3px 6px;text-align:right;color:#00ff41;font-size:.58rem">RATE</th><th style="padding:3px 6px;text-align:left;color:#00ff41;font-size:.58rem">TITLE</th></tr>';
+  entries.forEach((e,i)=>{
+    const t=getTitle(e.rating);
+    const me=e.name===myName;
+    const rowBg=me?'background:#0a1e0a;':'';
+    html+=`<tr style="${rowBg}border-bottom:1px solid #0f2a0f">`;
+    html+=`<td style="padding:2px 6px;font-size:.6rem;color:#446644;text-align:center">${i+1}</td>`;
+    html+=`<td style="padding:2px 6px;font-size:.63rem;color:${me?'#00ff41':'#669966'}">${me?'▶ ':''} ${e.name}</td>`;
+    html+=`<td style="padding:2px 6px;font-size:.63rem;color:${t.color};text-align:right;font-weight:bold">${e.rating}</td>`;
+    html+=`<td style="padding:2px 6px;font-size:.58rem;color:${t.color}">${t.name}</td>`;
+    html+=`</tr>`;
+  });
+  html+='</table>';
+  document.getElementById('lb-body').innerHTML=html;
 }
 
 function showSettings(){
