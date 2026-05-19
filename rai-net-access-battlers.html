@@ -1050,9 +1050,12 @@ function setOnlineMatchType(t){
   if(rb){rb.classList.toggle('on',t==='ranked');rb.style.borderColor=t==='ranked'?'#ff9900':'';rb.style.color=t==='ranked'?'#ffaa33':'';}
 }
 
-function calcELO(myR,oppR,result,k=32){
-  const exp=1/(1+Math.pow(10,(oppR-myR)/400));
-  return Math.round(myR+k*(result-exp));
+function calcRatingDelta(myR,oppR,iWin){
+  if(!iWin)return -calcRatingDelta(oppR,myR,true);
+  const diff=Math.abs(myR-oppR);
+  const underdog=myR<oppR;
+  if(underdog) return Math.min(50,Math.max(10,Math.round(diff/10)));
+  else         return Math.min(25,Math.max(10,Math.round(diff/20)));
 }
 function getTitle(r){
   if(r<1200)return{name:'ゼリーマン',color:'#888888'};
@@ -1850,15 +1853,18 @@ function showWin(w){
   else _losses++;
   const rChEl=document.getElementById('rating-change');
   if(_onlineMatchType==='ranked'&&isOnline){
-    const result=w==='draw'?0.5:((w===myPN)?1:0);
-    const newR=calcELO(_myRating,_oppRating,result);
-    const diff=newR-_myRating;
-    _myRating=newR;
+    if(w==='draw'){
+      if(rChEl)rChEl.textContent='引き分け — レート変動なし';
+    }else{
+      const iWin=w===myPN;
+      const delta=calcRatingDelta(_myRating,_oppRating,iWin);
+      _myRating=Math.max(1,_myRating+delta);
+      renderRating();
+      const t=getTitle(_myRating);
+      const sign=delta>=0?'+':'';
+      if(rChEl)rChEl.innerHTML=`RATE <span style="color:${delta>=0?'#00ff41':'#ff4444'}">${sign}${delta}</span> → <b style="color:${t.color}">${_myRating}</b> <span style="color:${t.color}">[${t.name}]</span>`;
+    }
     savePlayerData();
-    renderRating();
-    const t=getTitle(_myRating);
-    const sign=diff>=0?'+':'';
-    if(rChEl)rChEl.innerHTML=`RATE <span style="color:${diff>=0?'#00ff41':'#ff4444'}">${sign}${diff}</span> → <b style="color:${t.color}">${_myRating}</b> <span style="color:${t.color}">[${t.name}]</span>`;
   }else{
     if(rChEl)rChEl.textContent='';
     savePlayerData();
