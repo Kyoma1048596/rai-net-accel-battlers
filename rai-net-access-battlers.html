@@ -972,6 +972,7 @@ function _updateTimerUI(){
 }
 function autoTimeoutMove(){
   if(over)return;
+  if(gameMode==='online'&&turn!==myPN)return;
   const moves=[];
   const myPlayer=gameMode==='online'?myPN:1;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
@@ -1259,6 +1260,7 @@ function startTransformListen(){
 
 function applyOppTransform(d){
   if(d.ts<=lastTransformTs)return;
+  if(turn===myPN) return;
   lastTransformTs=d.ts;
   if(window._tfIv){clearInterval(window._tfIv);window._tfIv=null;}
   if(window._tfLrIv){clearInterval(window._tfLrIv);window._tfLrIv=null;}
@@ -1266,6 +1268,7 @@ function applyOppTransform(d){
   const w=checkWin();
   if(w!==0){over=true;render();showWin(w);return;}
   turn=turn===1?2:1;sel=null;validMoves=[];render();
+  if(gameMode==='online') startTurnTimer(turn===myPN);
 }
 
 // ── CPU AI ───────────────────────────────────────────
@@ -1343,6 +1346,7 @@ function render(){
   const bd=document.getElementById('board');bd.innerHTML='';
   bd.style.gridTemplateColumns=`repeat(${COLS},var(--cell,72px))`;
   bd.style.gridTemplateRows=`repeat(${ROWS},var(--cell,72px))`;
+  bd.style.pointerEvents=(gameMode==='online'&&!over&&turn!==myPN)?'none':'';
   const myZone=HOME[myPN];
   const baseRows=Array.from({length:ROWS},(_,i)=>i);
   const rowOrder=myPN===2?[...baseRows].reverse():baseRows;
@@ -1422,6 +1426,7 @@ function oppMvKey(){return currentRoomKey+'m'+(myPN===1?2:1);}
 
 function applyOppMove(mv){
   if(!mv||!mv.ts||mv.ts<=lastMoveTs||over||applyingRemote)return;
+  if(turn===myPN) return;
   lastMoveTs=mv.ts;
   applyingRemote=true;sel=null;validMoves=[];
   _oppSel=null;
@@ -1432,7 +1437,6 @@ function applyOppMove(mv){
   setTimeout(()=>{_oppMoveFlash=null;if(!over)render();},550);
 }
 function startMoveListen(){
-  lastMoveTs=0;
   const oppKey=oppMvKey();
   if(window._fbMoveIv)clearInterval(window._fbMoveIv);
   if(window._lrMoveIv)clearInterval(window._lrMoveIv);
@@ -1724,6 +1728,7 @@ function startOnlineGame(){
   updateNameLabel();updateCapLabels();sndOnline();
   _initGameLog();
   showVsMsg();
+  lastMoveTs=0;
   startMoveListen();
   startSelListen();
   startBattleBGM();
