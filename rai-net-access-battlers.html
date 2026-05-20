@@ -77,7 +77,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 .btn-online:hover { background:#001a22; }
 
 /* Difficulty */
-.diff-row { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:2px; }
+.diff-row { display:grid; grid-template-columns:repeat(2,1fr); gap:5px; margin-top:2px; }
 .diff-btn { padding:6px 2px; font-size:.72rem; letter-spacing:0; border-color:#004400; color:#446644; background:#050e05; }
 .diff-btn.on { border-color:#00ff41; color:#00ff41; background:#0a1e0a; }
 
@@ -95,6 +95,12 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 @keyframes mp  { 0%,100%{box-shadow:0 0 8px rgba(0,200,170,.4);}50%{box-shadow:0 0 20px rgba(0,200,170,.9);} }
 @keyframes mp2 { 0%,100%{box-shadow:0 0 8px rgba(200,68,170,.4);}50%{box-shadow:0 0 20px rgba(200,68,170,.9);} }
 .rt.med { background:#001a18; border:1px solid #00ccaa; color:#44ffdd; }
+.rt.worm { background:#1a0033; border:1px solid #9900ff; color:#cc66ff; }
+.piece.t-worm { background:linear-gradient(145deg,#1a0033,#330066); border:2px solid #9900ff; color:#cc66ff; box-shadow:0 0 10px rgba(153,0,255,.5); animation:worm-p 2s ease-in-out infinite; }
+.piece.t-worm.p2 { border-color:#aa00cc; box-shadow:0 0 10px rgba(170,0,204,.5); animation:worm-p2 2s ease-in-out infinite; }
+@keyframes worm-p  { 0%,100%{box-shadow:0 0 8px rgba(153,0,255,.4);}50%{box-shadow:0 0 22px rgba(153,0,255,.9);} }
+@keyframes worm-p2 { 0%,100%{box-shadow:0 0 8px rgba(170,0,204,.4);}50%{box-shadow:0 0 22px rgba(170,0,204,.9);} }
+.cap-chip.cw { background:#1a0033; border:1px solid #660099; color:#cc66ff; }
 .cell.center-line { border-top:2px solid #226633!important; border-bottom:2px solid #226633!important; background:#050e05; }
 .mode-btn { padding:7px 4px; font-size:.7rem; letter-spacing:1px; border-color:#004400; color:#446644; background:#050e05; }
 .mode-btn.on { border-color:#00ff41; color:#00ff41; background:#0a1e0a; }
@@ -227,9 +233,10 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <div class="box" id="diff-box">
       <h3>// DIFFICULTY</h3>
       <div class="diff-row">
-        <button class="diff-btn" id="d1" onclick="setDiff(1)">初級</button>
         <button class="diff-btn on" id="d2" onclick="setDiff(2)">中級</button>
         <button class="diff-btn" id="d3" onclick="setDiff(3)">上級</button>
+        <button class="diff-btn" id="d4" onclick="setDiff(4)">超上級</button>
+        <button class="diff-btn" id="d5" onclick="setDiff(5)">ハカー</button>
       </div>
     </div>
 
@@ -256,6 +263,9 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
         </button>
         <button class="piece-card" onclick="openPieceModal('medic')">
           <span class="rt med">✚MED</span><span class="piece-card-name">EXT</span>
+        </button>
+        <button class="piece-card" onclick="openPieceModal('worm')">
+          <span class="rt worm">≋WRM</span><span class="piece-card-name">WRM</span>
         </button>
         <button class="piece-card" onclick="showRulesInGame()" style="border-color:#334455;color:#556677">
           <span style="font-size:.9rem">📖</span><span class="piece-card-name">ルール</span>
@@ -320,13 +330,15 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-sub" style="color:#00ff41;letter-spacing:3px;font-size:.9rem">CPU 対戦 — モード／難易度選択</div>
   <div class="ov-panel" style="width:min(300px,90vw)">
     <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px">
       <button id="cpu-mode-btn-classic" class="mode-btn on" onclick="setCpuMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6 ／ 8駒</span></button>
-      <button id="cpu-mode-btn-extended" class="mode-btn" onclick="setCpuMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒＋MEDIC</span></button>
+      <button id="cpu-mode-btn-extended" class="mode-btn" onclick="setCpuMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒</span></button>
+      <button id="cpu-mode-btn-worm" class="mode-btn" onclick="setCpuMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×8 ／ 12駒</span></button>
     </div>
-    <button onclick="startCpuGame(1)" style="border-color:#224422;color:#668866">// 初級 &nbsp;— ランダム多め</button>
-    <button onclick="startCpuGame(2)" style="border-color:#00ff41;color:#00ff41">// 中級 &nbsp;— バランス型 ★</button>
-    <button onclick="startCpuGame(3)" style="border-color:#ff6600;color:#ff8833">// 上級 &nbsp;— 最強AI</button>
+    <button onclick="startCpuGame(2)" style="border-color:#00ff41;color:#00ff41">// 中級</button>
+    <button onclick="startCpuGame(3)" style="border-color:#ff6600;color:#ff8833">// 上級</button>
+    <button onclick="startCpuGame(4)" style="border-color:#ff2200;color:#ff4422">// 超上級</button>
+    <button onclick="startCpuGame(5)" style="border-color:#cc00ff;color:#dd44ff">// スーパーハカー</button>
     <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:6px">// ⬅ BACK</button>
   </div>
 </div>
@@ -399,6 +411,36 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
         &nbsp;&nbsp;2枚とも失って初めて敗北
       </div>
 
+      <div style="border:1px solid #330055;padding:8px;margin-top:10px">
+        <b style="color:#cc66ff;letter-spacing:2px">[ WORM モード — 6列×8行 ]</b><br>
+        <span style="font-size:.62rem;color:#775599">中央行にセンターライン（通常マスと同じ）</span><br>
+        <br>
+        <b style="color:#dd88ff">● 勝利条件</b><br>
+        ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行へ<br>
+        ② 相手の <span class="rt lnk">★LINK</span> を<b>全て</b>撃破する<br>
+        <br>
+        <b style="color:#dd88ff">● 駒（全12枚）</b><br>
+        <span class="rt lnk">★LINK</span> ×1　最重要駒<br>
+        <span class="rt prog">P4</span> ×1　<span class="rt prog">P3</span> ×2　<span class="rt prog">P2</span> ×2　強さ＝数値順<br>
+        <span class="rt fw">F/W</span> ×2　FIREWALL — 盾役<br>
+        <span class="rt vir">VIRUS</span> ×2　VIRUS — 奇襲役<br>
+        <span class="rt med">✚MED</span> ×1　MEDIC — 変身役<br>
+        <span class="rt worm">≋WRM</span> ×1　WORM — 感染型（下記参照）<br>
+        <br>
+        <b style="color:#dd88ff">● カード相性</b><br>
+        EXTENDEDと同じ相性＋WORMの特殊ルール<br>
+        <span class="rt worm">≋WRM</span> vs <span class="rt prog">PROG</span> → <b>感染発動</b>（通常戦闘なし）<br>
+        その他全駒 &gt; <span class="rt worm">≋WRM</span>（WORMは通常戦闘で必ず負ける）<br>
+        <br>
+        <b style="color:#dd88ff">● WORMの感染</b><br>
+        <span class="rt worm">≋WRM</span> を相手の <span class="rt prog">PROG</span> マスへ移動すると発動<br>
+        ① WORMが消滅<br>
+        ② 感染した <span class="rt prog">PROG</span> が消滅<br>
+        ③ その周囲1マスにいる相手 <span class="rt prog">PROG</span> も<b>連鎖消滅</b><br>
+        ※ <span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">★LINK</span>・<span class="rt med">MEDIC</span> には無効<br>
+        ※ WORMは消費型（1回使うと消える）
+      </div>
+
     </div>
       <div style="border:1px solid #2a2a1a;padding:8px;margin-top:10px">
         <b style="color:#ffaa00;letter-spacing:2px">[ ランク称号 ]</b><br><br>
@@ -434,9 +476,10 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     </div>
     <div style="margin-bottom:10px">
       <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE (HOSTが選択)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
         <button id="mode-btn-classic" class="mode-btn on" onclick="setOnlineMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6 ／ 8駒</span></button>
-        <button id="mode-btn-extended" class="mode-btn" onclick="setOnlineMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒＋MEDIC</span></button>
+        <button id="mode-btn-extended" class="mode-btn" onclick="setOnlineMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒</span></button>
+        <button id="mode-btn-worm" class="mode-btn" onclick="setOnlineMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×8 ／ 12駒</span></button>
       </div>
     </div>
     <div style="font-size:.68rem;color:#446644;margin-bottom:10px;line-height:1.7">
@@ -991,6 +1034,7 @@ let gameVariant='classic',selectedOnlineMode='classic';
 function applyVariant(v){
   gameVariant=v;
   if(v==='extended'){ROWS=7;COLS=5;GOAL={1:0,2:6};HOME={1:[4,5],2:[1,2]};}
+  else if(v==='worm'){ROWS=8;COLS=6;GOAL={1:0,2:7};HOME={1:[5,6],2:[1,2]};}
   else{ROWS=6;COLS=4;GOAL={1:0,2:5};HOME={1:[3,4],2:[1,2]};}
   if(typeof calcCellSize==='function')calcCellSize();
 }
@@ -998,12 +1042,14 @@ function setOnlineMode(m){
   selectedOnlineMode=m;
   document.getElementById('mode-btn-classic').classList.toggle('on',m==='classic');
   document.getElementById('mode-btn-extended').classList.toggle('on',m==='extended');
+  document.getElementById('mode-btn-worm').classList.toggle('on',m==='worm');
 }
 let selectedCpuMode='classic';
 function setCpuMode(m){
   selectedCpuMode=m;
   document.getElementById('cpu-mode-btn-classic').classList.toggle('on',m==='classic');
   document.getElementById('cpu-mode-btn-extended').classList.toggle('on',m==='extended');
+  document.getElementById('cpu-mode-btn-worm').classList.toggle('on',m==='worm');
 }
 
 // ── State ────────────────────────────────────────────
@@ -1116,10 +1162,36 @@ function placePiecesExt(player){
   for(let c=0;c<COLS;c++)board[frontRow][c]=pieces[c];
   for(let c=0;c<COLS;c++)board[backRow][c]=pieces[COLS+c];
 }
-function placeFn(player){return gameVariant==='extended'?placePiecesExt(player):placePieces(player);}
+function placePiecesWorm(player){
+  const pieces=sh([
+    {player,type:'firewall',value:null,revealed:false},
+    {player,type:'firewall',value:null,revealed:false},
+    {player,type:'virus',value:null,revealed:false},
+    {player,type:'virus',value:null,revealed:false},
+    {player,type:'program',value:4,revealed:false},
+    {player,type:'program',value:3,revealed:false},
+    {player,type:'program',value:3,revealed:false},
+    {player,type:'program',value:2,revealed:false},
+    {player,type:'program',value:2,revealed:false},
+    {player,type:'medic',value:null,revealed:false},
+    {player,type:'worm',value:null,revealed:false},
+    {player,type:'linker',value:null,revealed:false},
+  ]);
+  const frontRow=player===1?HOME[1][0]:HOME[2][0];
+  const backRow=player===1?HOME[1][1]:HOME[2][1];
+  for(let c=0;c<COLS;c++)board[frontRow][c]=pieces[c];
+  for(let c=0;c<COLS;c++)board[backRow][c]=pieces[COLS+c];
+}
+function placeFn(player){
+  if(gameVariant==='worm')return placePiecesWorm(player);
+  if(gameVariant==='extended')return placePiecesExt(player);
+  return placePieces(player);
+}
 
 // ── Battle ───────────────────────────────────────────
 function beats(a,b){
+  if(a.type==='worm')return false;
+  if(b.type==='worm')return true;
   if(a.type==='medic')return b.type==='virus';
   if(b.type==='medic')return a.type!=='virus';
   if(a.type==='virus')return b.type==='program'||b.type==='linker';
@@ -1129,7 +1201,7 @@ function beats(a,b){
   return false;
 }
 function resolveBattle(att,def){const aw=beats(att,def),dw=beats(def,att);if(aw&&!dw)return'att';if(dw&&!aw)return'def';return'both';}
-function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'★LNK',medic:'MED'}[p.type]||'?';}
+function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'★LNK',medic:'MED',worm:'WRM'}[p.type]||'?';}
 
 // ── Move ─────────────────────────────────────────────
 function getMoves(r,c){
@@ -1142,6 +1214,25 @@ function doMove(fr,fc,tr,tc){
   stopTurnTimer();
   const mover=board[fr][fc],target=board[tr][tc];
   const isMine=mover.player===myPN;
+  if(mover.type==='worm'&&target?.type==='program'){
+    const oppPlayer=target.player;
+    board[fr][fc]=null;board[tr][tc]=null;
+    [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>{
+      const nr=tr+dr,nc=tc+dc;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]?.player===oppPlayer&&board[nr][nc]?.type==='program')board[nr][nc]=null;
+    });
+    sndBattle();
+    _battleCell={r:tr,c:tc};setTimeout(()=>{_battleCell=null;},480);
+    setMsg('≋ WORM 感染発動！ プログラム連鎖崩壊！');
+    if(gameMode!=='placing')_pushGameLog(fr,fc,tr,tc,movedBy);
+    const w=checkWin();
+    if(w!==0){over=true;if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);render();showWin(w);return;}
+    turn=turn===1?2:1;sel=null;validMoves=[];render();
+    if(gameMode==='online')startTurnTimer(turn===myPN);
+    if(gameMode==='cpu'&&turn===2)scheduleCpu();
+    else if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);
+    return;
+  }
   if(!target){
     board[tr][tc]=mover;board[fr][fc]=null;
     isMine?sndMove():sndCpuMove();
@@ -1281,13 +1372,41 @@ function aiChooseMove(){
   const cands=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(board[r][c]?.player!==2)continue;for(const[tr,tc]of getMoves(r,c))cands.push({fr:r,fc:c,tr,tc,score:scoreMove(r,c,tr,tc,board[r][c])});}
   if(!cands.length)return null;
-  if(difficulty===1){if(Math.random()<0.3){cands.sort((a,b)=>b.score-a.score);return cands[0];}return cands[Math.floor(Math.random()*cands.length)];}
   cands.sort((a,b)=>b.score-a.score);
   if(difficulty===2){const pool=cands.slice(0,Math.min(3,cands.length)),w=[0.65,0.25,0.10];let rnd=Math.random(),idx=pool.length-1;for(let i=0;i<pool.length;i++){rnd-=(w[i]||0.05);if(rnd<=0){idx=i;break;}}return pool[idx];}
-  const top2=cands.slice(0,Math.min(2,cands.length));return(top2.length<2||Math.random()<0.85)?top2[0]:top2[1];
+  if(difficulty===3){const top2=cands.slice(0,Math.min(2,cands.length));return(top2.length<2||Math.random()<0.85)?top2[0]:top2[1];}
+  if(difficulty===4)return cands[0];
+  // difficulty 5: 即勝ちがあれば選択、なければ相手に即勝ちを許さない手を選ぶ
+  const winMove=cands.find(mv=>mv.score>=9e5);
+  if(winMove)return winMove;
+  const safe=cands.filter(mv=>{
+    const sFrom=board[mv.fr][mv.fc],sTo=board[mv.tr][mv.tc];
+    board[mv.tr][mv.tc]=sFrom;board[mv.fr][mv.fc]=null;
+    let oppWin=false;
+    outer:for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      if(!board[r][c]||board[r][c].player!==1)continue;
+      for(const[tr2,tc2]of getMoves(r,c)){
+        const p=board[r][c];
+        if((p.type==='linker'&&tr2===GOAL[1])||(board[tr2][tc2]?.player===2&&board[tr2][tc2]?.type==='linker'&&beats(p,board[tr2][tc2]))){oppWin=true;break outer;}
+      }
+    }
+    board[mv.fr][mv.fc]=sFrom;board[mv.tr][mv.tc]=sTo;
+    return !oppWin;
+  });
+  return(safe.length?safe:cands)[0];
 }
 function scoreMove(fr,fc,tr,tc,piece){
   let s=0;const tgt=board[tr][tc];
+  if(piece.type==='worm'){
+    if(!tgt)return s+(tr>fr?8:-4);
+    if(tgt.type==='program'){
+      let chain=0;
+      [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>{const nr=tr+dr,nc=tc+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]?.type==='program'&&board[nr][nc]?.player===tgt.player)chain++;});
+      const noise=[0,28,4,1,0,0][difficulty]||0;
+      return 260+chain*90+(Math.random()-.5)*noise;
+    }
+    return -500;
+  }
   if(piece.type==='linker'&&tr===GOAL[2])return 1e6;
   if(tgt?.revealed&&tgt.type==='linker'&&beats(piece,tgt))return 9e5;
   s+=(tr>fr)?10:-6;
@@ -1296,12 +1415,43 @@ function scoreMove(fr,fc,tr,tc,piece){
   if(piece.type==='firewall'&&tgt?.revealed&&tgt.type==='virus')s+=45;
   if(piece.type==='program'&&piece.value>=3&&tgt?.revealed&&tgt.type==='firewall')s+=30;
   if(tgt){if(tgt.revealed){const res=resolveBattle(piece,tgt);if(res==='att'){s+=28;if(tgt.type==='program')s+=tgt.value*7;}else if(res==='def')s-=85;else s-=8;}else{if(piece.type==='linker')s-=65;else if(piece.type==='virus')s+=18;else if(piece.type==='firewall')s+=8;else s-=piece.value<=2?28:6;}}
-  if(difficulty===3){
+  if(difficulty>=3){
     if(piece.type==='linker'){[[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>{const nr=tr+dr,nc=tc+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS){const adj=board[nr][nc];if(adj?.player===1)s-=adj.revealed&&beats(adj,piece)?60:18;}});}
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p?.player===1&&p.type==='linker'&&p.revealed){const dist=Math.abs(tr-r)+Math.abs(tc-c);if(dist<=2&&beats(piece,p))s+=35;}}
   }
+  if(difficulty>=4){
+    // リンカーを全8方向の脅威から守る
+    if(piece.type==='linker'){
+      for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+        if(!dr&&!dc)continue;
+        const nr=tr+dr,nc=tc+dc;
+        if(nr<0||nr>=ROWS||nc<0||nc>=COLS)continue;
+        const adj=board[nr][nc];
+        if(adj?.player===1){s-=adj.revealed&&beats(adj,piece)?80:22;}
+      }
+      // ゴールまでの縦列が空ならボーナス
+      let clearPath=true;
+      for(let r=tr+1;r<=GOAL[2];r++){if(board[r][tc]?.player===1){clearPath=false;break;}}
+      if(clearPath)s+=28;
+      // 脅威の数に応じてペナルティ
+      let threats=0;
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p?.player===1&&p.revealed&&beats(p,piece)){const d=Math.abs(tr-r)+Math.abs(tc-c);if(d<=2)threats++;}}
+      s-=threats*35;
+    }
+    // ウイルス/ファイアウォールで未公開の相手駒を探るボーナス
+    if((piece.type==='virus'||piece.type==='firewall')&&tgt&&!tgt.revealed&&tgt.player===1)s+=18;
+    // 低価値プログラムが未公開駒に突っ込むのを抑制
+    if(piece.type==='program'&&piece.value<=2&&tgt&&!tgt.revealed&&tgt.player===1)s-=18;
+    // 相手未公開駒（リンカー候補）に近い位置へ守備駒を寄せる
+    if(piece.type==='firewall'){
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+        const p=board[r][c];
+        if(p?.player===1&&!p.revealed&&r<=2){const d=Math.abs(tr-r)+Math.abs(tc-c);if(d<=1)s+=12;}
+      }
+    }
+  }
   s+=(tc===1||tc===2)?2:0;
-  const noise=[0,28,4,1][difficulty];s+=(Math.random()-.5)*noise;
+  const noise=[0,28,4,1,0,0][difficulty];s+=(Math.random()-.5)*noise;
   return s;
 }
 
@@ -1338,7 +1488,7 @@ function clickCell(r,c){
 function pieceInfo(p){
   const visible=p.player===myPN||p.revealed;
   if(!visible)return['?','???'];
-  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC']}[p.type];
+  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC'],worm:['≋','WORM']}[p.type];
 }
 function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type} p${p.player}`;}
 
@@ -1350,7 +1500,7 @@ function render(){
   const myZone=HOME[myPN];
   const baseRows=Array.from({length:ROWS},(_,i)=>i);
   const rowOrder=myPN===2?[...baseRows].reverse():baseRows;
-  const centerRow=gameVariant==='extended'?3:-1;
+  const centerRow=gameVariant==='extended'?3:gameVariant==='worm'?4:-1;
   for(const r of rowOrder)for(let c=0;c<COLS;c++){
     const el=document.createElement('div');el.className='cell';
     if(r===GOAL[1])el.classList.add('goal-top');
@@ -1382,7 +1532,7 @@ function render(){
   else{const isMyTurn=turn===myPN;tl.innerHTML=isMyTurn?`<span class="c1">▶ ${myName} のターン</span>`:`<span class="c2">▶ ${gameMode==='cpu'?'CPU':opponentName} のターン</span>`;}
   renderCaptured();
 }
-function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl',medic:'cm'}[p.type]||'cp';}
+function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl',medic:'cm',worm:'cw'}[p.type]||'cp';}
 function renderCaptured(){
   [1,2].forEach(pl=>{
     const el=document.getElementById(`cap${pl}`);const list=captured[pl];
@@ -1644,7 +1794,7 @@ function startPlacementPhase(){
   document.getElementById('btn-place-ok').style.display='';
   updateNameLabel();updateCapLabels();
   document.getElementById('badge-role').textContent=`${myName} vs ${opponentName}`;
-  let sec=30;
+  let sec=gameVariant==='worm'?50:30;
   setMsg(`駒を並べよう！ あと ${sec}秒 ／ タップで選択→交換`);
   render();
   if(window._placeTimer)clearInterval(window._placeTimer);
@@ -1817,7 +1967,7 @@ function stopBGM(){
 function setMsg(m){document.getElementById('msg').textContent=m;}
 function show(id){document.getElementById(id).classList.add('on');}
 function hide(id){document.getElementById(id).classList.remove('on');}
-function setDiff(d){difficulty=d;[1,2,3].forEach(i=>document.getElementById(`d${i}`).classList.toggle('on',i===d));}
+function setDiff(d){difficulty=d;[2,3,4,5].forEach(i=>{const el=document.getElementById(`d${i}`);if(el)el.classList.toggle('on',i===d);});}
 
 function flashScreen(color){
   const d=document.createElement('div');
@@ -1964,7 +2114,7 @@ function startCpuPlacementPhase(){
   document.getElementById('btn-place-ok').style.display='';
   hide('ov-win');setThinkBar(0);
   updateNameLabel();updateCapLabels();
-  let sec=30;
+  let sec=gameVariant==='worm'?50:30;
   setMsg(`駒を並べよう！ あと ${sec}秒 ／ タップで選択→交換`);
   render();
   if(window._placeTimer)clearInterval(window._placeTimer);
@@ -1983,6 +2133,7 @@ const PIECE_INFO={
   fw:{title:'F/W / ファイアウォール',sub:'[ 防御の壁・2枚 ]',body:'<span class="rt vir">VIRUS</span> に勝利。<span class="rt prog">P2</span> にも勝利。<br>P3・P4 には負ける。<span class="rt lnk">★</span>にも負ける。<br><br>自陣の入り口に置いて VIRUS の侵入を防ごう。',tip:'💡 F/W を2枚並べるとVIRUSを完全封鎖できる。'},
   virus:{title:'VIRUS / ウイルス',sub:'[ 奇襲役・2枚 ]',body:'<span class="rt prog">PROG</span> 全種・<span class="rt lnk">★LINK</span> に勝利。<br>ただし <span class="rt fw">F/W</span> と <span class="rt prog">P2</span> には負ける。<br><br>隠れている駒に突っ込んで正体を確認する使い方もある。',tip:'💡 相手のF/W位置を把握してから動かすこと。'},
   medic:{title:'✚ MEDIC / メディック',sub:'[ 変身役・EXTENDEDのみ ]',body:'通常時は最弱。<span class="rt vir">VIRUS</span> にだけ勝利し、それ以外の全駒に負ける。<br><br>VIRUS を撃破すると<b>変身</b>！ 好きな駒に変身できる。<br><span class="rt lnk">★LINK</span> に変身 → LINK が2枚に（2枚とも失うと敗北）。',tip:'💡 相手から見ると「何か分からない駒」。奇襲の鍵。'},
+  worm:{title:'≋ WORM / ワーム',sub:'[ 感染型・WORMモードのみ ]',body:'隣接する相手の <span class="rt prog">PROG</span> へ移動することで<b>感染発動</b>。<br><br>① WORMが消滅<br>② ターゲットPROGが消滅<br>③ そのPROGの周囲1マスにいる相手PROGも<b>連鎖消滅</b><br><br><span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">★LINK</span>・<span class="rt med">MEDIC</span> には通常戦闘で<b>必ず負ける</b>。',tip:'💡 PROG密集地帯への突撃で最大5枚を一撃消滅。タイミングを見極めよ。'},
 };
 function openPieceModal(key){
   const d=PIECE_INFO[key];if(!d)return;
