@@ -1216,10 +1216,16 @@ function doMove(fr,fc,tr,tc){
   const isMine=mover.player===myPN;
   if(mover.type==='worm'&&target?.type==='program'){
     const oppPlayer=target.player;
-    board[fr][fc]=null;board[tr][tc]=null;
+    board[fr][fc]=null;
+    captured[oppPlayer].push({...mover});
+    captured[movedBy].push({...target});
+    board[tr][tc]=null;
     [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>{
       const nr=tr+dr,nc=tc+dc;
-      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]?.player===oppPlayer&&board[nr][nc]?.type==='program')board[nr][nc]=null;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]?.player===oppPlayer&&board[nr][nc]?.type==='program'){
+        captured[movedBy].push({...board[nr][nc]});
+        board[nr][nc]=null;
+      }
     });
     sndBattle();
     _battleCell={r:tr,c:tc};setTimeout(()=>{_battleCell=null;},480);
@@ -2275,7 +2281,7 @@ function renderReplayStep(){
       cel.style.cssText=`width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${bc};display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:${Math.round(sz*.26)}px;box-sizing:border-box;`;
       const p=brd[r][c];
       if(p){
-        const ico={program:p.value,firewall:'⊘',virus:'V',linker:'★',medic:'✚'}[p.type]||'?';
+        const ico={program:p.value,firewall:'⊘',virus:'V',linker:'★',medic:'✚',worm:'≋'}[p.type]||'?';
         cel.style.color=p.player===1?'#44aaff':'#ff6633';
         cel.style.background=p.player===1?'rgba(0,40,100,.5)':'rgba(100,20,0,.5)';
         cel.textContent=p.revealed?ico:'?';
