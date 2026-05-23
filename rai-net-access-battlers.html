@@ -187,6 +187,25 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 .mp-stat-num { font-size:1.1rem; font-weight:bold; letter-spacing:1px; }
 .mp-stat-lbl { font-size:.55rem; color:#446644; letter-spacing:1px; margin-top:2px; }
 
+/* ── Emote System ─────────────────────────────────── */
+#emote-wrap { display:none; position:relative; margin-top:6px; }
+#emote-wrap.on { display:block; }
+#emote-toggle { width:100%; border-color:#1a3a2a; color:#336655; font-size:.72rem; letter-spacing:2px; }
+#emote-popup { display:none; position:absolute; bottom:calc(100% + 4px); left:0; right:0; background:#060e08; border:1px solid #1a3a1a; z-index:100; box-shadow:0 0 16px rgba(0,255,65,.15); }
+#emote-popup.on { display:block; }
+.emote-item { display:block; width:100%; text-align:left; padding:6px 10px; background:none; border:none; border-bottom:1px solid #0f1f0f; color:#00cc55; font-family:'Courier New',monospace; font-size:.7rem; cursor:pointer; letter-spacing:1px; transition:background .1s; }
+.emote-item:hover { background:#0a1e0a; color:#00ff41; }
+.emote-item:last-child { border-bottom:none; }
+.emote-item.cooldown { opacity:.3; pointer-events:none; }
+#emote-cooldown-bar { height:2px; background:#0f1f0f; margin-top:3px; border-radius:1px; overflow:hidden; display:none; }
+#emote-cooldown-bar.on { display:block; }
+#emote-cooldown-fill { height:100%; background:#00ff41; width:0%; }
+.emote-bubble { position:fixed; padding:7px 14px; border:1px solid; border-radius:3px; font-family:'Courier New',monospace; font-size:.78rem; letter-spacing:2px; pointer-events:none; z-index:400; white-space:nowrap; }
+@keyframes bubble-in { 0%{transform:scale(.75) translateY(8px);opacity:0;} 100%{transform:scale(1) translateY(0);opacity:1;} }
+.emote-bubble { animation:bubble-in .2s ease-out; }
+.emote-bubble.my  { background:#001a0d; border-color:#00aa44; color:#00ff88; box-shadow:0 0 10px rgba(0,180,80,.3); }
+.emote-bubble.opp { background:#1a0308; border-color:#aa0033; color:#ff4466; box-shadow:0 0 10px rgba(200,0,50,.3); }
+
 /* ── Piece cards ──────────────────────────────────── */
 .piece-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:5px; }
 .piece-card { background:#050e05; border:1px solid #1a2e1a; border-radius:4px; padding:7px 3px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; font-family:'Courier New',monospace; transition:all .12s; }
@@ -210,7 +229,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 
 <h1>雷ネット・アクセルバトラーズ</h1>
 <div class="subtitle">STEINS;GATE :: RAI-NET ACCEL BATTLERS <span id="ver-label"></span></div>
-<div id="online-badge">🌐 ONLINE — <span id="badge-role"></span></div>
+<div id="online-badge">🌐 ONLINE <span id="badge-role"></span></div>
 
 <div id="game-wrap">
   <div id="board"></div>
@@ -228,7 +247,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       </div>
     </div>
 
-    <button id="btn-place-ok" onclick="placementOK()" style="display:none;border-color:#00cc44;color:#00ff66;letter-spacing:2px;font-size:.85rem">// ✓ 準備OK！</button>
+    <button id="btn-place-ok" onclick="placementOK()" style="display:none;border-color:#00cc44;color:#00ff66;letter-spacing:2px;font-size:.85rem">// →準備OK！！</button>
 
     <div class="box" id="diff-box">
       <h3>// DIFFICULTY</h3>
@@ -236,30 +255,30 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
         <button class="diff-btn on" id="d2" onclick="setDiff(2)">中級</button>
         <button class="diff-btn" id="d3" onclick="setDiff(3)">上級</button>
         <button class="diff-btn" id="d4" onclick="setDiff(4)">超上級</button>
-        <button class="diff-btn" id="d5" onclick="setDiff(5)">ハカー</button>
+        <button class="diff-btn" id="d5" onclick="setDiff(5)">スーパーハカー</button>
       </div>
     </div>
 
     <div class="box" id="captured">
       <h3>// CAPTURED</h3>
-      <div><span id="cap-label1">あなた</span>が取得: <div class="cap-row" id="cap1"></div></div>
-      <div style="margin-top:6px"><span id="cap-label2">相手</span>が取得: <div class="cap-row" id="cap2"></div></div>
+      <div><span id="cap-label1">あなた</span>が取った <div class="cap-row" id="cap1"></div></div>
+      <div style="margin-top:6px"><span id="cap-label2">相手</span>が取った <div class="cap-row" id="cap2"></div></div>
     </div>
 
     <div class="box">
       <h3>// PIECES & RULES</h3>
       <div class="piece-grid">
         <button class="piece-card" onclick="openPieceModal('link')">
-          <span class="rt lnk">★</span><span class="piece-card-name">LINK</span>
+          <span class="rt lnk">☁</span><span class="piece-card-name">LINK</span>
         </button>
         <button class="piece-card" onclick="openPieceModal('prog')">
-          <span class="rt prog">PROG</span><span class="piece-card-name">×3</span>
+          <span class="rt prog">PROG</span><span class="piece-card-name">×</span>
         </button>
         <button class="piece-card" onclick="openPieceModal('fw')">
-          <span class="rt fw">F/W</span><span class="piece-card-name">×2</span>
+          <span class="rt fw">F/W</span><span class="piece-card-name">×</span>
         </button>
         <button class="piece-card" onclick="openPieceModal('virus')">
-          <span class="rt vir">VIRUS</span><span class="piece-card-name">×2</span>
+          <span class="rt vir">VIRUS</span><span class="piece-card-name">×</span>
         </button>
         <button class="piece-card" onclick="openPieceModal('medic')">
           <span class="rt med">✚MED</span><span class="piece-card-name">EXT</span>
@@ -272,6 +291,11 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
         </button>
       </div>
       <div style="font-size:.57rem;color:#2a3a2a;margin-top:4px;text-align:center">▶ タップで詳細</div>
+    </div>
+    <div id="emote-wrap">
+      <button id="emote-toggle" onclick="toggleEmotePopup()">// 💬 エモート</button>
+      <div id="emote-popup"></div>
+      <div id="emote-cooldown-bar"><div id="emote-cooldown-fill"></div></div>
     </div>
     <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.72rem">// TITLE [F2]</button>
   </div>
@@ -289,12 +313,12 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-panel">
     <h3 style="text-align:center;letter-spacing:3px">// PLAYER NAME</h3>
     <div class="pp-row" style="margin-top:8px">
-      <input id="name-input" type="text" placeholder="名前を入力..." maxlength="12"
+      <input id="name-input" type="text" placeholder="名前を入力.." maxlength="12"
         onkeydown="if(event.key==='Enter')confirmName()" oninput="document.getElementById('name-error').textContent=''">
       <button onclick="confirmName()" style="width:80px">OK</button>
     </div>
     <div id="name-error" style="color:#ff4444;font-size:.65rem;min-height:1.2em;margin-top:4px;text-align:center"></div>
-    <button onclick="hide('ov-name');show('ov-splash')" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:4px">// ⬅ BACK</button>
+    <button onclick="hide('ov-name');show('ov-splash')" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:4px">// ← BACK</button>
   </div>
 </div>
 
@@ -314,12 +338,13 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-sub">STEINS;GATE :: RAI-NET ACCEL BATTLERS <span class="ver-sub"></span></div>
   <div id="title-rating-display" style="font-size:.72rem;letter-spacing:2px;margin:4px 0 8px"></div>
   <div class="ov-panel" style="width:min(300px,90vw)">
-    <button onclick="selectDifficulty()">// ⚔ CPU 対戦</button>
+    <button onclick="selectDifficulty()">// ⚙ CPU 対戦</button>
     <button class="btn-online" onclick="enterOnlineMode()">// 🌐 オンライン対戦</button>
     <button onclick="showRules()" style="border-color:#445544;color:#669966;margin-top:4px">// 📖 ルール説明</button>
     <button onclick="showTutorial()" style="border-color:#223322;color:#445544;font-size:.7rem;margin-top:2px">// 🎓 チュートリアル</button>
     <button onclick="showSettings()" style="border-color:#1a2e1a;color:#334433;font-size:.7rem;margin-top:2px">// ⚙ 設定</button>
     <button onclick="showMyPage()" style="border-color:#1a2e1a;color:#336644;font-size:.7rem;margin-top:2px">// 👤 マイページ</button>
+    <button onclick="showSkin()" style="border-color:#1a2a3a;color:#336655;font-size:.7rem;margin-top:2px">// 🎨 スキン</button>
     <button onclick="showLeaderboard()" style="border-color:#1a1a2e;color:#334466;font-size:.7rem;margin-top:2px">// 🏆 リーダーボード</button>
   </div>
   <div style="font-size:.6rem;color:#1a3a1a;margin-top:4px;letter-spacing:1px">[ F2 ] TITLE</div>
@@ -331,15 +356,15 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-panel" style="width:min(300px,90vw)">
     <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px">
-      <button id="cpu-mode-btn-classic" class="mode-btn on" onclick="setCpuMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6 ／ 8駒</span></button>
-      <button id="cpu-mode-btn-extended" class="mode-btn" onclick="setCpuMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒</span></button>
-      <button id="cpu-mode-btn-worm" class="mode-btn" onclick="setCpuMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×8 ／ 12駒</span></button>
+      <button id="cpu-mode-btn-classic" class="mode-btn on" onclick="setCpuMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6  8駒</span></button>
+      <button id="cpu-mode-btn-extended" class="mode-btn" onclick="setCpuMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×6  10駒</span></button>
+      <button id="cpu-mode-btn-worm" class="mode-btn" onclick="setCpuMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×6  12駒</span></button>
     </div>
     <button onclick="startCpuGame(2)" style="border-color:#00ff41;color:#00ff41">// 中級</button>
     <button onclick="startCpuGame(3)" style="border-color:#ff6600;color:#ff8833">// 上級</button>
     <button onclick="startCpuGame(4)" style="border-color:#ff2200;color:#ff4422">// 超上級</button>
     <button onclick="startCpuGame(5)" style="border-color:#cc00ff;color:#dd44ff">// スーパーハカー</button>
-    <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:6px">// ⬅ BACK</button>
+    <button onclick="showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;margin-top:6px">// ← BACK</button>
   </div>
 </div>
 
@@ -349,115 +374,114 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <h3>// RULES — 雷ネット・アクセルバトラーズ</h3>
     <div class="rule-line" style="font-size:.68rem;line-height:1.9">
 
-      <b style="color:#00ff41">◆ 共通ルール</b><br>
+      <b style="color:#00ff41">◁ 共通ルール</b><br>
       • 1ターンに1駒を上下左右1マス移動<br>
-      • 駒は最初<b>裏向き</b>（相手には種類が見えない）<br>
+      • 駒最初<b>裏向き</b>相手には種類が見えない<br>
       • 戦闘発生時に両方の駒が<b>表向き</b>になる<br>
-      • 引き分け → 両方の駒が消滅<br>
+      • 引き分け → 両方の駒が消滅br>
       <br>
 
       <div style="border:1px solid #1a4a1a;padding:8px;margin-bottom:10px">
-        <b style="color:#00ff41;letter-spacing:2px">[ CLASSIC モード — 4列×6行 ]</b><br>
+        <b style="color:#00ff41;letter-spacing:2px">[ CLASSIC モード (4×6列) ]</b><br>
         <br>
-        <b style="color:#aaffaa">● 勝利条件</b><br>
-        ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行へ<br>
-        ② 相手の <span class="rt lnk">★LINK</span> を撃破する<br>
+        <b style="color:#aaffaa">◁ 勝利条件</b><br>
+        ① 自分の <span class="rt lnk">☁LINK</span> を相手ゴール行へ<br>
+        ② 相手の <span class="rt lnk">☁LINK</span> を撃破する<br>
         <br>
-        <b style="color:#aaffaa">● 駒（全8枚）</b><br>
-        <span class="rt lnk">★LINK</span> ×1　最重要駒。ゴールを目指せ<br>
-        <span class="rt prog">P4</span> ×1　<span class="rt prog">P3</span> ×1　<span class="rt prog">P2</span> ×1　強さ＝数値順<br>
-        <span class="rt fw">F/W</span> ×2　FIREWALL — 盾役<br>
-        <span class="rt vir">VIRUS</span> ×2　VIRUS — 奇襲役<br>
+        <b style="color:#aaffaa">◁ 駒（8枚！</b><br>
+        <span class="rt lnk">☁LINK</span>　最重要。ゴールを目指す<br>
+        <span class="rt prog">P4</span>　<span class="rt prog">P3</span>　<span class="rt prog">P2</span>　強さ＝数値順<br>
+        <span class="rt fw">F/W</span>　FIREWALL — 盾役<br>
+        <span class="rt vir">VIRUS</span>　VIRUS — 攻撃役<br>
         <br>
-        <b style="color:#aaffaa">● カード相性</b><br>
-        <span class="rt vir">VIRUS</span> &gt; <span class="rt prog">P2</span> <span class="rt prog">P3</span> <span class="rt prog">P4</span> <span class="rt lnk">★LINK</span><br>
+        <b style="color:#aaffaa">◁ カード相性</b><br>
+        <span class="rt vir">VIRUS</span> &gt; <span class="rt prog">P2</span> <span class="rt prog">P3</span> <span class="rt prog">P4</span> <span class="rt lnk">☁LINK</span><br>
         <span class="rt fw">F/W</span> &gt; <span class="rt vir">VIRUS</span> ・ <span class="rt prog">P2</span><br>
-        <span class="rt prog">P3</span> <span class="rt prog">P4</span> &gt; <span class="rt fw">F/W</span> （貫通）<br>
-        <span class="rt lnk">★LINK</span> &gt; <span class="rt fw">F/W</span> （通過）<br>
+        <span class="rt prog">P3</span> <span class="rt prog">P4</span> &gt; <span class="rt fw">F/W</span> 貫通！<br>
+        <span class="rt lnk">☁LINK</span> &gt; <span class="rt fw">F/W</span> 通過盤 br>
         PROG同士 → 数値が大きい方が勝利<br>
-        ※それ以外の組み合わせは引き分け
+        ※それ以外の組み合わせ引き分け
       </div>
 
       <div style="border:1px solid #1a4a4a;padding:8px">
-        <b style="color:#00ccaa;letter-spacing:2px">[ EXTENDED モード — 5列×7行 ]</b><br>
-        <span style="font-size:.62rem;color:#447766">中央行にセンターライン（通常マスと同じ）</span><br>
+        <b style="color:#00ccaa;letter-spacing:2px">[ EXTENDED モード (5×6列) ]</b><br>
+        <span style="font-size:.62rem;color:#447766">中央行にセンターライン通常マスと同じ</span><br>
         <br>
-        <b style="color:#88ffdd">● 勝利条件</b><br>
-        ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行へ<br>
-        ② 相手の <span class="rt lnk">★LINK</span> を<b>全て</b>撃破する<br>
-        &nbsp;&nbsp;（MEDICがLINKERに変身すると2枚になる）<br>
+        <b style="color:#88ffdd">◁ 勝利条件</b><br>
+        ① 自分の <span class="rt lnk">☁LINK</span> を相手ゴール行へ<br>
+        ② 相手の <span class="rt lnk">☁LINK</span> を<b>全て</b>撃破する<br>
+        &nbsp;&nbsp;盤 EDICがLINKERに変身すると2枚になる！<br>
         <br>
-        <b style="color:#88ffdd">● 駒（全10枚）</b><br>
-        <span class="rt lnk">★LINK</span> ×1　最重要駒<br>
-        <span class="rt prog">P4</span> ×1　<span class="rt prog">P3</span> ×2　<span class="rt prog">P2</span> ×1　強さ＝数値順<br>
-        <span class="rt fw">F/W</span> ×2　FIREWALL — 盾役<br>
-        <span class="rt vir">VIRUS</span> ×2　VIRUS — 奇襲役<br>
-        <span class="rt med">✚MED</span> ×1　MEDIC — 変身役（下記参照）<br>
+        <b style="color:#88ffdd">◁ 駒（10枚！</b><br>
+        <span class="rt lnk">☁LINK</span>　最重要<br>
+        <span class="rt prog">P4</span>　<span class="rt prog">P3</span>　<span class="rt prog">P2</span>　強さ＝数値順<br>
+        <span class="rt fw">F/W</span>　FIREWALL — 盾役<br>
+        <span class="rt vir">VIRUS</span>　VIRUS — 攻撃役<br>
+        <span class="rt med">✚MED</span>　MEDIC — 変身役（下記参照）<br>
         <br>
-        <b style="color:#88ffdd">● カード相性</b><br>
-        <span class="rt vir">VIRUS</span> &gt; <span class="rt prog">P2</span> <span class="rt prog">P3</span> <span class="rt prog">P4</span> <span class="rt lnk">★LINK</span><br>
+        <b style="color:#88ffdd">◁ カード相性</b><br>
+        <span class="rt vir">VIRUS</span> &gt; <span class="rt prog">P2</span> <span class="rt prog">P3</span> <span class="rt prog">P4</span> <span class="rt lnk">☁LINK</span><br>
         <span class="rt fw">F/W</span> &gt; <span class="rt vir">VIRUS</span> ・ <span class="rt prog">P2</span><br>
-        <span class="rt prog">P3</span> <span class="rt prog">P4</span> &gt; <span class="rt fw">F/W</span> （貫通）<br>
-        <span class="rt lnk">★LINK</span> &gt; <span class="rt fw">F/W</span> （通過）<br>
+        <span class="rt prog">P3</span> <span class="rt prog">P4</span> &gt; <span class="rt fw">F/W</span> 貫通！<br>
+        <span class="rt lnk">☁LINK</span> &gt; <span class="rt fw">F/W</span> 通過盤 br>
         <span class="rt med">✚MED</span> &gt; <span class="rt vir">VIRUS</span> のみ勝利<br>
-        その他全駒 &gt; <span class="rt med">✚MED</span>（MEDICは他全てに負ける）<br>
+        そ他駒&gt; <span class="rt med">✚MED</span>盤 EDICは他てに負ける盤 br>
         PROG同士 → 数値が大きい方が勝利<br>
-        ※それ以外の組み合わせは引き分け<br>
+        ※それ以外の組み合わせ引き分け<br>
         <br>
-        <b style="color:#88ffdd">● MEDICの変身</b><br>
-        <span class="rt med">✚MED</span> が <span class="rt vir">VIRUS</span> を撃破すると変身画面が出現<br>
-        好きな駒を選んで変身（効果もその駒と同じ）<br>
-        <span class="rt lnk">★LINK</span> に変身 → LINKERが2枚に！<br>
+        <b style="color:#88ffdd">◁ MEDICの変身</b><br>
+        <span class="rt med">✚MED</span> が<span class="rt vir">VIRUS</span> を撃破すると変身画面が現<br>
+        好きな駒を選んで変身効果もそ駒と同じ盤 br>
+        <span class="rt lnk">☁LINK</span> に変身 → LINKERが2枚に<br>
         &nbsp;&nbsp;2枚とも失って初めて敗北
       </div>
 
       <div style="border:1px solid #330055;padding:8px;margin-top:10px">
-        <b style="color:#cc66ff;letter-spacing:2px">[ WORM モード — 6列×8行 ]</b><br>
-        <span style="font-size:.62rem;color:#775599">中央行にセンターライン（通常マスと同じ）</span><br>
+        <b style="color:#cc66ff;letter-spacing:2px">[ WORM モード (6×6列) ]</b><br>
+        <span style="font-size:.62rem;color:#775599">中央行にセンターライン通常マスと同じ</span><br>
         <br>
-        <b style="color:#dd88ff">● 勝利条件</b><br>
-        ① 自分の <span class="rt lnk">★LINK</span> を相手ゴール行へ<br>
-        ② 相手の <span class="rt lnk">★LINK</span> を<b>全て</b>撃破する<br>
+        <b style="color:#dd88ff">◁ 勝利条件</b><br>
+        ① 自分の <span class="rt lnk">☁LINK</span> を相手ゴール行へ<br>
+        ② 相手の <span class="rt lnk">☁LINK</span> を<b>全て</b>撃破する<br>
         <br>
-        <b style="color:#dd88ff">● 駒（全12枚）</b><br>
-        <span class="rt lnk">★LINK</span> ×1　最重要駒<br>
-        <span class="rt prog">P4</span> ×1　<span class="rt prog">P3</span> ×2　<span class="rt prog">P2</span> ×2　強さ＝数値順<br>
-        <span class="rt fw">F/W</span> ×2　FIREWALL — 盾役<br>
-        <span class="rt vir">VIRUS</span> ×2　VIRUS — 奇襲役<br>
-        <span class="rt med">✚MED</span> ×1　MEDIC — 変身役<br>
-        <span class="rt worm">≋WRM</span> ×1　WORM — 感染型（下記参照）<br>
+        <b style="color:#dd88ff">◁ 駒（12枚！</b><br>
+        <span class="rt lnk">☁LINK</span>　最重要<br>
+        <span class="rt prog">P4</span>　<span class="rt prog">P3</span>　<span class="rt prog">P2</span>　強さ＝数値順<br>
+        <span class="rt fw">F/W</span>　FIREWALL — 盾役<br>
+        <span class="rt vir">VIRUS</span>　VIRUS — 攻撃役<br>
+        <span class="rt med">✚MED</span>　MEDIC — 変身役<br>
+        <span class="rt worm">≋WRM</span>　WORM — 感染型（下記参照）<br>
         <br>
-        <b style="color:#dd88ff">● カード相性</b><br>
-        EXTENDEDと同じ相性＋WORMの特殊ルール<br>
-        <span class="rt worm">≋WRM</span> vs <span class="rt prog">PROG</span> → <b>感染発動</b>（通常戦闘なし）<br>
-        その他全駒 &gt; <span class="rt worm">≋WRM</span>（WORMは通常戦闘で必ず負ける）<br>
+        <b style="color:#dd88ff">◁ カード相性</b><br>
+        EXTENDEDと同じ相性WORMの特殊ルール<br>
+        <span class="rt worm">≋WRM</span> vs <span class="rt prog">PROG</span> → <b>感染発動</b>通常戦闘なし！<br>
+        その他の駒 &gt; <span class="rt worm">≋WRM</span>（WORMは通常戦闘で必ず負ける）<br>
         <br>
-        <b style="color:#dd88ff">● WORMの感染</b><br>
+        <b style="color:#dd88ff">◁ WORMの感染</b><br>
         <span class="rt worm">≋WRM</span> を相手の <span class="rt prog">PROG</span> マスへ移動すると発動<br>
         ① WORMが消滅<br>
         ② 感染した <span class="rt prog">PROG</span> が消滅<br>
-        ③ その周囲1マスにいる相手 <span class="rt prog">PROG</span> も<b>連鎖消滅</b><br>
-        ※ <span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">★LINK</span>・<span class="rt med">MEDIC</span> には無効<br>
-        ※ WORMは消費型（1回使うと消える）
-      </div>
+        ③ その周囲1マスにある相手の<span class="rt prog">PROG</span> も<b>連鎖消滅</b><br>
+        ※ <span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">☁LINK</span>・<span class="rt med">MEDIC</span> には無効<br>
+        ※ WORMは消費型！1回使い切り消える！      </div>
 
     </div>
       <div style="border:1px solid #2a2a1a;padding:8px;margin-top:10px">
         <b style="color:#ffaa00;letter-spacing:2px">[ ランク称号 ]</b><br><br>
         <table style="width:100%;border-collapse:collapse;font-size:.65rem">
           <tr><th style="background:#1a1a00;color:#ffaa00;padding:4px 8px;text-align:left;border:1px solid #333300">レート</th><th style="background:#1a1a00;color:#ffaa00;padding:4px 8px;text-align:left;border:1px solid #333300">称号</th></tr>
-          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#888888">～1199</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#888888">ゼリーマン</td></tr>
-          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#4488ff">1200～1499</td><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#4488ff">ラボメン</td></tr>
-          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#00ff41">1500～1799</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#00ff41">世界線観測者</td></tr>
-          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#ff4444">1800～2099</td><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#ff4444">鳳凰院凶真</td></tr>
-          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#ffaa00">2100～</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#ffaa00">Steins;Gate</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#888888">盤 199</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#888888">ゼリーマン</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#4488ff">1200盤 499</td><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#4488ff">ラボメン</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#00ff41">1500盤 799</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#00ff41">世界線観測者</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#ff4444">1800盤 099</td><td style="padding:4px 8px;border:1px solid #2a2a0a;background:#0a0a14;color:#ff4444">鳳凰院凶真</td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#ffaa00">2100〜</td><td style="padding:4px 8px;border:1px solid #2a2a0a;color:#ffaa00">Steins;Gate</td></tr>
         </table>
-        <div style="font-size:.6rem;color:#446644;margin-top:5px">初期レート：1400（ラボメン）</div>
+        <div style="font-size:.6rem;color:#446644;margin-top:5px">初期レート：1400 ラボメン</div>
       </div>
 
     </div>
     <div style="display:flex;gap:6px;margin-top:10px">
-      <button onclick="closeRules()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ⬅ BACK</button>
+      <button onclick="closeRules()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ← BACK</button>
     </div>
   </div>
 </div>
@@ -471,36 +495,36 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// MATCH TYPE</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
         <button id="mtype-normal" class="mode-btn on" onclick="setOnlineMatchType('normal')">通常対戦<br><span style="font-size:.58rem;opacity:.7">レート変動なし</span></button>
-        <button id="mtype-ranked" class="mode-btn" onclick="setOnlineMatchType('ranked')">ガチ対戦<br><span style="font-size:.58rem;opacity:.7">⚔ ELOレーティング</span></button>
+        <button id="mtype-ranked" class="mode-btn" onclick="setOnlineMatchType('ranked')">ガチ対戦<br><span style="font-size:.58rem;opacity:.7">⚙ ELOレーティング</span></button>
       </div>
     </div>
     <div style="margin-bottom:10px">
       <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE (HOSTが選択)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
-        <button id="mode-btn-classic" class="mode-btn on" onclick="setOnlineMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6 ／ 8駒</span></button>
-        <button id="mode-btn-extended" class="mode-btn" onclick="setOnlineMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×7 ／ 10駒</span></button>
-        <button id="mode-btn-worm" class="mode-btn" onclick="setOnlineMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×8 ／ 12駒</span></button>
+        <button id="mode-btn-classic" class="mode-btn on" onclick="setOnlineMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6  8駒</span></button>
+        <button id="mode-btn-extended" class="mode-btn" onclick="setOnlineMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×6  10駒</span></button>
+        <button id="mode-btn-worm" class="mode-btn" onclick="setOnlineMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×6  12駒</span></button>
       </div>
     </div>
     <div style="font-size:.68rem;color:#446644;margin-bottom:10px;line-height:1.7">
-      <b style="color:#00cc33">HOST</b>：あいことばを決めて部屋を作り待機<br>
-      <b style="color:#0099cc">JOIN</b>：あいことばを入力して部屋に参加
+      <b style="color:#00cc33">HOST</b>あいことばを決めて部屋を作ります<br>
+      <b style="color:#0099cc">JOIN</b>あいことばを入力して部屋に参加
     </div>
     <div class="pp-row" style="margin-bottom:8px">
-      <input id="pp-input" type="text" placeholder="あいことばを入力..." maxlength="20"
+      <input id="pp-input" type="text" placeholder="あいことばを入力.." maxlength="20"
         onkeydown="if(event.key==='Enter')startJoin()">
     </div>
     <button onclick="startHost()" style="border-color:#00aa44;color:#00cc44">// 🏠 HOST — 部屋を作る</button>
-    <button onclick="startJoin()" style="margin-top:5px;border-color:#005577;color:#0099cc">// 🚪 JOIN &nbsp;— 部屋に入る</button>
+    <button onclick="startJoin()" style="margin-top:5px;border-color:#005577;color:#0099cc">// 🚪 JOIN &nbsp; — 部屋に入る</button>
     <div class="err-msg" id="match-err"></div>
-    <button onclick="hide('ov-online');showTitle()" style="margin-top:8px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
+    <button onclick="hide('ov-online');showTitle()" style="margin-top:8px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
   </div>
 </div>
 
 <!-- MEDIC transform overlay -->
 <div class="overlay" id="ov-transform">
-  <div class="ov-title" style="color:#00ccaa;font-size:clamp(1rem,3vw,1.5rem)">✚ MEDIC TRANSFORM</div>
-  <div class="ov-sub" style="color:#00aa88">VIRUSを撃破！変身先を選べ</div>
+  <div class="ov-title" style="color:#00ccaa;font-size:clamp(1rem,3vw,1.5rem)">☆MEDIC TRANSFORM</div>
+  <div class="ov-sub" style="color:#00aa88">VIRUSを撃破変身先を選べ</div>
   <div id="transform-btns" style="width:min(280px,90vw);display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
 </div>
 
@@ -509,7 +533,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div class="ov-panel" style="width:min(300px,92vw)">
     <div id="piece-modal-content"></div>
     <div style="display:flex;gap:6px;margin-top:10px">
-      <button onclick="hide('ov-piece')" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ⬅ BACK</button>
+      <button onclick="hide('ov-piece')" style="border-color:#1a2a1a;color:#335533;font-size:.65rem;flex:1">// ← BACK</button>
     </div>
   </div>
 </div>
@@ -523,17 +547,17 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <button id="tut-prev-btn" onclick="tutNav(-1)" style="border-color:#333;color:#555">◀ 戻る</button>
       <button id="tut-next-btn" onclick="tutNav(1)">次へ ▶</button>
     </div>
-    <button onclick="hide('ov-tutorial');showTitle()" style="margin-top:6px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
+    <button onclick="hide('ov-tutorial');showTitle()" style="margin-top:6px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
   </div>
 </div>
 
 <!-- Waiting overlay -->
 <div class="overlay" id="ov-waiting">
   <div class="spinner"></div>
-  <div class="wait-msg" id="wait-msg">対戦相手を探しています...</div>
+  <div class="wait-msg" id="wait-msg">対戦相手を探しています..</div>
   <div class="wait-code" id="wait-code"></div>
   <button onclick="cancelWaiting()" style="margin-top:8px;width:160px;border-color:#333;color:#555">// CANCEL</button>
-  <button onclick="cancelWaiting();show('ov-online')" style="margin-top:4px;width:160px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
+  <button onclick="cancelWaiting();show('ov-online')" style="margin-top:4px;width:160px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
 </div>
 
 <!-- Game Start overlay -->
@@ -570,27 +594,27 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     </div>
     <div style="margin-bottom:6px">
       <div style="font-size:.58rem;color:#446644;margin-bottom:3px;letter-spacing:1px">// PASSWORD</div>
-      <input id="auth-pass" type="password" placeholder="パスワード（6文字以上）" maxlength="64"
+      <input id="auth-pass" type="password" placeholder="パスワード6文字以上 maxlength="64"
         style="width:100%;background:#0a0f0a;border:1px solid #1a3a1a;color:#00ff41;padding:7px;font-family:'Courier New',monospace;font-size:.8rem;outline:none;box-sizing:border-box"
         onfocus="this.style.borderColor='#00ff41'" onblur="this.style.borderColor='#1a3a1a'"
         onkeydown="if(event.key==='Enter')authLogin()">
     </div>
     <div id="auth-err" style="color:#ff4444;font-size:.65rem;min-height:1.2em;margin-bottom:8px;text-align:center"></div>
     <button onclick="authLogin()" style="border-color:#00aa44;color:#00cc44">// ▶ ログイン</button>
-    <button onclick="authRegister()" style="margin-top:5px;border-color:#005577;color:#0099cc">// ✚ 新規登録</button>
+    <button onclick="authRegister()" style="margin-top:5px;border-color:#005577;color:#0099cc">// ☆新規登録</button>
     <button onclick="authResetPassword()" style="margin-top:5px;border-color:#1a2a3a;color:#446688;font-size:.65rem">// 🔑 パスワードを忘れた方</button>
-    <div style="text-align:center;font-size:.58rem;color:#334433;margin:8px 0 4px;letter-spacing:1px">── または ──</div>
-    <button onclick="authGuest()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// 👤 ゲストモードで続行</button>
+    <div style="text-align:center;font-size:.58rem;color:#334433;margin:8px 0 4px;letter-spacing:1px">── また' ──</div>
+    <button onclick="authGuest()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// 👤 ゲストモードで続ける</button>
   </div>
 </div>
 
 <!-- Recovery overlay -->
 <div class="overlay" id="ov-recover">
   <div class="ov-panel" style="width:min(320px,90vw)">
-    <h3 style="text-align:center;color:#ffaa00;letter-spacing:3px">// 対戦途中です</h3>
+    <h3 style="text-align:center;color:#ffaa00;letter-spacing:3px">// 対戦途中でリカバリー/h3>
     <div id="recover-info" style="font-size:.72rem;color:#669966;margin:8px 0 14px;text-align:center;line-height:1.9"></div>
     <button onclick="doRestore()" style="border-color:#00aa44;color:#00cc44">// ▶ 続きから再開</button>
-    <button onclick="clearAndContinue()" style="margin-top:5px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ✕ 新しく始める</button>
+    <button onclick="clearAndContinue()" style="margin-top:5px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ☆ 新しく始める</button>
   </div>
 </div>
 
@@ -629,6 +653,64 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       </div>
     </div>
 
+    <!-- Win rate -->
+    <div style="background:#080e08;border:1px solid #1a3a1a;padding:8px 12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:.58rem;color:#446644;letter-spacing:1px;margin-bottom:4px">
+        <span>// WIN RATE</span><span id="mp-winrate" style="color:#00ff41">0.0%</span>
+      </div>
+      <div style="height:3px;background:#0f1f0f;border-radius:2px;overflow:hidden">
+        <div id="mp-winrate-bar" style="height:100%;width:0%;background:#00ff41;border-radius:2px;transition:width .4s"></div>
+      </div>
+    </div>
+
+    <!-- Mode breakdown -->
+    <div style="margin-bottom:8px">
+      <div style="font-size:.58rem;color:#446644;letter-spacing:1px;margin-bottom:4px">// MODE 別　W - L - D</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+        <div class="mp-stat">
+          <div style="font-size:.48rem;color:#446644;margin-bottom:2px">CLASSIC</div>
+          <div id="mp-mode-classic" style="font-size:.62rem;color:#aaffaa">0-0-0</div>
+        </div>
+        <div class="mp-stat">
+          <div style="font-size:.48rem;color:#446644;margin-bottom:2px">EXTENDED</div>
+          <div id="mp-mode-extended" style="font-size:.62rem;color:#aaffdd">0-0-0</div>
+        </div>
+        <div class="mp-stat">
+          <div style="font-size:.48rem;color:#9966aa;margin-bottom:2px">WORM</div>
+          <div id="mp-mode-worm" style="font-size:.62rem;color:#cc66ff">0-0-0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- vs CPU / Online + Streak -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:8px">
+      <div class="mp-stat" style="grid-column:span 2">
+        <div style="font-size:.48rem;color:#446644;margin-bottom:2px">vs CPU</div>
+        <div id="mp-vs-cpu" style="font-size:.62rem">0-0-0</div>
+      </div>
+      <div class="mp-stat" style="grid-column:span 2">
+        <div style="font-size:.48rem;color:#446644;margin-bottom:2px">ONLINE</div>
+        <div id="mp-vs-online" style="font-size:.62rem">0-0-0</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px">
+      <div class="mp-stat">
+        <div class="mp-stat-num" id="mp-streak-cur" style="color:#ffaa00">0</div>
+        <div class="mp-stat-lbl">連勝中</div>
+      </div>
+      <div class="mp-stat">
+        <div class="mp-stat-num" id="mp-streak-best" style="color:#ff6600">0</div>
+        <div class="mp-stat-lbl">最高連勝</div>
+      </div>
+    </div>
+
+    <!-- Rating sparkline -->
+    <div style="background:#080e08;border:1px solid #1a3a1a;padding:8px 12px;margin-bottom:10px">
+      <div style="font-size:.58rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// RATE 推移直近10戦</div>
+      <div id="mp-rate-graph" style="display:flex;align-items:flex-end;gap:2px;height:28px"></div>
+      <div id="mp-rate-graph-empty" style="font-size:.55rem;color:#2a3a2a">対戦記録がまだありません</div>
+    </div>
+
     <!-- Name edit -->
     <div style="margin-bottom:8px">
       <div style="font-size:.58rem;color:#446644;margin-bottom:3px;letter-spacing:1px">// NAME</div>
@@ -643,7 +725,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     </div>
 
     <button onclick="logout()" style="border-color:#3a1a1a;color:#884444;font-size:.72rem;margin-bottom:4px">// 🚪 ログアウト</button>
-    <button onclick="hide('ov-mypage');showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
+    <button onclick="hide('ov-mypage');showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
   </div>
 </div>
 
@@ -653,7 +735,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <h3>// 🏆 GLOBAL LEADERBOARD — TOP 100</h3>
     <div id="lb-loading" style="text-align:center;padding:16px;font-size:.72rem;color:#446644">読み込み中...</div>
     <div id="lb-body"></div>
-    <button onclick="hide('ov-lb');showTitle()" style="margin-top:10px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ⬅ BACK</button>
+    <button onclick="hide('ov-lb');showTitle()" style="margin-top:10px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
   </div>
 </div>
 
@@ -665,11 +747,11 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <div id="replay-info" style="font-size:.6rem;color:#446644;letter-spacing:1px;margin:4px 0 6px"></div>
     <div style="display:flex;gap:5px;margin-top:4px">
       <button onclick="replayNav(-9999)" style="flex:.5;font-size:.75rem;padding:6px 2px;border-color:#1a3a1a;color:#335533">⟪</button>
-      <button onclick="replayNav(-1)" style="flex:1;font-size:.75rem;padding:6px 4px">◀ 前</button>
+      <button onclick="replayNav(-1)" style="flex:1;font-size:.75rem;padding:6px 4px">◀ 前へ</button>
       <button onclick="replayNav(1)" style="flex:1;font-size:.75rem;padding:6px 4px">次 ▶</button>
       <button onclick="replayNav(9999)" style="flex:.5;font-size:.75rem;padding:6px 2px;border-color:#1a3a1a;color:#335533">⟫</button>
     </div>
-    <button onclick="hide('ov-replay')" style="margin-top:8px;width:100%;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ✕ 閉じる</button>
+    <button onclick="hide('ov-replay')" style="margin-top:8px;width:100%;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ☆ 閉じる</button>
   </div>
 </div>
 
@@ -687,6 +769,16 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     <button onclick="closeSettings()">// 閉じる</button>
   </div>
 </div>
+<!-- Skin overlay -->
+<div class="overlay" id="ov-skin">
+  <div class="ov-panel" style="width:min(400px,96vw);max-height:92vh;overflow-y:auto">
+    <h3>// 🎨 SKIN</h3>
+    <div style="font-size:.6rem;color:#446644;margin-bottom:14px;letter-spacing:1px">テーマを選択してプレビューを確認できます<br><span style="color:#334433">※ 現在はプレビューのみ。実装完</span></div>
+    <div id="skin-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+    <button onclick="hide('ov-skin');showTitle()" style="margin-top:14px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
+  </div>
+</div>
+
 <audio id="bgm-title"  src="Surviving_Cyber.mp3" loop preload="auto"></audio>
 <audio id="bgm-battle" src="bgm.mp3"              loop preload="auto"></audio>
 <script>
@@ -698,14 +790,14 @@ document.querySelectorAll('.ver-sub,#ver-label').forEach(el=>el.textContent='v'+
 let _ac=null;
 function getAC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();if(_ac.state==='suspended')_ac.resume();return _ac;}
 
-// iOS/Android: 最初のタッチで無音バッファを再生してAudioContextをアンロック
+// iOS/Android: 最初タッチで無音バッファを生成してAudioContextをアンロック
 let _audioUnlocked=false;
 function _unlockAudio(){
   if(_audioUnlocked)return;
   if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();
   const resume=()=>{
     if(_ac.state==='suspended')_ac.resume();
-    // iOS用：無音バッファを再生して強制アンロック
+    // iOS用無音バッファを生成して強制アンロック
     try{
       const buf=_ac.createBuffer(1,1,22050);
       const src=_ac.createBufferSource();
@@ -724,13 +816,13 @@ function tone(freq,dur,type='square',vol=0.1,delay=0){try{const ctx=getAC(),t=ct
 function noiseBlip(dur,vol=0.08,delay=0){try{const ctx=getAC(),rate=ctx.sampleRate,buf=ctx.createBuffer(1,rate*dur,rate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const src=ctx.createBufferSource();src.buffer=buf;const g=ctx.createGain();src.connect(g);g.connect(ctx.destination);const t=ctx.currentTime+delay;const sv=Math.max(0.0001,vol*_seVol);g.gain.setValueAtTime(sv,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);src.start(t);}catch(e){}}
 // システム起動スキャン
 const sndBoot=()=>{for(let i=0;i<6;i++)tone(160+i*180,.032,'square',.055,i*.048);noiseBlip(.03,.05,.3);tone(1500,.2,'sine',.07,.34);};
-// ターミナルコマンド確定
+// ターミナルコマンド確認
 const sndSelect=()=>{tone(1800,.022,'square',.055);tone(2600,.038,'sine',.04,.024);};
 // キャンセル
 const sndDesel=()=>{tone(900,.035,'square',.04);tone(600,.05,'sine',.03,.038);};
-// データパケット送信（自分）
+// データパケット送信動作
 const sndMove=()=>{tone(1400,.018,'square',.055);tone(1000,.038,'sine',.04,.02);};
-// データパケット（CPU）
+// データパケット — CPU処理 
 const sndCpuMove=()=>{tone(340,.022,'sawtooth',.055);tone(240,.048,'sawtooth',.04,.024);};
 // ハッキング衝突
 const sndBattle=()=>{noiseBlip(.065,.1);[580,290,480,190].forEach((f,i)=>tone(f,.022,'square',.06,i*.02));tone(160,.1,'sawtooth',.07,.06);};
@@ -738,15 +830,15 @@ const sndBattle=()=>{noiseBlip(.065,.1);[580,290,480,190].forEach((f,i)=>tone(f,
 const sndWin=()=>{[650,950,1350].forEach((f,i)=>tone(f,.058,'square',.065,i*.07));tone(1800,.1,'sine',.05,.22);};
 // アクセス拒否
 const sndLose=()=>{[480,330,210].forEach((f,i)=>tone(f,.08,'sawtooth',.065,i*.09));};
-// データ破損・相打ち
+// データ破損、相打ち
 const sndDraw=()=>{noiseBlip(.048,.09);noiseBlip(.028,.06,.058);tone(270,.08,'square',.05,.042);};
-// タイマーパルス
+// タイマパルス
 const sndTick=()=>tone(1700,.011,'sine',.024);
 // システム完全制圧
 const sndVictory=()=>{[320,480,640,840,1040,1380].forEach((f,i)=>tone(f,.13,'square',.07,i*.11));[320,480,640].forEach((f,i)=>tone(f,.35,'sine',.04,.74+i*.05));noiseBlip(.038,.06,.7);};
 // システムクラッシュ
 const sndDefeat=()=>{[540,420,330,250,170].forEach((f,i)=>tone(f,.17,'sawtooth',.07,i*.13));noiseBlip(.2,.07,.7);tone(120,.35,'sine',.05,.74);};
-// ネットワーク接続確立
+// ネットワーク接続確認
 const sndOnline=()=>{tone(480,.048,'sine',.07);tone(780,.048,'square',.06,.09);tone(1100,.1,'sine',.07,.18);noiseBlip(.022,.05,.16);};
 
 // ── Firebase Realtime Database relay ─────────────────
@@ -813,6 +905,10 @@ if(bc) {
     if(msg.type==='sel' && msg.key===currentRoomKey && msg.player!==myPN && gameMode==='online'){
       _oppSel=(msg.r>=0&&msg.c>=0)?{r:msg.r,c:msg.c}:null;render();
     }
+    // Emote (same device)
+    if(msg.type==='emote' && msg.key===currentRoomKey && msg.player!==myPN && gameMode==='online'){
+      if(msg.ts>_emoteLastOppTs){_emoteLastOppTs=msg.ts;showEmoteBubble(msg.id,'opp');}
+    }
   };
 }
 
@@ -828,10 +924,10 @@ async function _fbAuthFetch(ep,body){
     return r.json();}catch(e){return{error:{message:'NETWORK_ERROR'}};}
 }
 function _authErrMsg(c){
-  return({'EMAIL_NOT_FOUND':'メールが見つかりません','INVALID_PASSWORD':'パスワードが違います',
-    'EMAIL_EXISTS':'このメールは既に登録済み','INVALID_LOGIN_CREDENTIALS':'メールまたはパスワードが違います',
-    'WEAK_PASSWORD : Password should be at least 6 characters':'パスワードは6文字以上',
-    'TOO_MANY_ATTEMPTS_TRY_LATER':'しばらく後に再試行','NETWORK_ERROR':'通信エラー'}[c]||c);
+  return({'EMAIL_NOT_FOUND':'メールが見つかりません','INVALID_PASSWORD':'パスワードが違いまぁ',
+    'EMAIL_EXISTS':'こメールは既に登録済み','INVALID_LOGIN_CREDENTIALS':'メールまたパスワードが違いまぁ',
+    'WEAK_PASSWORD : Password should be at least 6 characters':'パスワード6文字以上',
+    'TOO_MANY_ATTEMPTS_TRY_LATER':'しらく後に再試衁','NETWORK_ERROR':'通信エラー'}[c]||c);
 }
 function _authSetErr(m){document.getElementById('auth-err').textContent=m;}
 async function _onAuthSuccess(d){
@@ -849,7 +945,7 @@ async function _onAuthSuccess(d){
 async function authLogin(){
   const em=document.getElementById('auth-email').value.trim();
   const pw=document.getElementById('auth-pass').value;
-  if(!em||!pw){_authSetErr('メールとパスワードを入力');return;}
+  if(!em||!pw){_authSetErr('メールとパスワードを入劁');return;}
   _authSetErr('接続中...');
   const d=await _fbAuthFetch('signInWithPassword',{email:em,password:pw,returnSecureToken:true});
   if(d.error){_authSetErr(_authErrMsg(d.error.message));return;}
@@ -858,8 +954,8 @@ async function authLogin(){
 async function authRegister(){
   const em=document.getElementById('auth-email').value.trim();
   const pw=document.getElementById('auth-pass').value;
-  if(!em||!pw){_authSetErr('メールとパスワードを入力');return;}
-  if(pw.length<6){_authSetErr('パスワードは6文字以上');return;}
+  if(!em||!pw){_authSetErr('メールとパスワードを入劁');return;}
+  if(pw.length<6){_authSetErr('パスワード6文字以上');return;}
   _authSetErr('登録中...');
   const d=await _fbAuthFetch('signUp',{email:em,password:pw,returnSecureToken:true});
   if(d.error){_authSetErr(_authErrMsg(d.error.message));return;}
@@ -867,7 +963,7 @@ async function authRegister(){
 }
 async function authResetPassword(){
   const em=document.getElementById('auth-email').value.trim();
-  if(!em){_authSetErr('メールアドレスを入力してください');return;}
+  if(!em){_authSetErr('メールアドレスを力してください');return;}
   _authSetErr('送信中...');
   const d=await _fbAuthFetch('sendOobCode',{requestType:'PASSWORD_RESET',email:em});
   if(d.error){_authSetErr(_authErrMsg(d.error.message));return;}
@@ -1008,7 +1104,7 @@ function _updateTimerUI(){
   fillEl.style.width=((_timerLeft/TURN_SEC)*100)+'%';
   if(secEl)secEl.textContent=_timerLeft+'s';
   const who=document.getElementById('timer-who');
-  if(who)who.textContent='▶ あなたのターン';
+  if(who)who.textContent='▶ あなたターン';
   const urgent=_timerLeft<=10;
   wrap.classList.toggle('timer-urgent',urgent);
   if(urgent&&_timerLeft>0&&_timerLeft%2===0)sndTick();
@@ -1065,6 +1161,10 @@ let opponentName='???';
 let _myRating=1400;
 let _oppRating=1500;
 let _wins=0,_losses=0,_draws=0;
+let _statsMode={classic:{w:0,l:0,d:0},extended:{w:0,l:0,d:0},worm:{w:0,l:0,d:0}};
+let _statsVs={cpu:{w:0,l:0,d:0},online:{w:0,l:0,d:0}};
+let _streak={cur:0,best:0};
+let _ratingHistory=[];
 let _authEmail=localStorage.getItem('dna-auth-email')||'';
 let _oppSel=null,_oppMoveFlash=null;
 let _gameLog=[],_replayStep=0;
@@ -1079,6 +1179,10 @@ function loadPlayerData(n){
   if(raw){try{const d=JSON.parse(raw);
     _myRating=typeof d.rating==='number'?d.rating:1500;
     _wins=d.wins||0;_losses=d.losses||0;_draws=d.draws||0;
+    if(d.statsMode)_statsMode=d.statsMode;
+    if(d.statsVs)_statsVs=d.statsVs;
+    if(d.streak)_streak=d.streak;
+    if(d.ratingHistory)_ratingHistory=d.ratingHistory;
   }catch(e){_myRating=1500;}}
   else{const old=localStorage.getItem('dna-rating');_myRating=old!==null?+old:1400;}
 }
@@ -1086,6 +1190,7 @@ function savePlayerData(){
   if(!myName)return;
   let d={};try{const r=localStorage.getItem(_playerKey(myName));if(r)d=JSON.parse(r);}catch(e){}
   d.rating=_myRating;d.wins=_wins;d.losses=_losses;d.draws=_draws;
+  d.statsMode=_statsMode;d.statsVs=_statsVs;d.streak=_streak;d.ratingHistory=_ratingHistory;
   localStorage.setItem(_playerKey(myName),JSON.stringify(d));
   saveCloudData();
 }
@@ -1107,8 +1212,8 @@ function calcRatingDelta(myR,oppR,iWin){
 function getTitle(r){
   if(r<1200)return{name:'ゼリーマン',color:'#888888'};
   if(r<1500)return{name:'ラボメン',color:'#4488ff'};
-  if(r<1800)return{name:'世界線観測者',color:'#00ff41'};
-  if(r<2100)return{name:'鳳凰院凶真',color:'#ff4444'};
+  if(r<1800)return{name:'世界線観測老',color:'#00ff41'};
+  if(r<2100)return{name:'鳳凰院凶省',color:'#ff4444'};
   return{name:'Steins;Gate',color:'#ffaa00'};
 }
 function renderRating(){
@@ -1201,7 +1306,7 @@ function beats(a,b){
   return false;
 }
 function resolveBattle(att,def){const aw=beats(att,def),dw=beats(def,att);if(aw&&!dw)return'att';if(dw&&!aw)return'def';return'both';}
-function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'★LNK',medic:'MED',worm:'WRM'}[p.type]||'?';}
+function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'☁LNK',medic:'MED',worm:'WRM'}[p.type]||'?';}
 
 // ── Move ─────────────────────────────────────────────
 function getMoves(r,c){
@@ -1229,7 +1334,7 @@ function doMove(fr,fc,tr,tc){
     });
     sndBattle();
     _battleCell={r:tr,c:tc};setTimeout(()=>{_battleCell=null;},480);
-    setMsg('≋ WORM 感染発動！ プログラム連鎖崩壊！');
+    setMsg('≋WORM 感染発動！プログラム連鎖崩壊！');
     if(gameMode!=='placing')_pushGameLog(fr,fc,tr,tc,movedBy);
     const w=checkWin();
     if(w!==0){over=true;if(gameMode==='online'&&!applyingRemote)sendOnlineMove(fr,fc,tr,tc);render();showWin(w);return;}
@@ -1250,13 +1355,13 @@ function doMove(fr,fc,tr,tc){
     const winner=turn,loser=turn===1?2:1;
     sndBattle();
     _battleCell={r:tr,c:tc};setTimeout(()=>{_battleCell=null;},480);
-    let msg=`⚔ ${pLabel(mover)} vs ${pLabel(target)} `;
+    let msg=`⚙ ${pLabel(mover)} vs ${pLabel(target)} `;
     let medicBeat=false;
-    if(res==='att'){board[tr][tc]=mover;board[fr][fc]=null;captured[winner].push({...target});msg+=`→ ${pLabel(mover)} 勝利！`;setTimeout(()=>isMine?sndWin():sndLose(),120);
+    if(res==='att'){board[tr][tc]=mover;board[fr][fc]=null;captured[winner].push({...target});msg+=`→ ${pLabel(mover)} 勝利`;setTimeout(()=>isMine?sndWin():sndLose(),120);
       _moveAnimCell={r:tr,c:tc};setTimeout(()=>{_moveAnimCell=null;},400);
       if(mover.type==='medic'&&target.type==='virus')medicBeat=true;}
-    else if(res==='def'){board[fr][fc]=null;captured[loser].push({...mover});msg+=`→ ${pLabel(target)} 防御！`;setTimeout(()=>isMine?sndLose():sndWin(),120);}
-    else{board[tr][tc]=null;board[fr][fc]=null;captured[winner].push({...mover});captured[loser].push({...target});msg+=`→ 相打ち！`;setTimeout(sndDraw,120);}
+    else if(res==='def'){board[fr][fc]=null;captured[loser].push({...mover});msg+=`→ ${pLabel(target)} 防御`;setTimeout(()=>isMine?sndLose():sndWin(),120);}
+    else{board[tr][tc]=null;board[fr][fc]=null;captured[winner].push({...mover});captured[loser].push({...target});msg+=`→ 相打ち`;setTimeout(sndDraw,120);}
     setMsg(msg);
     if(medicBeat){
       if(gameMode!=='placing')_pushGameLog(fr,fc,tr,tc,movedBy);
@@ -1298,7 +1403,7 @@ function showTransformPicker(r,c){
     {type:'program',value:2,label:'PROG 2',cls:'prog'},
     {type:'firewall',value:null,label:'F/W',cls:'fw'},
     {type:'virus',value:null,label:'VIRUS',cls:'vir'},
-    {type:'linker',value:null,label:'★ LINKER',cls:'lnk'},
+    {type:'linker',value:null,label:'☁LINKER',cls:'lnk'},
   ];
   choices.forEach(({type,value,label,cls})=>{
     const btn=document.createElement('button');
@@ -1323,7 +1428,7 @@ function chooseMedicTransform(r,c,type,value){
 function cpuMedicTransform(r,c){
   const type='linker',value=null;
   board[r][c]={...board[r][c],type,value,revealed:true};
-  setMsg('CPU MEDIC → ★LINKERに変身！');
+  setMsg('CPU MEDIC → ☁LINKERに変身盤');
   const w=checkWin();
   if(w!==0){over=true;render();showWin(w);return;}
   turn=1;sel=null;validMoves=[];render();
@@ -1426,7 +1531,7 @@ function scoreMove(fr,fc,tr,tc,piece){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p?.player===1&&p.type==='linker'&&p.revealed){const dist=Math.abs(tr-r)+Math.abs(tc-c);if(dist<=2&&beats(piece,p))s+=35;}}
   }
   if(difficulty>=4){
-    // リンカーを全8方向の脅威から守る
+    // リンカーを8方向から守る
     if(piece.type==='linker'){
       for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
         if(!dr&&!dc)continue;
@@ -1435,20 +1540,20 @@ function scoreMove(fr,fc,tr,tc,piece){
         const adj=board[nr][nc];
         if(adj?.player===1){s-=adj.revealed&&beats(adj,piece)?80:22;}
       }
-      // ゴールまでの縦列が空ならボーナス
+      // ゴールまでの縦列が空ならーナス
       let clearPath=true;
       for(let r=tr+1;r<=GOAL[2];r++){if(board[r][tc]?.player===1){clearPath=false;break;}}
       if(clearPath)s+=28;
-      // 脅威の数に応じてペナルティ
+      // 脅威数に応じてペナルティ
       let threats=0;
       for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p?.player===1&&p.revealed&&beats(p,piece)){const d=Math.abs(tr-r)+Math.abs(tc-c);if(d<=2)threats++;}}
       s-=threats*35;
     }
-    // ウイルス/ファイアウォールで未公開の相手駒を探るボーナス
+    // ウイルス/ファイアウォールで未公開相手駒を探るーナス
     if((piece.type==='virus'||piece.type==='firewall')&&tgt&&!tgt.revealed&&tgt.player===1)s+=18;
     // 低価値プログラムが未公開駒に突っ込むのを抑制
     if(piece.type==='program'&&piece.value<=2&&tgt&&!tgt.revealed&&tgt.player===1)s-=18;
-    // 相手未公開駒（リンカー候補）に近い位置へ守備駒を寄せる
+    // 相手未公開駒（リンカー候補）に近い位置へ守備駒を集める
     if(piece.type==='firewall'){
       for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
         const p=board[r][c];
@@ -1494,7 +1599,7 @@ function clickCell(r,c){
 function pieceInfo(p){
   const visible=p.player===myPN||p.revealed;
   if(!visible)return['?','???'];
-  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC'],worm:['≋','WORM']}[p.type];
+  return{program:[p.value,'PROG'],firewall:['⊁','F/W'],virus:['V!','VIRUS'],linker:['☁','LINK'],medic:['☆','MEDIC'],worm:['≁','WORM']}[p.type];
 }
 function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type} p${p.player}`;}
 
@@ -1596,12 +1701,12 @@ function startMoveListen(){
   const oppKey=oppMvKey();
   if(window._fbMoveIv)clearInterval(window._fbMoveIv);
   if(window._lrMoveIv)clearInterval(window._lrMoveIv);
-  // Firebase polling（500ms）
+  // Firebase polling盤 00ms盤
   window._fbMoveIv=setInterval(async()=>{
     if(over||!currentRoomKey){clearInterval(window._fbMoveIv);return;}
     applyOppMove(await fbGet(oppKey));
   },500);
-  // ローカルリレーポーリング（500ms）
+  // ローカルリレーポリング盤 00ms盤
   if(localRelayBase){
     window._lrMoveIv=setInterval(async()=>{
       if(over||!currentRoomKey){clearInterval(window._lrMoveIv);return;}
@@ -1612,7 +1717,7 @@ function startMoveListen(){
 
 async function startHost(){
   const pp=document.getElementById('pp-input').value.trim().toLowerCase();
-  if(!pp){document.getElementById('match-err').textContent='あいことばを入力してください';return;}
+  if(!pp){document.getElementById('match-err').textContent='あいことばを力してください';return;}
   currentPassphrase=pp;currentRoomKey=ppToKey(pp);
   hide('ov-online');cancelWait=false;
   myPN=1;myRole='host';
@@ -1629,6 +1734,8 @@ async function startHost(){
   fbPut(currentRoomKey+'tf2',null);
   fbPut(currentRoomKey+'sel1',null);
   fbPut(currentRoomKey+'sel2',null);
+  fbPut(currentRoomKey+'em1',null);
+  fbPut(currentRoomKey+'em2',null);
   lrPut(currentRoomKey,hostRoomData);
   lrPut(currentRoomKey+'-g',null);
   lrPut(currentRoomKey+'-m1',null);
@@ -1637,7 +1744,7 @@ async function startHost(){
   lrPut(currentRoomKey+'-p2',null);
   lrPut(currentRoomKey+'-tf1',null);
   lrPut(currentRoomKey+'-tf2',null);
-  showWaiting(`🏠 HOST — 「${pp}」`);
+  showWaiting(`🏠 HOST 「${pp}」`);
   document.getElementById('wait-code').textContent=`あいことば:「${pp}」で待機中...`;
   if(window._hostHB)clearInterval(window._hostHB);
   window._hostHB=setInterval(()=>{
@@ -1645,7 +1752,7 @@ async function startHost(){
     fbPut(currentRoomKey,hostRoomData);
     lrPut(currentRoomKey,hostRoomData);
   },5000);
-  // Firebase + ローカルリレーでゲストを待つ
+  // Firebase + ローカルリレーでゲストを待機
   if(window._fbGuestIv)clearInterval(window._fbGuestIv);
   if(window._lrGuestIv)clearInterval(window._lrGuestIv);
   const onGuestFound=(d)=>{
@@ -1671,14 +1778,14 @@ async function startHost(){
 
 async function startJoin(){
   const pp=document.getElementById('pp-input').value.trim().toLowerCase();
-  if(!pp){document.getElementById('match-err').textContent='あいことばを入力してください';return;}
+  if(!pp){document.getElementById('match-err').textContent='あいことばを力してください';return;}
   currentPassphrase=pp;currentRoomKey=ppToKey(pp);
   hide('ov-online');cancelWait=false;
-  showWaiting(`🚪 JOIN — 「${pp}」`);
+  showWaiting(`🚪 JOIN 「${pp}」`);
   const waitEl=document.getElementById('wait-code');
   waitEl.textContent=`部屋を検索中... 6s`;
 
-  // 1. BroadcastChannel（同デバイス・即時）
+  // 1. BroadcastChannel同デバイス・即時！
   let data = await new Promise(resolve=>{
     if(!bc){resolve(null);return;}
     let done=false;
@@ -1693,13 +1800,13 @@ async function startJoin(){
     setTimeout(()=>{if(!done){done=true;bc.removeEventListener('message',h);resolve(null);}},800);
   });
 
-  // 2. ローカルリレー（同WiFi・即時）
+  // 2. ローカルリレー同WiFi・即時！
   if(!data||!data.hostName){
     waitEl.textContent='ローカルリレーを確認中...';
     data=await lrGet(currentRoomKey);
   }
 
-  // 3. Firebaseリレー（最大12秒ポーリング）
+  // 3. Firebaseリレー最大12秒ーリング盤
   if(!data||!data.hostName){
     let sec=12;
     waitEl.textContent=`Firebaseリレー接続中... ${sec}s`;
@@ -1750,7 +1857,7 @@ function returnToRoom(){
   lrPut(currentRoomKey+'-g',null);
   lrPut(currentRoomKey+'-p1',null);
   lrPut(currentRoomKey+'-p2',null);
-  showWaiting(`🏠 HOST — 「${currentPassphrase}」`);
+  showWaiting(`🏠 HOST 「${currentPassphrase}」`);
   document.getElementById('wait-code').textContent=`あいことば:「${currentPassphrase}」で待機中...`;
   if(window._fbGuestIv)clearInterval(window._fbGuestIv);
   if(window._lrGuestIv)clearInterval(window._lrGuestIv);
@@ -1781,7 +1888,7 @@ function returnToRoom(){
 
 function showVsMsg(){
   document.getElementById('badge-role').textContent=`${myName} vs ${opponentName}`;
-  setMsg(`マッチ成立！ ${myName}（P${myPN}）vs ${opponentName}（P${myPN===1?2:1}）`);
+  setMsg(`マッチ成立！${myName} P${myPN} vs ${opponentName} P${myPN===1?2:1}`);
   render();
 }
 
@@ -1801,14 +1908,14 @@ function startPlacementPhase(){
   updateNameLabel();updateCapLabels();
   document.getElementById('badge-role').textContent=`${myName} vs ${opponentName}`;
   let sec=gameVariant==='worm'?50:30;
-  setMsg(`駒を並べよう！ あと ${sec}秒 ／ タップで選択→交換`);
+  setMsg(`駒を並べよう！ あと ${sec}秒！ タップで選択交換`);
   render();
   if(window._placeTimer)clearInterval(window._placeTimer);
   window._placeTimer=setInterval(()=>{
     if(_placementSubmitted){clearInterval(window._placeTimer);window._placeTimer=null;return;}
     sec--;
     if(sec<=0){clearInterval(window._placeTimer);window._placeTimer=null;placementOK();}
-    else setMsg(`駒を並べよう！ あと ${sec}秒 ／ タップで選択→交換`);
+    else setMsg(`駒を並べよう！ あと ${sec}秒！ タップで選択交換`);
   },1000);
 }
 
@@ -1824,9 +1931,10 @@ async function placementOK(){
     setMsg(`${myName} のターンです（PLAYER 1 / 青）`);
     sndBoot();startBattleBGM();render();
     _initGameLog();
+    document.getElementById('emote-wrap').classList.add('on');
     return;
   }
-  setMsg('相手の準備を待っています...');
+  setMsg('相手の準備を待っています..');
   const myRowInds=HOME[myPN];
   const rowData={};
   myRowInds.forEach(r=>{rowData['r'+r]=board[r];});
@@ -1850,7 +1958,7 @@ async function placementOK(){
     },500);
   }
   window._placeTimeout=setTimeout(()=>{
-    if(gameMode==='placing'){setMsg('相手が応答しません。タイトルに戻ります...');setTimeout(showTitle,2000);}
+    if(gameMode==='placing'){setMsg('相手が応答しません。タイトルに戻りまぁ..');setTimeout(showTitle,2000);}
   },60000);
 }
 
@@ -1887,8 +1995,10 @@ function startOnlineGame(){
   lastMoveTs=0;
   startMoveListen();
   startSelListen();
+  startEmoteListen();
   startBattleBGM();
   render();
+  document.getElementById('emote-wrap').classList.add('on');
   startTurnTimer(myPN===1);
 }
 
@@ -1997,21 +2107,27 @@ function showWin(w){
   el.className='ov-title';
   void el.offsetWidth;
   if(w==='draw'){
-    el.style.color='#aaaaaa';el.textContent='DRAW';sub.textContent='両者のLINKERが同時に失われた';
+    el.style.color='#aaaaaa';el.textContent='DRAW';sub.textContent='両者のLINKERが同時に失われました';
     sndDraw();flashScreen('rgba(150,150,150,.4)');
     el.classList.add('win-anim');
   }else{
     const iWin=(gameMode==='cpu'&&w===1)||(gameMode==='online'&&w===myPN);
     el.style.color=iWin?'#0088ff':'#ff3300';
-    el.innerHTML=(iWin?'YOU WIN':'YOU LOSE')+'<br><span style="font-size:.55em;letter-spacing:2px">'+(iWin?'アクセス成功！':'侵入を阻止された...')+'</span>';
+    el.innerHTML=(iWin?'YOU WIN':'YOU LOSE')+'<br><span style="font-size:.55em;letter-spacing:2px">'+(iWin?'アクセス成功盤':'侵入を阻止されぁ..')+'</span>';
     sub.textContent='EL PSY KONGROO';
     setTimeout(iWin?sndVictory:sndDefeat,200);
     flashScreen(iWin?'rgba(0,80,255,.35)':'rgba(200,0,0,.35)');
     el.classList.add(iWin?'win-anim':'lose-anim');
   }
+  const _result=w==='draw'?'d':((gameMode==='cpu'&&w===1)||(gameMode==='online'&&w===myPN)?'w':'l');
   if(w==='draw')_draws++;
-  else if((gameMode==='cpu'&&w===1)||(gameMode==='online'&&w===myPN))_wins++;
+  else if(_result==='w')_wins++;
   else _losses++;
+  const _vsKey=gameMode==='online'?'online':'cpu';
+  if(_statsMode[gameVariant])_statsMode[gameVariant][_result]++;
+  _statsVs[_vsKey][_result]++;
+  if(_result==='w'){_streak.cur++;if(_streak.cur>_streak.best)_streak.best=_streak.cur;}
+  else if(_result==='l')_streak.cur=0;
   const rChEl=document.getElementById('rating-change');
   if(_onlineMatchType==='ranked'&&isOnline){
     if(w==='draw'){
@@ -2025,9 +2141,11 @@ function showWin(w){
       const sign=delta>=0?'+':'';
       if(rChEl)rChEl.innerHTML=`RATE <span style="color:${delta>=0?'#00ff41':'#ff4444'}">${sign}${delta}</span> → <b style="color:${t.color}">${_myRating}</b> <span style="color:${t.color}">[${t.name}]</span>`;
     }
+    _ratingHistory.push(_myRating);if(_ratingHistory.length>20)_ratingHistory.shift();
     savePlayerData();
   }else{
     if(rChEl)rChEl.textContent='';
+    _ratingHistory.push(_myRating);if(_ratingHistory.length>20)_ratingHistory.shift();
     savePlayerData();
   }
   document.getElementById('btn-return-room').style.display=(isOnline&&isHost)?'':'none';
@@ -2121,26 +2239,26 @@ function startCpuPlacementPhase(){
   hide('ov-win');setThinkBar(0);
   updateNameLabel();updateCapLabels();
   let sec=gameVariant==='worm'?50:30;
-  setMsg(`駒を並べよう！ あと ${sec}秒 ／ タップで選択→交換`);
+  setMsg(`駒を並べよう！ あと ${sec}秒！ タップで選択交換`);
   render();
   if(window._placeTimer)clearInterval(window._placeTimer);
   window._placeTimer=setInterval(()=>{
     if(_placementSubmitted){clearInterval(window._placeTimer);window._placeTimer=null;return;}
     sec--;
     if(sec<=0){clearInterval(window._placeTimer);window._placeTimer=null;placementOK();}
-    else setMsg(`駒を並べよう！ あと ${sec}秒 ／ タップで選択→交換`);
+    else setMsg(`駒を並べよう！ あと ${sec}秒！ タップで選択交換`);
   },1000);
 }
 
 // ── Piece detail modal ────────────────────────────────
 const PIECE_INFO={
-  link:{title:'★ LINK / リンカー',sub:'[ 最重要駒 ]',body:'これが相手ゴールに到達するか、相手の LINK を全て撃破すれば<b>勝利</b>。<br>逆に、これが撃破されると<b>即敗北</b>。<br><br><span class="rt fw">F/W</span> を通過できる（引き分けにならず勝利）。',tip:'💡 序盤は動かさず、他の駒で前を開いてから進めるのが定石。'},
-  prog:{title:'PROG / プログラム',sub:'[ P2・P3・P4 の3枚 ]',body:'数値が大きい方が勝利（P4 > P3 > P2）。<br><span class="rt fw">F/W</span> に対して P3・P4 は<b>貫通</b>（勝利）、P2 は負ける。<br><span class="rt vir">VIRUS</span> には全種が負ける。',tip:'💡 P4 は汎用アタッカー。P2 は囮や盾として使おう。'},
-  fw:{title:'F/W / ファイアウォール',sub:'[ 防御の壁・2枚 ]',body:'<span class="rt vir">VIRUS</span> に勝利。<span class="rt prog">P2</span> にも勝利。<br>P3・P4 には負ける。<span class="rt lnk">★</span>にも負ける。<br><br>自陣の入り口に置いて VIRUS の侵入を防ごう。',tip:'💡 F/W を2枚並べるとVIRUSを完全封鎖できる。'},
-  virus:{title:'VIRUS / ウイルス',sub:'[ 奇襲役・2枚 ]',body:'<span class="rt prog">PROG</span> 全種・<span class="rt lnk">★LINK</span> に勝利。<br>ただし <span class="rt fw">F/W</span> と <span class="rt prog">P2</span> には負ける。<br><br>隠れている駒に突っ込んで正体を確認する使い方もある。',tip:'💡 相手のF/W位置を把握してから動かすこと。'},
-  medic:{title:'✚ MEDIC / メディック',sub:'[ 変身役・EXTENDEDのみ ]',body:'通常時は最弱。<span class="rt vir">VIRUS</span> にだけ勝利し、それ以外の全駒に負ける。<br><br>VIRUS を撃破すると<b>変身</b>！ 好きな駒に変身できる。<br><span class="rt lnk">★LINK</span> に変身 → LINK が2枚に（2枚とも失うと敗北）。',tip:'💡 相手から見ると「何か分からない駒」。奇襲の鍵。'},
-  worm:{title:'≋ WORM / ワーム',sub:'[ 感染型・WORMモードのみ ]',body:'隣接する相手の <span class="rt prog">PROG</span> へ移動することで<b>感染発動</b>。<br><br>① WORMが消滅<br>② ターゲットPROGが消滅<br>③ そのPROGの周囲1マスにいる相手PROGも<b>連鎖消滅</b><br><br><span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">★LINK</span>・<span class="rt med">MEDIC</span> には通常戦闘で<b>必ず負ける</b>。',tip:'💡 PROG密集地帯への突撃で最大5枚を一撃消滅。タイミングを見極めよ。'},
-};
+  link:{title:'☆LINK / リンカー',sub:'[ 最重要駒 ]',body:'これが相手ゴールに到達するか、相手の LINK を倒して撃破すれば<b>勝利</b>。<br>逆に、これが撃破されると<b>即敗北</b>。<br><br><span class="rt fw">F/W</span> を通過できる（引き分けにならず勝利）。',tip:'💡 序盤は動かさず、他の駒で前を開いてから進めるのが定石。'},
+  prog:{title:'PROG / プログラム',sub:'[ P2・P3・P4 の3種 ]',body:'数値が大きい方が勝利（P4 > P3 > P2）。<br><span class="rt fw">F/W</span> に対して P3・P4 は<b>貫通</b>（勝利）。P2 は負ける。<br><span class="rt vir">VIRUS</span> には全種が負ける。',tip:'💡 P4 は汎用アタッカー。P2 は囮として使おう。'},
+  fw:{title:'F/W / ファイアウォール',sub:'[ 防御の壁・2種 ]',body:'<span class="rt vir">VIRUS</span> に勝利。<span class="rt prog">P2</span> にも勝利。<br>P3・P4 には負ける。<span class="rt lnk">☆</span>にも負ける。<br><br>自陣の入り口に置き VIRUS の侵入を防ごう。',tip:'💡 F/W 2枚並べるとVIRUSを完全封鎖できる。'},
+  virus:{title:'VIRUS / ウイルス',sub:'[ 奇襲役・2種 ]',body:'<span class="rt prog">PROG</span> 全種・<span class="rt lnk">☆LINK</span> に勝利。<br>ただし<span class="rt fw">F/W</span> と <span class="rt prog">P2</span> には負ける。<br><br>隠れている駒に突っ込んで正体を確認する使い方もある。',tip:'💡 相手のF/W位置を把握してから動かすこと。'},
+  medic:{title:'✚MEDIC / メディック',sub:'[ 変身役・EXTENDEDのみ ]',body:'通常時は最弱。<span class="rt vir">VIRUS</span> にだけ勝利し、それ以外の全駒に負ける。<br><br>VIRUS を撃破すると<b>変身</b>！好きな駒に変身できる。<br><span class="rt lnk">☆LINK</span> に変身 → LINK が2枚に→2枚とも失うと敗北。',tip:'💡 相手から見ると「何か分からない」。奇襲の鍵。'},
+  worm:{title:'≋WORM / ワーム',sub:'[ 感染型・WORMモードのみ ]',body:'隣接する相手の <span class="rt prog">PROG</span> へ移動することで<b>感染発動</b>。<br><br>① WORMが消滅<br>② ターゲットPROGが消滅<br>③ そのPROGの周囲1マスにいる相手PROGも<b>連鎖消滅</b><br><br><span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">☆LINK</span>・<span class="rt med">MEDIC</span> には通常戦闘で<b>必ず負ける</b>。',tip:'💡 PROG密集地帯への突撃で最大5枚を一撃。滅タイミングを見極めよ。'},
+};;
 function openPieceModal(key){
   const d=PIECE_INFO[key];if(!d)return;
   document.getElementById('piece-modal-content').innerHTML=
@@ -2153,11 +2271,11 @@ function openPieceModal(key){
 
 // ── Tutorial ──────────────────────────────────────────
 const TUT=[
-  {h:'// RAI-NET ACCEL BATTLERS とは',b:`シュタインズ・ゲートの世界を舞台にした<b>情報戦カードゲーム</b>。<br><br>▶ 自分の <span class="rt lnk">★LINK</span> を相手ゴールへ運ぶか、<br>&nbsp;&nbsp; 相手の <span class="rt lnk">★LINK</span> を全て撃破すれば勝利！<br><br>駒は全て<b>裏向き</b>で配置される。<br>戦闘が起きるまで相手には種類が見えない。<br>これが読み合いの核心。`},
-  {h:'// 駒の種類',b:`<span class="rt lnk">★LINK</span> ×1 … 最重要。撃破されると即敗北<br><span class="rt prog">P4/P3/P2</span> ×3 … 汎用アタッカー（数値順）<br><span class="rt fw">F/W</span> ×2 … 防御壁。VIRUSを止める<br><span class="rt vir">VIRUS</span> ×2 … 奇襲役。PROG全種を撃破<br><br><b>EXTENDEDモードのみ：</b><br><span class="rt med">✚MED</span> ×1 … 変身役。VIRUSを倒すと好きな駒に変身！`},
-  {h:'// カード相性',b:`<span class="rt vir">VIRUS</span> &gt; <span class="rt prog">PROG</span>全・<span class="rt lnk">★</span><br><span class="rt fw">F/W</span> &gt; <span class="rt vir">VIRUS</span>・<span class="rt prog">P2</span><br><span class="rt prog">P3/P4</span> &gt; <span class="rt fw">F/W</span>（貫通）<br><span class="rt lnk">★</span> &gt; <span class="rt fw">F/W</span>（通過）<br>PROG同士 → 数値が大きい方が勝利<br>引き分け → 両方消滅<br><br>相手の駒は<b>裏向き</b>なので種類不明。<br>戦闘で初めて両者が表向きになる。`},
-  {h:'// 遊び方のコツ',b:`① 序盤は <span class="rt lnk">★LINK</span> を動かさず、<br>&nbsp;&nbsp;&nbsp;<span class="rt fw">F/W</span> と <span class="rt prog">PROG</span> で前を固める<br><br>② <span class="rt vir">VIRUS</span> で相手の裏向き駒に突撃すると<br>&nbsp;&nbsp;&nbsp;正体がバレる（情報収集）<br><br>③ 相手の <span class="rt lnk">★LINK</span> の位置を推測しながら<br>&nbsp;&nbsp;&nbsp;包囲網を敷くのが勝利の鍵！<br><br>まずは <b>CPU 初級</b> で練習しよう。`},
-];
+  {h:'// RAI-NET ACCEL BATTLERS とは',b:`シュタインズ・ゲートの世界を舞台にした<b>情報戦カードゲーム</b>。<br><br>▶ 自分の <span class="rt lnk">☆LINK</span> を相手ゴールへ運ぶか、<br>&nbsp;&nbsp; 相手の <span class="rt lnk">☆LINK</span> を倒して撃破すれば勝利。<br><br>駒は全て<b>裏向き</b>で配置される。<br>戦闘が起きるまで相手には種類が見えない。<br>これが読み合いの核心。`},
+  {h:'// 駒の種類',b:`<span class="rt lnk">☆LINK</span> × … 最重要。撃破されると即敗北<br><span class="rt prog">P4/P3/P2</span> × … 汎用アタッカー。数値順<br><span class="rt fw">F/W</span> × … 防御壁。VIRUSを止める<br><span class="rt vir">VIRUS</span> × … 奇襲役。PROG全種を撃破<br><br><b>EXTENDEDモードのみ：</b><br><span class="rt med">✚MED</span> × … 変身役。VIRUSを倒すと好きな駒に変身。`},
+  {h:'// カード相性',b:`<span class="rt vir">VIRUS</span> &gt; <span class="rt prog">PROG</span>全・<span class="rt lnk">☆</span><br><span class="rt fw">F/W</span> &gt; <span class="rt vir">VIRUS</span>・<span class="rt prog">P2</span><br><span class="rt prog">P3/P4</span> &gt; <span class="rt fw">F/W</span>（貫通！）<br><span class="rt lnk">☆</span> &gt; <span class="rt fw">F/W</span>（通過）<br>PROG同士 → 数値が大きい方が勝利<br>引き分け → 両方消滅<br><br>相手の駒は<b>裏向き</b>なので種類不明。<br>戦闘で初めて両者が表向きになる。`},
+  {h:'// 遊び方のコツ',b:`① 序盤は <span class="rt lnk">☆LINK</span> を動かさず、<br>&nbsp;&nbsp;&nbsp;<span class="rt fw">F/W</span> と <span class="rt prog">PROG</span> で前を固める<br><br>② <span class="rt vir">VIRUS</span> で相手の裏向き駒に突撃すると<br>&nbsp;&nbsp;&nbsp;正体がバレる（情報収集）<br><br>③ 相手の <span class="rt lnk">☆LINK</span> の位置を推測しながら<br>&nbsp;&nbsp;&nbsp;包囲網を敷くのが勝利の鍵。<br><br>まずは <b>CPU 初級</b> で練習しよう。`},
+];;
 let _tutStep=0;
 function showTutorial(){
   _tutStep=0;
@@ -2197,11 +2315,46 @@ function showMyPage(){
   const av=document.getElementById('mp-avatar');
   av.textContent=initial;av.style.color=t.color;av.style.borderColor=t.color;
   document.getElementById('mp-name').textContent=myName||'---';
-  document.getElementById('mp-email').textContent=_authEmail||(isAuthValid()?'ログイン中':'ゲストモード');
+  document.getElementById('mp-email').textContent=_authEmail||(isAuthValid()?'ログイン中':'ゲストモーチ');
   document.getElementById('mp-rating').innerHTML=`RATE <span style="color:${t.color};font-weight:bold">${_myRating}</span> <span style="color:${t.color}">[${t.name}]</span>`;
   document.getElementById('mp-wins').textContent=_wins;
   document.getElementById('mp-losses').textContent=_losses;
   document.getElementById('mp-draws').textContent=_draws;
+  // Win rate
+  const total=_wins+_losses+_draws;
+  const wr=total>0?(_wins/total*100).toFixed(1)+'%':'--';
+  const wrPct=total>0?Math.round(_wins/total*100):0;
+  document.getElementById('mp-winrate').textContent=wr;
+  document.getElementById('mp-winrate-bar').style.width=wrPct+'%';
+  // Mode breakdown
+  ['classic','extended','worm'].forEach(m=>{
+    const s=_statsMode[m]||{w:0,l:0,d:0};
+    document.getElementById('mp-mode-'+m).textContent=`${s.w}-${s.l}-${s.d}`;
+  });
+  // vs CPU / Online
+  const sc=_statsVs.cpu,so=_statsVs.online;
+  document.getElementById('mp-vs-cpu').textContent=`${sc.w}-${sc.l}-${sc.d}`;
+  document.getElementById('mp-vs-online').textContent=`${so.w}-${so.l}-${so.d}`;
+  // Streak
+  document.getElementById('mp-streak-cur').textContent=_streak.cur;
+  document.getElementById('mp-streak-best').textContent=_streak.best;
+  // Rating sparkline
+  const hist=_ratingHistory.slice(-10);
+  const graphEl=document.getElementById('mp-rate-graph');
+  const emptyEl=document.getElementById('mp-rate-graph-empty');
+  graphEl.innerHTML='';
+  if(hist.length===0){emptyEl.style.display='';graphEl.style.display='none';}
+  else{
+    emptyEl.style.display='none';graphEl.style.display='flex';
+    const mn=Math.min(...hist)-100,mx=Math.max(...hist)+100;
+    hist.forEach((r,i)=>{
+      const bar=document.createElement('div');
+      const pct=Math.max(8,Math.round((r-mn)/(mx-mn)*100));
+      bar.style.cssText=`flex:1;height:${pct}%;background:${i===hist.length-1?'#00ff41':'#1a4a1a'};border-radius:1px 1px 0 0;`;
+      bar.title=String(r);
+      graphEl.appendChild(bar);
+    });
+  }
   document.getElementById('mp-name-input').value=myName||'';
   document.getElementById('mp-name-err').textContent='';
   show('ov-mypage');
@@ -2209,14 +2362,14 @@ function showMyPage(){
 function mpChangeName(){
   const v=document.getElementById('mp-name-input').value.trim();
   const errEl=document.getElementById('mp-name-err');
-  if(!v){errEl.textContent='名前を入力してください';return;}
+  if(!v){errEl.textContent='名前を力してください';return;}
   if(v!==myName&&localStorage.getItem(_playerKey(v))){errEl.textContent='その名前は既に使われています';return;}
   const old=myName;
   myName=v;
   localStorage.setItem('dna-name',myName);
   if(old&&old!==myName)localStorage.removeItem(_playerKey(old));
   savePlayerData();
-  errEl.style.color='#00cc44';errEl.textContent='変更しました！';
+  errEl.style.color='#00cc44';errEl.textContent='変更しました盤';
   document.getElementById('mp-name').textContent=myName;
   const av=document.getElementById('mp-avatar');
   av.textContent=myName[0].toUpperCase();
@@ -2281,7 +2434,7 @@ function renderReplayStep(){
       cel.style.cssText=`width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${bc};display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:${Math.round(sz*.26)}px;box-sizing:border-box;`;
       const p=brd[r][c];
       if(p){
-        const ico={program:p.value,firewall:'⊘',virus:'V',linker:'★',medic:'✚',worm:'≋'}[p.type]||'?';
+        const ico={program:p.value,firewall:'⊁',virus:'V',linker:'☁',medic:'☆',worm:'≁'}[p.type]||'?';
         cel.style.color=p.player===1?'#44aaff':'#ff6633';
         cel.style.background=p.player===1?'rgba(0,40,100,.5)':'rgba(100,20,0,.5)';
         cel.textContent=p.revealed?ico:'?';
@@ -2294,8 +2447,8 @@ function renderReplayStep(){
   const totalMoves=_gameLog.length-1;
   const p1n=_gameLog[0]?.p1name||'P1';
   const p2n=_gameLog[0]?.p2name||'P2';
-  const who=entry.movedBy===0?'—':(entry.movedBy===1?p1n:p2n);
-  const moveStr=entry.fr>=0?`(${entry.fc+1},${entry.fr+1})→(${entry.tc+1},${entry.tr+1})`:'開始時';
+  const who=entry.movedBy===0?' ':(entry.movedBy===1?p1n:p2n);
+  const moveStr=entry.fr>=0?`(${entry.fc+1},${entry.fr+1})→ ${entry.tc+1},${entry.tr+1})`:'開始時';
   infoEl.textContent=`STEP ${_replayStep}/${totalMoves}　${who}　${moveStr}`;
 }
 
@@ -2356,6 +2509,249 @@ function onSESlider(v){
   localStorage.setItem('dna-se-vol',_seVol);
 }
 
+// ── Skin Preview ──────────────────────────────────────
+const SKIN_THEMES = [
+  {
+    id:'default', name:'DEFAULT', sub:'現在のスタイル', badge:'適用中',
+    bg:'#050a05', board:'#0a0f0a', cell:'#0c130c', border:'#1a2e1a',
+    primary:'#00ff41', p1:'#44aaff', p2:'#ff6633',
+    p1bg:'rgba(0,40,100,.7)', p2bg:'rgba(100,20,0,.7)',
+    goalTop:'#060d1a', goalBot:'#1a0606',
+    titleColor:'#00ff41', uiBorder:'#007700',
+    pieces:[
+      {r:0,c:1,pl:1,icon:'▲',label:'LNK'},{r:0,c:2,pl:1,icon:'P',label:'P4'},
+      {r:1,c:0,pl:1,icon:'F',label:'F/W'},{r:1,c:3,pl:1,icon:'V',label:'VIR'},
+      {r:3,c:1,pl:2,icon:'▲',label:'LNK'},{r:3,c:2,pl:2,icon:'P',label:'P3'},
+      {r:2,c:0,pl:2,icon:'F',label:'F/W'},{r:2,c:3,pl:2,icon:'V',label:'VIR'},
+    ]
+  },
+  {
+    id:'labmembers', name:'Lab Members', sub:'Steins;Gate', badge:'近日公開',
+    bg:'#05050f', board:'#08081a', cell:'#0c0c1e', border:'#2a1a4a',
+    primary:'#ffdd55', p1:'#88ccff', p2:'#ff88aa',
+    p1bg:'rgba(10,30,90,.8)', p2bg:'rgba(80,10,50,.8)',
+    goalTop:'#06060e', goalBot:'#1a0610',
+    titleColor:'#ffdd55', uiBorder:'#664400',
+    pieces:[
+      {r:0,c:1,pl:1,icon:'鈴',label:'LINK'},{r:0,c:2,pl:1,icon:'紅',label:'P4'},
+      {r:1,c:0,pl:1,icon:'ダ',label:'F/W'},{r:1,c:3,pl:1,icon:'岡',label:'VIR'},
+      {r:3,c:1,pl:2,icon:'盤',label:'LINK'},{r:3,c:2,pl:2,icon:'盤',label:'P3'},
+      {r:2,c:0,pl:2,icon:'盤',label:'F/W'},{r:2,c:3,pl:2,icon:'盤',label:'VIR'},
+    ]
+  },
+  {
+    id:'sern', name:'SERN', sub:'監視グリッド', badge:'近日公開',
+    bg:'#0a0000', board:'#150000', cell:'#180404', border:'#4a1a1a',
+    primary:'#ff2200', p1:'#ff4444', p2:'#888888',
+    p1bg:'rgba(80,0,0,.7)', p2bg:'rgba(40,40,40,.7)',
+    goalTop:'#0a0000', goalBot:'#300000',
+    titleColor:'#ff2200', uiBorder:'#660000',
+    pieces:[
+      {r:0,c:1,pl:1,icon:'⊁',label:'LINK'},{r:0,c:2,pl:1,icon:'P',label:'P4'},
+      {r:1,c:0,pl:1,icon:'=',label:'F/W'},{r:1,c:3,pl:1,icon:'!',label:'VIR'},
+      {r:3,c:1,pl:2,icon:'⊁',label:'LINK'},{r:3,c:2,pl:2,icon:'P',label:'P3'},
+      {r:2,c:0,pl:2,icon:'=',label:'F/W'},{r:2,c:3,pl:2,icon:'!',label:'VIR'},
+    ]
+  },
+  {
+    id:'terminal', name:'TERMINAL', sub:'レトロ端末', badge:'近日公開',
+    bg:'#000800', board:'#000e00', cell:'#000d00', border:'#004400',
+    primary:'#33ff33', p1:'#33ff33', p2:'#ff8800',
+    p1bg:'rgba(0,40,0,.8)', p2bg:'rgba(40,20,0,.8)',
+    goalTop:'#000800', goalBot:'#080300',
+    titleColor:'#33ff33', uiBorder:'#005500',
+    pieces:[
+      {r:0,c:1,pl:1,icon:'>',label:'LNK'},{r:0,c:2,pl:1,icon:'P',label:'P4'},
+      {r:1,c:0,pl:1,icon:'[',label:'F/W'},{r:1,c:3,pl:1,icon:'$',label:'VIR'},
+      {r:3,c:1,pl:2,icon:'>',label:'LNK'},{r:3,c:2,pl:2,icon:'P',label:'P3'},
+      {r:2,c:0,pl:2,icon:'[',label:'F/W'},{r:2,c:3,pl:2,icon:'$',label:'VIR'},
+    ]
+  },
+  {
+    id:'neon', name:'NEON HACK', sub:'ネオン発光', badge:'近日公開',
+    bg:'#050010', board:'#0a0018', cell:'#0d001e', border:'#3a0060',
+    primary:'#ff00ff', p1:'#00ffff', p2:'#ff00ff',
+    p1bg:'rgba(0,30,60,.8)', p2bg:'rgba(50,0,60,.8)',
+    goalTop:'#05000e', goalBot:'#120010',
+    titleColor:'#ff00ff', uiBorder:'#550055',
+    pieces:[
+      {r:0,c:1,pl:1,icon:'▲',label:'LNK'},{r:0,c:2,pl:1,icon:'P',label:'P4'},
+      {r:1,c:0,pl:1,icon:'F',label:'F/W'},{r:1,c:3,pl:1,icon:'V',label:'VIR'},
+      {r:3,c:1,pl:2,icon:'▲',label:'LNK'},{r:3,c:2,pl:2,icon:'P',label:'P3'},
+      {r:2,c:0,pl:2,icon:'F',label:'F/W'},{r:2,c:3,pl:2,icon:'V',label:'VIR'},
+    ]
+  },
+  {
+    id:'ghost', name:'GHOST', sub:'ステルス', badge:'近日公開',
+    bg:'#050508', board:'#080810', cell:'#0a0a14', border:'#1a1a30',
+    primary:'#8888ff', p1:'#aaaaff', p2:'#44ff88',
+    p1bg:'rgba(20,20,60,.8)', p2bg:'rgba(0,40,20,.8)',
+    goalTop:'#050510', goalBot:'#050510',
+    titleColor:'#8888ff', uiBorder:'#333366',
+    pieces:[
+      {r:0,c:1,pl:1,icon:'◁',label:'LNK'},{r:0,c:2,pl:1,icon:'P',label:'P4'},
+      {r:1,c:0,pl:1,icon:'◻',label:'F/W'},{r:1,c:3,pl:1,icon:'◁',label:'VIR'},
+      {r:3,c:1,pl:2,icon:'◁',label:'LNK'},{r:3,c:2,pl:2,icon:'P',label:'P3'},
+      {r:2,c:0,pl:2,icon:'◻',label:'F/W'},{r:2,c:3,pl:2,icon:'◁',label:'VIR'},
+    ]
+  },
+];
+
+function showSkin(){
+  hide('ov-title');
+  const container = document.getElementById('skin-cards');
+  container.innerHTML = '';
+  SKIN_THEMES.forEach(th => {
+    const card = document.createElement('div');
+    card.style.cssText = `background:${th.bg};border:1px solid ${th.primary}55;border-radius:4px;padding:10px 8px;cursor:pointer;transition:all .15s;`;
+    card.onmouseover = () => { card.style.borderColor = th.primary; card.style.boxShadow = `0 0 10px ${th.primary}44`; };
+    card.onmouseleave = () => { card.style.borderColor = th.primary+'55'; card.style.boxShadow = ''; };
+
+    // バッジ
+    const badge = document.createElement('div');
+    badge.style.cssText = `font-size:.5rem;letter-spacing:1px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;`;
+    badge.innerHTML = `<span style="color:${th.primary};font-family:'Courier New',monospace">${th.name}</span><span style="background:${th.id==='default'?th.primary+'33':'#1a1a1a'};color:${th.id==='default'?th.primary:'#446644'};border:1px solid ${th.id==='default'?th.primary+'88':'#2a3a2a'};padding:1px 5px;border-radius:2px;font-size:.48rem">${th.badge}</span>`;
+    card.appendChild(badge);
+
+    // ミニボード    const grid = document.createElement('div');
+    grid.style.cssText = `display:grid;grid-template-columns:repeat(4,auto);gap:1px;background:${th.board};border:1px solid ${th.primary}33;padding:3px;margin:4px 0;`;
+    for(let r=0;r<4;r++){
+      for(let c=0;c<4;c++){
+        const cel = document.createElement('div');
+        const cz = 24;
+        let bg = th.cell;
+        if(r===0) bg = th.goalTop;
+        if(r===3) bg = th.goalBot;
+        cel.style.cssText = `width:${cz}px;height:${cz}px;background:${bg};border:1px solid ${th.border};display:flex;align-items:center;justify-content:center;font-size:8px;font-family:'Courier New',monospace;box-sizing:border-box;`;
+        const piece = th.pieces.find(p=>p.r===r&&p.c===c);
+        if(piece){
+          const col = piece.pl===1 ? th.p1 : th.p2;
+          const pbg = piece.pl===1 ? th.p1bg : th.p2bg;
+          cel.style.background = pbg;
+          cel.style.color = col;
+          cel.style.border = `1px solid ${col}88`;
+          cel.textContent = piece.icon;
+        }
+        grid.appendChild(cel);
+      }
+    }
+    card.appendChild(grid);
+
+    // サブタイトル
+    const sub = document.createElement('div');
+    sub.style.cssText = `font-size:.5rem;color:${th.primary}88;letter-spacing:1px;font-family:'Courier New',monospace;`;
+    sub.textContent = th.sub;
+    card.appendChild(sub);
+
+    container.appendChild(card);
+  });
+  show('ov-skin');
+}
+
+//  Emote System 
+const EMOTES=[
+  {id:'gg',   text:'>> GG',   desc:'Q[Zbg'},
+  {id:'glhf', text:'>> GLHF', desc:''},
+  {id:'ack',  text:'>> ACK',  desc:''},
+  {id:'nice', text:'>> NICE', desc:'iCXI'},
+  {id:'hmm',  text:'>> ???',  desc:'f'},
+  {id:'ex',   text:'>> !',    desc:''},
+];
+let _emoteLastTs=0,_emoteCooldownIv=null,_emoteListenIv=null,_emoteLastOppTs=0;
+
+function toggleEmotePopup(){
+  const popup=document.getElementById('emote-popup');
+  if(popup.classList.contains('on')){popup.classList.remove('on');return;}
+  const cdLeft=Math.max(0,10000-(Date.now()-_emoteLastTs));
+  popup.innerHTML='';
+  EMOTES.forEach(e=>{
+    const btn=document.createElement('button');
+    btn.className='emote-item'+(cdLeft>0?' cooldown':'');
+    btn.innerHTML=`<span style="color:#00ff41">${e.text}</span> <span style="color:#335533;font-size:.6rem">${e.desc}</span>`;
+    btn.onclick=()=>{sendEmote(e.id);popup.classList.remove('on');};
+    popup.appendChild(btn);
+  });
+  popup.classList.add('on');
+}
+
+function sendEmote(id){
+  const now=Date.now();
+  if(now-_emoteLastTs<10000)return;
+  _emoteLastTs=now;
+  showEmoteBubble(id,'my');
+  startEmoteCooldown();
+  if(gameMode==='online'){
+    const data={id,ts:now};
+    fbPut(currentRoomKey+'em'+myPN,data);
+    if(bc)bc.postMessage({type:'emote',key:currentRoomKey,player:myPN,...data});
+  } else if(gameMode==='cpu'){
+    const delay=1500+Math.random()*1500;
+    setTimeout(()=>{
+      if(over||gameMode!=='cpu')return;
+      const cpuEmotes=['gg','ack','hmm','ex'];
+      showEmoteBubble(cpuEmotes[Math.floor(Math.random()*cpuEmotes.length)],'opp');
+    },delay);
+  }
+}
+
+function showEmoteBubble(id,side){
+  const emote=EMOTES.find(e=>e.id===id);
+  if(!emote)return;
+  const existId='emote-bubble-'+side;
+  const existing=document.getElementById(existId);
+  if(existing)existing.remove();
+  const el=document.createElement('div');
+  el.id=existId;
+  el.className='emote-bubble '+side;
+  el.textContent=emote.text;
+  el.style.cssText+=side==='my'?'bottom:80px;right:20px;':'top:80px;right:20px;';
+  document.body.appendChild(el);
+  setTimeout(()=>{
+    el.style.transition='opacity .5s';el.style.opacity='0';
+    setTimeout(()=>el.remove(),500);
+  },3000);
+}
+
+function startEmoteCooldown(){
+  const bar=document.getElementById('emote-cooldown-bar');
+  const fill=document.getElementById('emote-cooldown-fill');
+  if(!fill)return;
+  bar.classList.add('on');fill.style.width='100%';
+  if(_emoteCooldownIv)clearInterval(_emoteCooldownIv);
+  const start=Date.now(),total=10000;
+  _emoteCooldownIv=setInterval(()=>{
+    const pct=Math.max(0,100-(Date.now()-start)/total*100);
+    fill.style.width=pct+'%';
+    if(pct<=0){clearInterval(_emoteCooldownIv);_emoteCooldownIv=null;bar.classList.remove('on');}
+  },100);
+}
+
+function startEmoteListen(){
+  const oppPN=myPN===1?2:1;
+  if(_emoteListenIv)clearInterval(_emoteListenIv);
+  _emoteLastOppTs=0;
+  _emoteListenIv=setInterval(async()=>{
+    if(over||!currentRoomKey){clearInterval(_emoteListenIv);_emoteListenIv=null;return;}
+    const d=await fbGet(currentRoomKey+'em'+oppPN);
+    if(d&&d.ts&&d.ts>_emoteLastOppTs){_emoteLastOppTs=d.ts;showEmoteBubble(d.id,'opp');}
+  },600);
+}
+
+function stopEmote(){
+  if(_emoteListenIv){clearInterval(_emoteListenIv);_emoteListenIv=null;}
+  if(_emoteCooldownIv){clearInterval(_emoteCooldownIv);_emoteCooldownIv=null;}
+  ['emote-bubble-my','emote-bubble-opp'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
+  const popup=document.getElementById('emote-popup');if(popup)popup.classList.remove('on');
+  const wrap=document.getElementById('emote-wrap');if(wrap)wrap.classList.remove('on');
+  const bar=document.getElementById('emote-cooldown-bar');if(bar)bar.classList.remove('on');
+}
+
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('emote-wrap');
+  const popup=document.getElementById('emote-popup');
+  if(popup&&wrap&&!wrap.contains(e.target))popup.classList.remove('on');
+});
+
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
     ['bgm-title','bgm-battle'].forEach(id=>{const au=document.getElementById(id);if(au&&!au.paused){au.pause();_hiddenBGMId=id;}});
@@ -2385,8 +2781,10 @@ function calcCellSize(){
 window.addEventListener('resize',()=>{calcCellSize();if(board)render();});
 calcCellSize();
 
-// 常にスプラッシュから開始（ov-splash は HTML で on クラス付き）
-renderRating();
+// 常にスプラッシュから開始！v-splash は HTML で on クラス付き盤 renderRating();
+
+
 </script>
 </body>
 </html>
+
