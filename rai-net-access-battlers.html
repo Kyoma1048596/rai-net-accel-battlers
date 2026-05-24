@@ -269,7 +269,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
       <h3>// PIECES & RULES</h3>
       <div class="piece-grid">
         <button class="piece-card" onclick="openPieceModal('link')">
-          <span class="rt lnk">☁</span><span class="piece-card-name">LINK</span>
+          <span class="rt lnk">★</span><span class="piece-card-name">LINK</span>
         </button>
         <button class="piece-card" onclick="openPieceModal('prog')">
           <span class="rt prog">PROG</span><span class="piece-card-name">×</span>
@@ -1599,7 +1599,7 @@ function clickCell(r,c){
 function pieceInfo(p){
   const visible=p.player===myPN||p.revealed;
   if(!visible)return['?','???'];
-  return{program:[p.value,'PROG'],firewall:['⊁','F/W'],virus:['V!','VIRUS'],linker:['☁','LINK'],medic:['☆','MEDIC'],worm:['≁','WORM']}[p.type];
+  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC'],worm:['≋','WORM']}[p.type];
 }
 function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type} p${p.player}`;}
 
