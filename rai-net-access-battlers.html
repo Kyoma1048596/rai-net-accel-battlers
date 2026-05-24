@@ -2613,7 +2613,7 @@ function showSkin(){
     badge.innerHTML = `<span style="color:${th.primary};font-family:'Courier New',monospace">${th.name}</span><span style="background:${th.id==='default'?th.primary+'33':'#1a1a1a'};color:${th.id==='default'?th.primary:'#446644'};border:1px solid ${th.id==='default'?th.primary+'88':'#2a3a2a'};padding:1px 5px;border-radius:2px;font-size:.48rem">${th.badge}</span>`;
     card.appendChild(badge);
 
-    // ミニボード    const grid = document.createElement('div');
+    const grid = document.createElement('div');
     grid.style.cssText = `display:grid;grid-template-columns:repeat(4,auto);gap:1px;background:${th.board};border:1px solid ${th.primary}33;padding:3px;margin:4px 0;`;
     for(let r=0;r<4;r++){
       for(let c=0;c<4;c++){
