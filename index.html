@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -174,6 +174,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 #timer-bar { height:4px; background:#0f1f0f; border-radius:2px; overflow:hidden; }
 #timer-fill { height:100%; background:#00ff41; box-shadow:0 0 5px #00ff41; border-radius:2px; transition:background .4s,box-shadow .4s; }
 .timer-urgent #timer-fill { background:#ff4444!important; box-shadow:0 0 8px #ff4444!important; }
+.timer-opp #timer-fill { background:#4488cc!important; box-shadow:0 0 5px #4488cc!important; }
 .timer-urgent #timer-label { color:#ff4444!important; }
 
 /* ── Piece move & battle animations ──────────────────────── */
@@ -225,6 +226,53 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 .tut-nav button { flex:1; }
 .tut-prog { font-size:.6rem; color:#334433; text-align:right; margin-bottom:6px; letter-spacing:1px; }
 
+/* ── Dark Neumorphism + Polish ─────────────────────────────── */
+body { background:radial-gradient(ellipse 130% 55% at 50% 0%,#071407 0%,#050a05 68%); }
+.box { box-shadow:4px 4px 14px rgba(0,0,0,.8),-2px -2px 8px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.05); }
+.ov-panel { box-shadow:6px 6px 22px rgba(0,0,0,.9),-3px -3px 12px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.06); }
+button { box-shadow:3px 3px 8px rgba(0,0,0,.7),-1px -1px 4px rgba(0,255,65,.05),inset 0 1px 0 rgba(0,255,65,.04); transition:background .15s,box-shadow .1s,transform .08s,color .15s; }
+button:hover { box-shadow:4px 4px 12px rgba(0,0,0,.75),-1px -1px 5px rgba(0,255,65,.08),0 0 8px rgba(0,255,65,.2),inset 0 1px 0 rgba(0,255,65,.06); }
+button:active { transform:scale(.97) translateY(1px); box-shadow:inset 2px 2px 7px rgba(0,0,0,.8),inset -1px -1px 3px rgba(0,255,65,.04); }
+.piece-card { box-shadow:3px 3px 8px rgba(0,0,0,.7),-1px -1px 4px rgba(0,255,65,.04); transition:all .13s; }
+.piece-card:active { transform:scale(.95) translateY(1px); box-shadow:inset 2px 2px 6px rgba(0,0,0,.75); }
+/* Piece shimmer */
+.piece { position:relative; overflow:hidden; }
+.piece::after { content:''; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.07) 43%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.07) 57%,transparent 100%); background-size:300% 100%; background-position:200% 0; animation:piece-shimmer 4.5s ease-in-out infinite; pointer-events:none; }
+@keyframes piece-shimmer { 0%,58%{background-position:200% 0} 100%{background-position:-100% 0} }
+.piece.hidden::after { display:none; }
+/* h1 accent line */
+h1::after { content:''; display:block; height:1px; margin-top:4px; background:linear-gradient(90deg,transparent 0%,#00ff41 35%,#0077cc 65%,transparent 100%); background-size:200% 100%; animation:title-line 3.5s ease-in-out infinite; }
+@keyframes title-line { 0%{background-position:150% 0} 100%{background-position:-150% 0} }
+/* Selected cell pulse */
+.cell.selected { animation:sel-pulse .85s ease-in-out infinite alternate; }
+@keyframes sel-pulse { 0%{box-shadow:inset 0 0 10px rgba(0,255,65,.3);border-color:#00cc33;} 100%{box-shadow:inset 0 0 22px rgba(0,255,65,.6),0 0 10px rgba(0,255,65,.25);border-color:#00ff41;} }
+/* Moveable dot pulse */
+@keyframes dot-pulse { 0%,100%{transform:scale(1);opacity:.65} 50%{transform:scale(1.4);opacity:1} }
+.cell.moveable::after { animation:dot-pulse 1.1s ease-in-out infinite; }
+/* Overlay slide-up fade-in */
+@keyframes overlay-in { from{opacity:0;transform:translateY(10px) scale(.985)} to{opacity:1;transform:translateY(0) scale(1)} }
+.overlay.on { animation:overlay-in .2s cubic-bezier(.4,0,.2,1); }
+/* Piece flip on reveal */
+@keyframes piece-flip { 0%{transform:scaleX(1)}35%{transform:scaleX(0);filter:brightness(3.5)}100%{transform:scaleX(1)} }
+.piece.piece-flip { animation:piece-flip .32s ease-in-out; }
+/* Goal cell burst */
+@keyframes goal-burst { 0%{box-shadow:inset 0 0 50px rgba(255,220,0,.95),0 0 30px rgba(255,220,0,.8)}100%{box-shadow:none} }
+.cell.goal-burst { animation:goal-burst 1s ease-out forwards; }
+/* Win/Lose glitch */
+@keyframes win-glitch { 0%,88%,100%{transform:none;filter:none} 90%{transform:translateX(-3px);filter:hue-rotate(90deg)} 93%{transform:translateX(3px);filter:hue-rotate(-90deg)} 96%{transform:none;filter:none} }
+.win-anim { animation:win-pop .45s cubic-bezier(.2,1.5,.4,1) both,win-glitch 3s 1s ease-in-out infinite; }
+.lose-anim { animation:lose-shake .4s ease both,win-glitch 2.5s .6s ease-in-out infinite; }
+/* Win screen scan line overlay */
+#ov-win::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.13) 3px,rgba(0,0,0,.13) 4px); pointer-events:none; }
+/* Splash title glitch */
+@keyframes splash-glitch { 0%,78%,100%{filter:none;transform:none} 81%{filter:hue-rotate(90deg);transform:translateX(-2px)} 84%{filter:hue-rotate(-90deg);transform:translateX(2px)} 87%{filter:none;transform:none} }
+#ov-splash .ov-title { animation:splash-glitch 7s ease-in-out infinite; }
+/* HUD bars */
+#hud-bars { display:none; margin-bottom:6px; }
+.hud-bar { height:3px; border-radius:2px; transition:width .4s cubic-bezier(.4,0,.2,1); }
+.hud-bar.p1 { background:linear-gradient(90deg,#003388,#0088ff); }
+.hud-bar.p2 { background:linear-gradient(90deg,#880011,#ff3300); margin-top:3px; }
+
 </style>
 </head>
 <body>
@@ -238,6 +286,10 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
   <div id="panel">
     <div class="box">
       <h3>// STATUS</h3>
+      <div id="hud-bars">
+        <div class="hud-bar p1" id="hud-bar-p1" style="width:100%"></div>
+        <div class="hud-bar p2" id="hud-bar-p2" style="width:100%"></div>
+      </div>
       <div id="turn-label"></div>
       <div id="msg"></div>
       <div id="think-bar"><div id="think-fill"></div></div>
@@ -518,6 +570,8 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
     </div>
     <button onclick="startHost()" style="border-color:#00aa44;color:#00cc44">// 🏠 HOST — 部屋を作る</button>
     <button onclick="startJoin()" style="margin-top:5px;border-color:#005577;color:#0099cc">// 🚪 JOIN &nbsp; — 部屋に入る</button>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0 2px"><div style="flex:1;height:1px;background:rgba(0,255,65,.1)"></div><span style="font-size:.58rem;color:#446644;letter-spacing:1px">OR</span><div style="flex:1;height:1px;background:rgba(0,255,65,.1)"></div></div>
+    <button id="random-match-btn" onclick="startRandomMatch()" style="border-color:#554400;color:#ccaa00;background:rgba(255,190,0,.04)">// 🎲 ランダムマッチ — 自動マッチング</button>
     <div class="err-msg" id="match-err"></div>
     <button onclick="hide('ov-online');showTitle()" style="margin-top:8px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
   </div>
@@ -733,10 +787,15 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 
 <!-- Leaderboard overlay -->
 <div class="overlay" id="ov-lb">
-  <div class="ov-panel" style="width:min(360px,96vw);max-height:88vh;overflow-y:auto">
-    <h3>// 🏆 GLOBAL LEADERBOARD — TOP 100</h3>
+  <div class="ov-panel" style="width:min(380px,96vw);max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 style="margin:0;border:none;padding:0">// 🏆 LEADERBOARD</h3>
+      <button id="lb-refresh-btn" onclick="showLeaderboard()" style="width:auto;padding:3px 10px;font-size:.62rem;border-color:#1a3a1a;color:#446644;letter-spacing:1px">↻ 更新</button>
+    </div>
+    <div id="lb-myrank" style="display:none;background:#0a1a0a;border:1px solid #1a4a1a;padding:6px 10px;margin-bottom:8px;font-size:.62rem;border-radius:2px"></div>
     <div id="lb-loading" style="text-align:center;padding:16px;font-size:.72rem;color:#446644">読み込み中...</div>
     <div id="lb-body"></div>
+    <div id="lb-timestamp" style="font-size:.52rem;color:#2a3a2a;text-align:right;margin-top:6px;letter-spacing:1px"></div>
     <button onclick="hide('ov-lb');showTitle()" style="margin-top:10px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
   </div>
 </div>
@@ -1120,7 +1179,7 @@ function startSelListen(){
 function startTurnTimer(isMyTurn){
   stopTurnTimer();
   if(over||gameMode==='placing')return;
-  if(!isMyTurn)return;
+  _timerIsMyTurn=isMyTurn;
   const wrap=document.getElementById('timer-wrap');
   if(wrap)wrap.style.display='';
   _timerLeft=TURN_SEC;
@@ -1128,7 +1187,7 @@ function startTurnTimer(isMyTurn){
   _timerIv=setInterval(()=>{
     _timerLeft--;
     _updateTimerUI();
-    if(_timerLeft<=0){stopTurnTimer();autoTimeoutMove();}
+    if(_timerLeft<=0){stopTurnTimer();if(isMyTurn)autoTimeoutMove();else _handleOppStall();}
   },1000);
 }
 function stopTurnTimer(){
@@ -1144,10 +1203,11 @@ function _updateTimerUI(){
   fillEl.style.width=((_timerLeft/TURN_SEC)*100)+'%';
   if(secEl)secEl.textContent=_timerLeft+'s';
   const who=document.getElementById('timer-who');
-  if(who)who.textContent='▶ あなたターン';
+  if(who)who.textContent=_timerIsMyTurn?'▶ あなたのターン':'⏳ 相手のターン';
   const urgent=_timerLeft<=10;
-  wrap.classList.toggle('timer-urgent',urgent);
-  if(urgent&&_timerLeft>0&&_timerLeft%2===0)sndTick();
+  wrap.classList.toggle('timer-urgent',urgent&&_timerIsMyTurn);
+  wrap.classList.toggle('timer-opp',!_timerIsMyTurn);
+  if(_timerIsMyTurn&&urgent&&_timerLeft>0&&_timerLeft%2===0)sndTick();
 }
 function autoTimeoutMove(){
   if(over)return;
@@ -1161,6 +1221,10 @@ function autoTimeoutMove(){
   const mv=moves[Math.floor(Math.random()*moves.length)];
   sel=null;validMoves=[];
   doMove(mv.fr,mv.fc,mv.tr,mv.tc);
+}
+function _handleOppStall(){
+  if(over)return;
+  setMsg('⚠ 相手のターンが終わりません — 接続を確認してください');
 }
 
 // ── Constants ────────────────────────────────────────
@@ -1208,9 +1272,9 @@ let _ratingHistory=[];
 let _authEmail=localStorage.getItem('dna-auth-email')||'';
 let _oppSel=null,_oppMoveFlash=null;
 let _gameLog=[],_replayStep=0;
-let _moveAnimCell=null,_battleCell=null;
+let _moveAnimCell=null,_battleCell=null,_slideFrom=null,_revealAnim=false;
 const TURN_SEC=30;
-let _timerLeft=0,_timerIv=null;
+let _timerLeft=0,_timerIv=null,_timerIsMyTurn=true;
 let _onlineMatchType='normal';
 function _playerKey(n){return'dna-player-'+n;}
 function loadPlayerData(n){
@@ -1252,7 +1316,7 @@ function calcRatingDelta(myR,oppR,iWin){
 function getTitle(r){
   if(r<1200)return{name:'ゼリーマン',color:'#888888'};
   if(r<1500)return{name:'ラボメン',color:'#4488ff'};
-  if(r<1800)return{name:'世界線観測老',color:'#00ff41'};
+  if(r<1800)return{name:'世界線観測者',color:'#00ff41'};
   if(r<2100)return{name:'鳳凰院凶省',color:'#ff4444'};
   return{name:'Steins;Gate',color:'#ffaa00'};
 }
@@ -1374,6 +1438,7 @@ function doMove(fr,fc,tr,tc){
     });
     sndBattle();
     _battleCell={r:tr,c:tc};setTimeout(()=>{_battleCell=null;},480);
+    spawnParticles(tr,tc,'#cc66ff');
     setMsg('≋WORM 感染発動！プログラム連鎖崩壊！');
     if(gameMode!=='placing')_pushGameLog(fr,fc,tr,tc,movedBy);
     const w=checkWin();
@@ -1388,17 +1453,18 @@ function doMove(fr,fc,tr,tc){
     board[tr][tc]=mover;board[fr][fc]=null;
     isMine?sndMove():sndCpuMove();
     if(isMine)setMsg(`${pname(turn)}: ${pLabel(mover)} 移動`);
-    _moveAnimCell={r:tr,c:tc};setTimeout(()=>{_moveAnimCell=null;},350);
+    _slideFrom={r:fr,c:fc};_moveAnimCell={r:tr,c:tc};setTimeout(()=>{_moveAnimCell=null;},350);
   }else{
     mover.revealed=true;target.revealed=true;
     const res=resolveBattle(mover,target);
     const winner=turn,loser=turn===1?2:1;
     sndBattle();
     _battleCell={r:tr,c:tc};setTimeout(()=>{_battleCell=null;},480);
+    spawnParticles(tr,tc,'#ffcc44');
     let msg=`⚙ ${pLabel(mover)} vs ${pLabel(target)} `;
     let medicBeat=false;
     if(res==='att'){board[tr][tc]=mover;board[fr][fc]=null;captured[winner].push({...target});msg+=`→ ${pLabel(mover)} 勝利`;setTimeout(()=>isMine?sndWin():sndLose(),120);
-      _moveAnimCell={r:tr,c:tc};setTimeout(()=>{_moveAnimCell=null;},400);
+      _slideFrom={r:fr,c:fc};_revealAnim=true;_moveAnimCell={r:tr,c:tc};setTimeout(()=>{_moveAnimCell=null;},400);
       if(mover.type==='medic'&&target.type==='virus')medicBeat=true;}
     else if(res==='def'){board[fr][fc]=null;captured[loser].push({...mover});msg+=`→ ${pLabel(target)} 防御`;setTimeout(()=>isMine?sndLose():sndWin(),120);}
     else{board[tr][tc]=null;board[fr][fc]=null;captured[winner].push({...mover});captured[loser].push({...target});msg+=`→ 相打ち`;setTimeout(sndDraw,120);}
@@ -1674,15 +1740,15 @@ function render(){
     const p=board[r][c];
     const visible=(gameMode==='placing'&&p?.player===myPN)||p?.player===myPN||p?.revealed;
     if(p){const[ic,lb]=visible?pieceInfo(p):['?','???'];const pe=document.createElement('div');pe.className=pieceClass(p,visible);pe.innerHTML=`<div class="pi">${ic}</div><div class="pl">${lb}</div>`;
-      if(_moveAnimCell&&r===_moveAnimCell.r&&c===_moveAnimCell.c)pe.classList.add('move-pop');
+      if(_moveAnimCell&&r===_moveAnimCell.r&&c===_moveAnimCell.c){pe.classList.add('move-pop');if(_revealAnim)pe.classList.add('piece-flip');}
       el.appendChild(pe);}
-    el.onclick=()=>clickCell(r,c);bd.appendChild(el);
+    el.dataset.r=r;el.dataset.c=c;el.onclick=()=>clickCell(r,c);bd.appendChild(el);
   }
   const tl=document.getElementById('turn-label');
   if(gameMode==='placing'){tl.innerHTML='<span style="color:#ffaa00">▶ 配置フェーズ</span>';}
   else if(over){tl.textContent='GAME OVER';}
   else{const isMyTurn=turn===myPN;tl.innerHTML=isMyTurn?`<span class="c1">▶ ${myName} のターン</span>`:`<span class="c2">▶ ${gameMode==='cpu'?'CPU':opponentName} のターン</span>`;}
-  renderCaptured();
+  renderCaptured();applySlideAnim();renderHUD();_revealAnim=false;
 }
 function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl',medic:'cm',worm:'cw'}[p.type]||'cp';}
 function renderCaptured(){
@@ -2076,8 +2142,110 @@ function cleanupOnline(){
 function showWaiting(msg){document.getElementById('wait-msg').textContent=msg;show('ov-waiting');}
 function hideWaiting(){hide('ov-waiting');}
 
+// ── ランダムマッチ ────────────────────────────────────
+let _rmPollIv=null,_rmMyUid=null,_rmActive=false;
+function _getRMUid(){
+  if(!_rmMyUid){
+    _rmMyUid=localStorage.getItem('dna-session-uid');
+    if(!_rmMyUid){_rmMyUid='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem('dna-session-uid',_rmMyUid);}
+  }
+  return _rmMyUid;
+}
+async function startRandomMatch(){
+  if(_rmActive)return;
+  if(!myName){show('ov-name');return;}
+  const uid=_getRMUid();
+  const ts=Date.now();
+  const myEntry={name:myName,uid,mode:selectedOnlineMode,matchType:_onlineMatchType,rating:_myRating,ts,status:'waiting'};
+  try{const res=await fetch(`${FB_DB}/queue/${uid}.json`,{method:'PUT',body:JSON.stringify(myEntry)});if(!res.ok)throw new Error();}
+  catch(e){document.getElementById('match-err').textContent='接続失敗。しばらく後に再試行してください。';return;}
+  _rmActive=true;cancelWait=false;
+  hide('ov-online');showWaiting('🎲 ランダムマッチ');
+  document.getElementById('wait-code').textContent='対戦相手を検索中...';
+  let attempts=0;
+  _rmPollIv=setInterval(async()=>{
+    if(!_rmActive){clearInterval(_rmPollIv);_rmPollIv=null;return;}
+    attempts++;
+    // Check if HOST matched me (GUEST path)
+    let mine=null;
+    try{const r=await fetch(`${FB_DB}/queue/${uid}.json`);mine=await r.json();}catch(e){}
+    if(mine&&mine.status==='matched'&&mine.roomKey){
+      clearInterval(_rmPollIv);_rmPollIv=null;_rmActive=false;
+      fetch(`${FB_DB}/queue/${uid}.json`,{method:'DELETE'}).catch(()=>{});
+      await _rmJoinAsGuest(mine.roomKey,mine.hostName,mine.mode);
+      return;
+    }
+    // Scan queue for candidate (HOST path)
+    let queue=null;
+    try{const r=await fetch(`${FB_DB}/queue.json`);queue=await r.json();}catch(e){}
+    if(queue&&typeof queue==='object'){
+      const now=Date.now();
+      const mySnap=queue[uid];
+      if(mySnap&&mySnap.status==='waiting'){
+        const candidates=Object.entries(queue)
+          .filter(([k,e])=>k!==uid&&e&&e.status==='waiting'&&e.mode===selectedOnlineMode&&e.matchType===_onlineMatchType&&(now-e.ts)<90000)
+          .map(([,e])=>e)
+          .sort((a,b)=>a.ts-b.ts);
+        if(candidates.length){
+          const opp=candidates[0];
+          if(mySnap.ts<opp.ts||(mySnap.ts===opp.ts&&uid<opp.uid)){
+            // I'm HOST
+            clearInterval(_rmPollIv);_rmPollIv=null;_rmActive=false;
+            await _rmActAsHost(uid,opp,mySnap);
+            return;
+          }
+        }
+      }
+    }
+    if(attempts>60){
+      clearInterval(_rmPollIv);_rmPollIv=null;_rmActive=false;
+      fetch(`${FB_DB}/queue/${uid}.json`,{method:'DELETE'}).catch(()=>{});
+      hideWaiting();show('ov-online');
+      document.getElementById('match-err').textContent='相手が見つかりませんでした（タイムアウト）';
+    }else{
+      document.getElementById('wait-code').textContent=`対戦相手を検索中... (${attempts*2}s)`;
+    }
+  },2000);
+}
+async function _rmActAsHost(myUid,opp,myEntry){
+  const roomKey='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  // Signal opponent they're matched
+  try{await fetch(`${FB_DB}/queue/${opp.uid}.json`,{method:'PATCH',body:JSON.stringify({status:'matched',roomKey,hostName:myEntry.name,mode:selectedOnlineMode})});}catch(e){}
+  // Setup room (mirrors startHost)
+  currentRoomKey=roomKey;myPN=1;myRole='host';
+  opponentName=opp.name;_oppRating=opp.rating||1500;
+  applyVariant(selectedOnlineMode);
+  hostStartTs=Date.now();cancelWait=false;
+  const rd={hostName:myEntry.name,ts:hostStartTs,status:'playing',mode:selectedOnlineMode,matchType:_onlineMatchType,rating:_myRating};
+  fbPut(roomKey,rd);
+  fbPut(roomKey+'g',{guestName:opp.name,ts:Date.now(),rating:opp.rating||1500});
+  fbPut(roomKey+'m1',null);fbPut(roomKey+'m2',null);
+  fbPut(roomKey+'p1',null);fbPut(roomKey+'p2',null);
+  fbPut(roomKey+'tf1',null);fbPut(roomKey+'tf2',null);
+  fbPut(roomKey+'sel1',null);fbPut(roomKey+'sel2',null);
+  fbPut(roomKey+'em1',null);fbPut(roomKey+'em2',null);
+  fetch(`${FB_DB}/queue/${myUid}.json`,{method:'DELETE'}).catch(()=>{});
+  hideWaiting();startPlacementPhase();
+}
+async function _rmJoinAsGuest(roomKey,hostName,mode){
+  currentRoomKey=roomKey;myPN=2;myRole='guest';
+  opponentName=hostName;cancelWait=false;
+  applyVariant(mode||selectedOnlineMode);
+  const hostData=await fbGet(roomKey);
+  if(hostData){_oppRating=hostData.rating||1500;if(hostData.matchType)_onlineMatchType=hostData.matchType;}
+  hideWaiting();startPlacementPhase();
+}
+function cancelRandomMatch(){
+  if(_rmPollIv){clearInterval(_rmPollIv);_rmPollIv=null;}
+  if(_rmActive){
+    _rmActive=false;
+    fetch(`${FB_DB}/queue/${_getRMUid()}.json`,{method:'DELETE'}).catch(()=>{});
+  }
+}
+
 async function cancelWaiting(){
   cancelWait=true;
+  cancelRandomMatch();
   cleanupOnline();
   hideWaiting();
   gameMode='cpu';myPN=1;
@@ -2148,6 +2316,7 @@ function showWin(w){
   }
   stopBGM();
   if(isOnline)localStorage.removeItem('dna-game-snap');
+  for(let gc=0;gc<COLS;gc++){if(board[GOAL[1]]?.[gc]?.type==='linker')spawnGoalBurst(GOAL[1],gc);if(board[GOAL[2]]?.[gc]?.type==='linker')spawnGoalBurst(GOAL[2],gc);}
   const el=document.getElementById('ov-win-title'),sub=document.getElementById('ov-win-sub');
   el.className='ov-title';
   void el.offsetWidth;
@@ -2464,25 +2633,26 @@ function renderReplayStep(){
   const brd=JSON.parse(entry.board);
   const rows=brd.length,cols=brd[0].length;
   const goal2=rows-1;
-  const sz=Math.max(34,Math.min(52,Math.floor((Math.min(window.innerWidth-100,340)-cols*2)/cols)));
+  const sz=Math.max(36,Math.min(56,Math.floor((Math.min(window.innerWidth-80,360)-cols*2-8)/cols)));
   const grid=document.createElement('div');
-  grid.style.cssText=`display:grid;grid-template-columns:repeat(${cols},${sz}px);grid-template-rows:repeat(${rows},${sz}px);gap:2px;background:#0a0f0a;border:1px solid rgba(0,255,65,.4);padding:4px;`;
+  grid.style.cssText=`--cell:${sz}px;display:grid;grid-template-columns:repeat(${cols},${sz}px);grid-template-rows:repeat(${rows},${sz}px);gap:2px;background:#0a0f0a;border:1px solid rgba(0,255,65,.4);padding:4px;box-shadow:0 0 30px rgba(0,255,65,.18),inset 0 0 20px rgba(0,0,0,.6);pointer-events:none;`;
   const rowOrder=myPN===2?[...Array(rows).keys()].reverse():[...Array(rows).keys()];
   for(const r of rowOrder){
     for(let c=0;c<cols;c++){
       const cel=document.createElement('div');
-      let bg='#0c130c',bc='#1a2e1a';
-      if(r===0)bg='#060d1a',bc='#1a4080';
-      if(r===goal2)bg='#1a0606',bc='#801a1a';
-      if(entry.fr>=0&&r===entry.fr&&c===entry.fc)bc='#ffaa00';
-      if(entry.fr>=0&&r===entry.tr&&c===entry.tc)bc='#00ff41';
-      cel.style.cssText=`width:${sz}px;height:${sz}px;background:${bg};border:1px solid ${bc};display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:${Math.round(sz*.26)}px;box-sizing:border-box;`;
+      cel.className='cell';
+      if(r===0)cel.classList.add('goal-top');
+      if(r===goal2)cel.classList.add('goal-bot');
+      if(entry.fr>=0&&r===entry.fr&&c===entry.fc)cel.style.cssText='border-color:#ffaa00!important;box-shadow:inset 0 0 10px rgba(255,170,0,.4)';
+      if(entry.fr>=0&&r===entry.tr&&c===entry.tc)cel.style.cssText='border-color:#00ff41!important;box-shadow:inset 0 0 12px rgba(0,255,65,.45)';
       const p=brd[r][c];
       if(p){
-        const ico={program:p.value,firewall:'⊁',virus:'V',linker:'☁',medic:'☆',worm:'≁'}[p.type]||'?';
-        cel.style.color=p.player===1?'#44aaff':'#ff6633';
-        cel.style.background=p.player===1?'rgba(0,40,100,.5)':'rgba(100,20,0,.5)';
-        cel.textContent=p.revealed?ico:'?';
+        const pp={...p,revealed:true};
+        const[ic,lb]=pieceInfo(pp);
+        const pe=document.createElement('div');
+        pe.className=pieceClass(pp,true);
+        pe.innerHTML=`<div class="pi">${ic}</div><div class="pl">${lb}</div>`;
+        cel.appendChild(pe);
       }
       grid.appendChild(cel);
     }
@@ -2492,46 +2662,76 @@ function renderReplayStep(){
   const totalMoves=_gameLog.length-1;
   const p1n=_gameLog[0]?.p1name||'P1';
   const p2n=_gameLog[0]?.p2name||'P2';
-  const who=entry.movedBy===0?' ':(entry.movedBy===1?p1n:p2n);
-  const moveStr=entry.fr>=0?`(${entry.fc+1},${entry.fr+1})→ ${entry.tc+1},${entry.tr+1})`:'開始時';
-  infoEl.textContent=`STEP ${_replayStep}/${totalMoves}　${who}　${moveStr}`;
+  const who=entry.movedBy===0?'':entry.movedBy===1?`<span style="color:#44aaff">${p1n}</span>`:`<span style="color:#ff6633">${p2n}</span>`;
+  const moveStr=entry.fr>=0?`(${entry.fc+1}:${entry.fr+1})→(${entry.tc+1}:${entry.tr+1})`:'開始時';
+  infoEl.innerHTML=`STEP <b style="color:#00ff41">${_replayStep}</b>/${totalMoves}　${who}　${moveStr}`;
 }
-
 // ── Leaderboard ──────────────────────────────────────
 async function showLeaderboard(){
   show('ov-lb');
   hide('ov-title');
-  document.getElementById('lb-loading').style.display='';
-  document.getElementById('lb-body').innerHTML='';
+  const loadEl=document.getElementById('lb-loading');
+  const bodyEl=document.getElementById('lb-body');
+  const myrankEl=document.getElementById('lb-myrank');
+  const tsEl=document.getElementById('lb-timestamp');
+  const refreshBtn=document.getElementById('lb-refresh-btn');
+  loadEl.style.display='';bodyEl.innerHTML='';
+  if(myrankEl)myrankEl.style.display='none';
+  if(refreshBtn)refreshBtn.disabled=true;
   const data=await fbDbGet('leaderboard');
-  document.getElementById('lb-loading').style.display='none';
+  loadEl.style.display='none';
+  if(refreshBtn)refreshBtn.disabled=false;
   if(!data||typeof data!=='object'){
-    document.getElementById('lb-body').innerHTML='<div style="color:#ff4444;text-align:center;padding:10px;font-size:.7rem">データ取得失敗</div>';
+    bodyEl.innerHTML='<div style="color:#ff4444;text-align:center;padding:10px;font-size:.7rem">データ取得失敗</div>';
     return;
   }
-  const entries=Object.values(data)
+  const all=Object.values(data)
     .filter(e=>e&&e.name&&typeof e.rating==='number')
-    .sort((a,b)=>b.rating-a.rating)
-    .slice(0,100);
-  if(!entries.length){
-    document.getElementById('lb-body').innerHTML='<div style="color:#446644;text-align:center;padding:10px;font-size:.7rem">データなし</div>';
+    .sort((a,b)=>b.rating-a.rating);
+  if(!all.length){
+    bodyEl.innerHTML='<div style="color:#446644;text-align:center;padding:10px;font-size:.7rem">データなし</div>';
     return;
   }
+  // 自分の順位
+  const myIdx=isAuthValid()?all.findIndex(e=>e.name===myName):- 1;
+  if(myIdx>=0&&myrankEl){
+    const myT=getTitle(all[myIdx].rating);
+    const pos=myIdx+1;
+    myrankEl.style.display='';
+    myrankEl.innerHTML=`<span style="color:#446644">// あなたの順位：</span><span style="color:#00ff41;font-weight:bold"> ${pos}位</span><span style="color:#334433"> / ${all.length}人</span>　<span style="color:${myT.color}">${myT.name}</span>　<b style="color:#00ff41">${all[myIdx].rating}</b>`;
+  }
+  const entries=all.slice(0,100);
+  const medals=['🥇','🥈','🥉'];
+  const topClr=['#ffd700','#c0c0c0','#cd7f32'];
   let html='<table style="width:100%;border-collapse:collapse">';
-  html+='<tr style="border-bottom:1px solid #1a3a1a"><th style="padding:3px 6px;text-align:center;color:#00ff41;font-size:.58rem">#</th><th style="padding:3px 6px;text-align:left;color:#00ff41;font-size:.58rem">NAME</th><th style="padding:3px 6px;text-align:right;color:#00ff41;font-size:.58rem">RATE</th><th style="padding:3px 6px;text-align:left;color:#00ff41;font-size:.58rem">TITLE</th></tr>';
+  html+='<tr style="border-bottom:1px solid #1a3a1a">';
+  html+='<th style="padding:3px 4px;text-align:center;color:#00ff41;font-size:.55rem;width:26px">#</th>';
+  html+='<th style="padding:3px 6px;text-align:left;color:#00ff41;font-size:.55rem">NAME</th>';
+  html+='<th style="padding:3px 4px;text-align:right;color:#00ff41;font-size:.55rem">RATE</th>';
+  html+='<th style="padding:3px 4px;text-align:center;color:#00ff41;font-size:.55rem">W-L</th>';
+  html+='<th style="padding:3px 6px;text-align:left;color:#00ff41;font-size:.55rem">TITLE</th>';
+  html+='</tr>';
   entries.forEach((e,i)=>{
+    const rank=i+1;
     const t=getTitle(e.rating);
-    const me=e.name===myName;
-    const rowBg=me?'background:#0a1e0a;':'';
-    html+=`<tr style="${rowBg}border-bottom:1px solid #0f2a0f">`;
-    html+=`<td style="padding:2px 6px;font-size:.6rem;color:#446644;text-align:center">${i+1}</td>`;
-    html+=`<td style="padding:2px 6px;font-size:.63rem;color:${me?'#00ff41':'#669966'}">${me?'▶ ':''} ${e.name}</td>`;
-    html+=`<td style="padding:2px 6px;font-size:.63rem;color:${t.color};text-align:right;font-weight:bold">${e.rating}</td>`;
-    html+=`<td style="padding:2px 6px;font-size:.58rem;color:${t.color}">${t.name}</td>`;
+    const isMe=isAuthValid()&&e.name===myName&&(myIdx===i);
+    const isTop3=rank<=3;
+    const rowBg=isMe?'background:rgba(0,255,65,.06);':isTop3?`background:rgba(${rank===1?'255,215,0':rank===2?'192,192,192':'205,127,50'},.04);`:'';
+    const rankDisp=isTop3?`<span style="font-size:.75rem">${medals[i]}</span>`:rank;
+    const rankClr=isTop3?topClr[i]:'#2a4a2a';
+    const nameClr=isMe?'#00ff41':isTop3?topClr[i]:'#669966';
+    const wl=(typeof e.wins==='number'&&typeof e.losses==='number')?`<span style="color:#44aa66">${e.wins}</span><span style="color:#334433">-</span><span style="color:#aa4444">${e.losses}</span>`:'<span style="color:#2a3a2a">—</span>';
+    html+=`<tr style="${rowBg}border-bottom:1px solid #0a1a0a">`;
+    html+=`<td style="padding:3px 4px;text-align:center;color:${rankClr};font-size:.6rem">${rankDisp}</td>`;
+    html+=`<td style="padding:3px 6px;font-size:.63rem;color:${nameClr};max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${isMe?'▶ ':''}${e.name}</td>`;
+    html+=`<td style="padding:3px 4px;font-size:.65rem;color:${t.color};text-align:right;font-weight:bold;white-space:nowrap">${e.rating}</td>`;
+    html+=`<td style="padding:3px 4px;font-size:.6rem;text-align:center;white-space:nowrap">${wl}</td>`;
+    html+=`<td style="padding:3px 6px;font-size:.54rem;color:${t.color};white-space:nowrap">${t.name}</td>`;
     html+=`</tr>`;
   });
   html+='</table>';
-  document.getElementById('lb-body').innerHTML=html;
+  bodyEl.innerHTML=html;
+  if(tsEl)tsEl.textContent=`更新: ${new Date().toLocaleTimeString('ja-JP')}　登録${all.length}人`;
 }
 
 function showSettings(){
@@ -2848,6 +3048,76 @@ function calcCellSize(){
 }
 window.addEventListener('resize',()=>{calcCellSize();if(board)render();});
 calcCellSize();
+
+// ── Slide animation ──────────────────────────────────────────
+function applySlideAnim(){
+  if(!_slideFrom||!_moveAnimCell)return;
+  const bd=document.getElementById('board');
+  const fEl=bd.querySelector('[data-r="'+_slideFrom.r+'"][data-c="'+_slideFrom.c+'"]');
+  const tEl=bd.querySelector('[data-r="'+_moveAnimCell.r+'"][data-c="'+_moveAnimCell.c+'"]');
+  if(!fEl||!tEl){_slideFrom=null;return;}
+  const fR=fEl.getBoundingClientRect(),tR=tEl.getBoundingClientRect();
+  const dx=fR.left-tR.left,dy=fR.top-tR.top;
+  const pe=tEl.querySelector('.piece');
+  if(!pe){_slideFrom=null;return;}
+  pe.style.transition='none';pe.style.transform='translate('+dx+'px,'+dy+'px)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    pe.style.transition='transform .22s cubic-bezier(.4,0,.2,1)';
+    pe.style.transform='translate(0,0)';
+    setTimeout(()=>{pe.style.transition='';pe.style.transform='';_slideFrom=null;},280);
+  }));
+}
+
+// ── Particles ────────────────────────────────────────────────
+function spawnParticles(r,c,col){
+  const bd=document.getElementById('board');
+  const cell=bd.querySelector('[data-r="'+r+'"][data-c="'+c+'"]');
+  if(!cell)return;
+  const rect=cell.getBoundingClientRect();
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  for(let i=0;i<8;i++){
+    const p=document.createElement('div');
+    const ang=(i/8)*Math.PI*2,spd=24+Math.random()*32;
+    const dx=Math.cos(ang)*spd,dy=Math.sin(ang)*spd;
+    p.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;width:5px;height:5px;border-radius:50%;background:'+col+';box-shadow:0 0 6px '+col+';transform:translate(-50%,-50%);z-index:500;pointer-events:none;';
+    document.body.appendChild(p);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      p.style.transition='transform .38s ease-out,opacity .38s ease-out';
+      p.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';
+      p.style.opacity='0';
+    }));
+    setTimeout(()=>p.remove(),450);
+  }
+}
+function spawnGoalBurst(r,c){
+  const bd=document.getElementById('board');
+  const cell=bd.querySelector('[data-r="'+r+'"][data-c="'+c+'"]');
+  if(cell)cell.classList.add('goal-burst');
+  spawnParticles(r,c,'#ffdd00');
+  setTimeout(()=>spawnParticles(r,c,'#00ff88'),130);
+  setTimeout(()=>spawnParticles(r,c,'#ffffff'),260);
+}
+
+// ── HUD bars ─────────────────────────────────────────────────
+const _PIECE_TOTAL={classic:8,extended:10,worm:12};
+function renderHUD(){
+  const hb=document.getElementById('hud-bars');if(!hb)return;
+  if(gameMode==='placing'||gameMode==='cpu'||gameMode==='online'){
+    const total=_PIECE_TOTAL[gameVariant]||8;
+    const cnt={1:0,2:0};
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const p=board[r][c];if(p)cnt[p.player]++;}
+    hb.style.display='block';
+    const b1=document.getElementById('hud-bar-p1'),b2=document.getElementById('hud-bar-p2');
+    if(b1)b1.style.width=Math.max(0,cnt[1]/total*100)+'%';
+    if(b2)b2.style.width=Math.max(0,cnt[2]/total*100)+'%';
+  }else{hb.style.display='none';}
+}
+
+// ── Haptic feedback ──────────────────────────────────────────
+document.addEventListener('touchstart',function(e){
+  const el=e.target.closest('button,.piece-card,.cell');
+  if(el&&navigator.vibrate)navigator.vibrate(8);
+},{passive:true});
 
 // 常にスプラッシュから開始！v-splash は HTML で on クラス付き盤 renderRating();
 
