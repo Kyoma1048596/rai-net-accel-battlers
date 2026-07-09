@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -107,6 +107,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 
 /* Overlays */
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); flex-direction:column; align-items:center; justify-content:center; z-index:200; gap:14px; padding:20px; }
+#ov-title { background:#000; }
 .overlay.on { display:flex; }
 .ov-title { font-size:clamp(1.2rem,4vw,2rem); letter-spacing:4px; text-align:center; line-height:1.4; text-shadow:0 0 20px currentColor; }
 .ov-sub { font-size:.75rem; color:#556655; letter-spacing:2px; text-align:center; }
@@ -612,7 +613,7 @@ h1::after { content:''; display:block; height:1px; margin-top:4px; background:li
   <div class="spinner"></div>
   <div class="wait-msg" id="wait-msg">対戦相手を探しています..</div>
   <div class="wait-code" id="wait-code"></div>
-  <button onclick="cancelWaiting()" style="margin-top:8px;width:160px;border-color:#333;color:#555">// CANCEL</button>
+  <button onclick="cancelWaiting();showTitle()" style="margin-top:8px;width:160px;border-color:#333;color:#555">// CANCEL</button>
   <button onclick="cancelWaiting();show('ov-online')" style="margin-top:4px;width:160px;border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
 </div>
 
@@ -2157,7 +2158,7 @@ async function startRandomMatch(){
   const uid=_getRMUid();
   const ts=Date.now();
   const myEntry={name:myName,uid,mode:selectedOnlineMode,matchType:_onlineMatchType,rating:_myRating,ts,status:'waiting'};
-  try{const res=await fetch(`${FB_DB}/queue/${uid}.json`,{method:'PUT',body:JSON.stringify(myEntry)});if(!res.ok)throw new Error();}
+  try{const res=await fetch(`${FB}/queue/${uid}.json`,{method:'PUT',body:JSON.stringify(myEntry)});if(!res.ok)throw new Error();}
   catch(e){document.getElementById('match-err').textContent='接続失敗。しばらく後に再試行してください。';return;}
   _rmActive=true;cancelWait=false;
   hide('ov-online');showWaiting('🎲 ランダムマッチ');
@@ -2168,16 +2169,16 @@ async function startRandomMatch(){
     attempts++;
     // Check if HOST matched me (GUEST path)
     let mine=null;
-    try{const r=await fetch(`${FB_DB}/queue/${uid}.json`);mine=await r.json();}catch(e){}
+    try{const r=await fetch(`${FB}/queue/${uid}.json`);mine=await r.json();}catch(e){}
     if(mine&&mine.status==='matched'&&mine.roomKey){
       clearInterval(_rmPollIv);_rmPollIv=null;_rmActive=false;
-      fetch(`${FB_DB}/queue/${uid}.json`,{method:'DELETE'}).catch(()=>{});
+      fetch(`${FB}/queue/${uid}.json`,{method:'DELETE'}).catch(()=>{});
       await _rmJoinAsGuest(mine.roomKey,mine.hostName,mine.mode);
       return;
     }
     // Scan queue for candidate (HOST path)
     let queue=null;
-    try{const r=await fetch(`${FB_DB}/queue.json`);queue=await r.json();}catch(e){}
+    try{const r=await fetch(`${FB}/queue.json`);queue=await r.json();}catch(e){}
     if(queue&&typeof queue==='object'){
       const now=Date.now();
       const mySnap=queue[uid];
@@ -2199,7 +2200,7 @@ async function startRandomMatch(){
     }
     if(attempts>60){
       clearInterval(_rmPollIv);_rmPollIv=null;_rmActive=false;
-      fetch(`${FB_DB}/queue/${uid}.json`,{method:'DELETE'}).catch(()=>{});
+      fetch(`${FB}/queue/${uid}.json`,{method:'DELETE'}).catch(()=>{});
       hideWaiting();show('ov-online');
       document.getElementById('match-err').textContent='相手が見つかりませんでした（タイムアウト）';
     }else{
@@ -2210,7 +2211,7 @@ async function startRandomMatch(){
 async function _rmActAsHost(myUid,opp,myEntry){
   const roomKey='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
   // Signal opponent they're matched
-  try{await fetch(`${FB_DB}/queue/${opp.uid}.json`,{method:'PATCH',body:JSON.stringify({status:'matched',roomKey,hostName:myEntry.name,mode:selectedOnlineMode})});}catch(e){}
+  try{await fetch(`${FB}/queue/${opp.uid}.json`,{method:'PATCH',body:JSON.stringify({status:'matched',roomKey,hostName:myEntry.name,mode:selectedOnlineMode})});}catch(e){}
   // Setup room (mirrors startHost)
   currentRoomKey=roomKey;myPN=1;myRole='host';
   opponentName=opp.name;_oppRating=opp.rating||1500;
@@ -2224,7 +2225,7 @@ async function _rmActAsHost(myUid,opp,myEntry){
   fbPut(roomKey+'tf1',null);fbPut(roomKey+'tf2',null);
   fbPut(roomKey+'sel1',null);fbPut(roomKey+'sel2',null);
   fbPut(roomKey+'em1',null);fbPut(roomKey+'em2',null);
-  fetch(`${FB_DB}/queue/${myUid}.json`,{method:'DELETE'}).catch(()=>{});
+  fetch(`${FB}/queue/${myUid}.json`,{method:'DELETE'}).catch(()=>{});
   hideWaiting();startPlacementPhase();
 }
 async function _rmJoinAsGuest(roomKey,hostName,mode){
@@ -2239,7 +2240,7 @@ function cancelRandomMatch(){
   if(_rmPollIv){clearInterval(_rmPollIv);_rmPollIv=null;}
   if(_rmActive){
     _rmActive=false;
-    fetch(`${FB_DB}/queue/${_getRMUid()}.json`,{method:'DELETE'}).catch(()=>{});
+    fetch(`${FB}/queue/${_getRMUid()}.json`,{method:'DELETE'}).catch(()=>{});
   }
 }
 
