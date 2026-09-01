@@ -2964,16 +2964,15 @@ function _renderSkinPreview(){
   el.innerHTML='';
   const piecesLayout=[
     [null,null,null,null],
-    [{p:1,i:'P',l:'PROG'},{p:1,i:'★',l:'LINK'},{p:1,i:'⊘',l:'F/W'},{p:1,i:'V!',l:'VIR'}],
     [{p:2,i:'P',l:'PROG'},{p:2,i:'★',l:'LINK'},{p:2,i:'⊘',l:'F/W'},{p:2,i:'V!',l:'VIR'}],
+    [{p:1,i:'P',l:'PROG'},{p:1,i:'★',l:'LINK'},{p:1,i:'⊘',l:'F/W'},{p:1,i:'V!',l:'VIR'}],
     [null,null,null,null],
   ];
-  const goals=['g1','g2'];
   piecesLayout.forEach((row,r)=>{
     row.forEach((pc,c)=>{
       const d=document.createElement('div');
       if(r===0||r===3){
-        const gk=r===0?'g1':'g2';
+        const gk=r===0?'g2':'g1';
         d.style.cssText=`height:38px;background:${th[gk]};border:1px solid ${th[gk+'bd']};box-sizing:border-box;`;
       } else if(pc){
         const col=pc.p===1?sk.p1:sk.p2;
