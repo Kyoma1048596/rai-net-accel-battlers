@@ -16,7 +16,7 @@ body::before {
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);
   pointer-events:none; z-index:999;
 }
-h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:#00ff41; text-shadow:0 0 12px #00ff41,0 0 24px #00aa2a; margin-bottom:2px; }
+h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:var(--p1-c); text-shadow:0 0 12px var(--p1-c),0 0 24px var(--p1-bd); margin-bottom:2px; }
 .subtitle { font-size:.7rem; color:#0077cc; letter-spacing:3px; margin-bottom:16px; text-shadow:0 0 8px #0077cc; }
 #game-wrap { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
 
@@ -24,16 +24,16 @@ h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:#00ff41; text-s
 #board { display:grid; grid-template-columns:repeat(4,var(--cell,72px)); grid-template-rows:repeat(6,var(--cell,72px)); gap:3px; padding:8px; background:#0a0f0a; border:1px solid #00ff41; box-shadow:0 0 24px rgba(0,255,65,.2),inset 0 0 20px rgba(0,0,0,.5); }
 .cell { width:var(--cell,72px); height:var(--cell,72px); background:#0c130c; border:1px solid #1a2e1a; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:background .12s; }
 .cell:hover { background:#162416; }
-.cell.goal-top { background:#060d1a; border-color:#1a4080; }
-.cell.goal-bot { background:#1a0606; border-color:#801a1a; }
+.cell.goal-top { background:#1a0606; border-color:#801a1a; }
+.cell.goal-bot { background:#060d1a; border-color:#1a4080; }
 .cell.selected { background:#1c301c; border-color:#00ff41; box-shadow:inset 0 0 12px rgba(0,255,65,.35); }
 .cell.moveable::after { content:''; position:absolute; width:22px; height:22px; border-radius:50%; background:rgba(0,255,65,.18); border:2px solid rgba(0,255,65,.5); pointer-events:none; }
 .cell.cpu-block { pointer-events:none; }
 .cell.place-zone { background:#0a1a08; border-color:#1a4a1a; }
 .cell.place-zone:hover { background:#112611; }
 .corner { position:absolute; top:2px; left:3px; font-size:7px; color:#1c3a1c; pointer-events:none; }
-.cell.goal-top .corner { color:#1a60cc; }
-.cell.goal-bot .corner { color:#cc2222; }
+.cell.goal-top .corner { color:#cc2222; }
+.cell.goal-bot .corner { color:#1a60cc; }
 
 /* Piece skin variables (default = CLASSIC) */
 :root {
@@ -281,46 +281,63 @@ body[data-bt="void"]{background:#0a0012;}
 body[data-bt="void"] #board{background:#0e0818;border-color:#aa44ff;box-shadow:0 0 24px rgba(170,68,255,.2),inset 0 0 20px rgba(0,0,0,.5);}
 body[data-bt="void"] .cell{background:#110d1c;border-color:#2a1a3a;}
 body[data-bt="void"] .cell:hover{background:#1a1230;}
-body[data-bt="void"] .cell.goal-top{background:#080020;border-color:#221a50;}
-body[data-bt="void"] .cell.goal-bot{background:#1e0828;border-color:#5a1060;}
+body[data-bt="void"] .cell.goal-top{background:#1e0828;border-color:#5a1060;}
+body[data-bt="void"] .cell.goal-bot{background:#080020;border-color:#221a50;}
 body[data-bt="void"] .cell.selected{background:#201040;border-color:#aa44ff;box-shadow:inset 0 0 12px rgba(170,68,255,.35);}
 body[data-bt="void"] .cell.moveable::after{background:rgba(170,68,255,.18);border-color:rgba(170,68,255,.5);}
 body[data-bt="void"] .cell.place-zone{background:#140a28;border-color:#2a1a4a;}
 body[data-bt="void"] .cell.center-line{border-top-color:#442266!important;border-bottom-color:#442266!important;background:#0c0818;}
-body[data-bt="void"] h1{color:#aa44ff;text-shadow:0 0 12px #aa44ff,0 0 24px #7722cc;}
 body[data-bt="void"] .subtitle{color:#6622aa;text-shadow:0 0 8px #6622aa;}
 body[data-bt="void"] .push-start{color:#aa44ff;}
 body[data-bt="amber"]{background:#0c0800;}
 body[data-bt="amber"] #board{background:#100a00;border-color:#ffaa00;box-shadow:0 0 24px rgba(255,170,0,.2),inset 0 0 20px rgba(0,0,0,.5);}
 body[data-bt="amber"] .cell{background:#150d00;border-color:#3a2800;}
 body[data-bt="amber"] .cell:hover{background:#1e1200;}
-body[data-bt="amber"] .cell.goal-top{background:#001a10;border-color:#005544;}
-body[data-bt="amber"] .cell.goal-bot{background:#1a0800;border-color:#884400;}
+body[data-bt="amber"] .cell.goal-top{background:#1a0800;border-color:#884400;}
+body[data-bt="amber"] .cell.goal-bot{background:#001a10;border-color:#005544;}
 body[data-bt="amber"] .cell.selected{background:#281800;border-color:#ffaa00;box-shadow:inset 0 0 12px rgba(255,170,0,.35);}
 body[data-bt="amber"] .cell.moveable::after{background:rgba(255,170,0,.18);border-color:rgba(255,170,0,.5);}
 body[data-bt="amber"] .cell.place-zone{background:#1a1000;border-color:#442a00;}
 body[data-bt="amber"] .cell.center-line{border-top-color:#664400!important;border-bottom-color:#664400!important;background:#100800;}
-body[data-bt="amber"] h1{color:#ffaa00;text-shadow:0 0 12px #ffaa00,0 0 24px #cc7700;}
 body[data-bt="amber"] .subtitle{color:#886600;text-shadow:0 0 8px #886600;}
 body[data-bt="amber"] .push-start{color:#ffaa00;}
 body[data-bt="ice"]{background:#000a14;}
 body[data-bt="ice"] #board{background:#000a1a;border-color:#44aaff;box-shadow:0 0 24px rgba(68,170,255,.2),inset 0 0 20px rgba(0,0,0,.5);}
 body[data-bt="ice"] .cell{background:#03101e;border-color:#1a2a3a;}
 body[data-bt="ice"] .cell:hover{background:#091828;}
-body[data-bt="ice"] .cell.goal-top{background:#000818;border-color:#1a3060;}
-body[data-bt="ice"] .cell.goal-bot{background:#080010;border-color:#301858;}
+body[data-bt="ice"] .cell.goal-top{background:#080010;border-color:#301858;}
+body[data-bt="ice"] .cell.goal-bot{background:#000818;border-color:#1a3060;}
 body[data-bt="ice"] .cell.selected{background:#0a1c2e;border-color:#44aaff;box-shadow:inset 0 0 12px rgba(68,170,255,.35);}
 body[data-bt="ice"] .cell.moveable::after{background:rgba(68,170,255,.18);border-color:rgba(68,170,255,.5);}
 body[data-bt="ice"] .cell.place-zone{background:#001428;border-color:#1a3a5a;}
 body[data-bt="ice"] .cell.center-line{border-top-color:#1a4466!important;border-bottom-color:#1a4466!important;background:#000814;}
-body[data-bt="ice"] h1{color:#44aaff;text-shadow:0 0 12px #44aaff,0 0 24px #2266cc;}
 body[data-bt="ice"] .subtitle{color:#224466;text-shadow:0 0 8px #224466;}
 body[data-bt="ice"] .push-start{color:#44aaff;}
-/* ── Piece skins — CSS variable overrides (affect ALL piece types) ── */
-body[data-ps="cyber"]{--p1-c:#44ffff;--p1-d1:#001a1a;--p1-d2:#003333;--p1-bd:#00cccc;--p1-sh:rgba(0,200,200,.5);--p1-hb:#006666;--p2-c:#ff44ff;--p2-d1:#1a001a;--p2-d2:#330033;--p2-bd:#cc00cc;--p2-sh:rgba(200,0,200,.5);--p2-hb:#660066;--c1-col:#00cccc;--c2-col:#cc00cc;}
-body[data-ps="fire"] {--p1-c:#ffaa44;--p1-d1:#1a0800;--p1-d2:#3a1500;--p1-bd:#ff6600;--p1-sh:rgba(255,102,0,.5);--p1-hb:#663300;--p2-c:#ffff44;--p2-d1:#1a1500;--p2-d2:#333000;--p2-bd:#dddd00;--p2-sh:rgba(220,220,0,.5);--p2-hb:#666600;--c1-col:#ff6600;--c2-col:#dddd00;}
-body[data-ps="royal"]{--p1-c:#ffe066;--p1-d1:#1a1400;--p1-d2:#2e2200;--p1-bd:#ffcc00;--p1-sh:rgba(255,200,0,.5);--p1-hb:#665500;--p2-c:#dddddd;--p2-d1:#181818;--p2-d2:#282828;--p2-bd:#aaaaaa;--p2-sh:rgba(170,170,170,.4);--p2-hb:#555555;--c1-col:#ffcc00;--c2-col:#aaaaaa;}
-body[data-ps="mono"] {--p1-c:#eeeeee;--p1-d1:#1c1c1c;--p1-d2:#2c2c2c;--p1-bd:#aaaaaa;--p1-sh:rgba(200,200,200,.3);--p1-hb:#666666;--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:#666666;--p2-sh:rgba(120,120,120,.3);--p2-hb:#444444;--c1-col:#cccccc;--c2-col:#888888;}
+/* ── P1 color options (10 colors) ──────────────────────────────── */
+body[data-p1s="blue"]   {--p1-c:#44aaff;--p1-d1:#001833;--p1-d2:#003366;--p1-bd:#0066cc;--p1-sh:rgba(0,102,204,.5);--p1-hb:#224466;--c1-col:#0088ff;}
+body[data-p1s="red"]    {--p1-c:#ff6633;--p1-d1:#1a0000;--p1-d2:#3a0000;--p1-bd:#cc2200;--p1-sh:rgba(204,34,0,.5);--p1-hb:#442222;--c1-col:#ff3300;}
+body[data-p1s="cyan"]   {--p1-c:#44ffff;--p1-d1:#001a1a;--p1-d2:#003333;--p1-bd:#00cccc;--p1-sh:rgba(0,200,200,.5);--p1-hb:#006666;--c1-col:#00cccc;}
+body[data-p1s="magenta"]{--p1-c:#ff44ff;--p1-d1:#1a001a;--p1-d2:#330033;--p1-bd:#cc00cc;--p1-sh:rgba(200,0,200,.5);--p1-hb:#660066;--c1-col:#cc00cc;}
+body[data-p1s="orange"] {--p1-c:#ffaa44;--p1-d1:#1a0800;--p1-d2:#3a1500;--p1-bd:#ff6600;--p1-sh:rgba(255,102,0,.5);--p1-hb:#663300;--c1-col:#ff6600;}
+body[data-p1s="yellow"] {--p1-c:#ffff44;--p1-d1:#1a1500;--p1-d2:#333000;--p1-bd:#dddd00;--p1-sh:rgba(220,220,0,.5);--p1-hb:#666600;--c1-col:#dddd00;}
+body[data-p1s="gold"]   {--p1-c:#ffe066;--p1-d1:#1a1400;--p1-d2:#2e2200;--p1-bd:#ffcc00;--p1-sh:rgba(255,200,0,.5);--p1-hb:#665500;--c1-col:#ffcc00;}
+body[data-p1s="silver"] {--p1-c:#dddddd;--p1-d1:#181818;--p1-d2:#282828;--p1-bd:#aaaaaa;--p1-sh:rgba(170,170,170,.4);--p1-hb:#555555;--c1-col:#cccccc;}
+body[data-p1s="white"]  {--p1-c:#eeeeee;--p1-d1:#1c1c1c;--p1-d2:#2c2c2c;--p1-bd:#aaaaaa;--p1-sh:rgba(200,200,200,.3);--p1-hb:#666666;--c1-col:#dddddd;}
+body[data-p1s="gray"]   {--p1-c:#999999;--p1-d1:#282828;--p1-d2:#383838;--p1-bd:#666666;--p1-sh:rgba(120,120,120,.3);--p1-hb:#444444;--c1-col:#888888;}
+/* ── P2 color options (10 colors) ──────────────────────────────── */
+body[data-p2s="blue"]   {--p2-c:#44aaff;--p2-d1:#001833;--p2-d2:#003366;--p2-bd:#0066cc;--p2-sh:rgba(0,102,204,.5);--p2-hb:#224466;--c2-col:#0088ff;}
+body[data-p2s="red"]    {--p2-c:#ff6633;--p2-d1:#1a0000;--p2-d2:#3a0000;--p2-bd:#cc2200;--p2-sh:rgba(204,34,0,.5);--p2-hb:#442222;--c2-col:#ff3300;}
+body[data-p2s="cyan"]   {--p2-c:#44ffff;--p2-d1:#001a1a;--p2-d2:#003333;--p2-bd:#00cccc;--p2-sh:rgba(0,200,200,.5);--p2-hb:#006666;--c2-col:#00cccc;}
+body[data-p2s="magenta"]{--p2-c:#ff44ff;--p2-d1:#1a001a;--p2-d2:#330033;--p2-bd:#cc00cc;--p2-sh:rgba(200,0,200,.5);--p2-hb:#660066;--c2-col:#cc00cc;}
+body[data-p2s="orange"] {--p2-c:#ffaa44;--p2-d1:#1a0800;--p2-d2:#3a1500;--p2-bd:#ff6600;--p2-sh:rgba(255,102,0,.5);--p2-hb:#663300;--c2-col:#ff6600;}
+body[data-p2s="yellow"] {--p2-c:#ffff44;--p2-d1:#1a1500;--p2-d2:#333000;--p2-bd:#dddd00;--p2-sh:rgba(220,220,0,.5);--p2-hb:#666600;--c2-col:#dddd00;}
+body[data-p2s="gold"]   {--p2-c:#ffe066;--p2-d1:#1a1400;--p2-d2:#2e2200;--p2-bd:#ffcc00;--p2-sh:rgba(255,200,0,.5);--p2-hb:#665500;--c2-col:#ffcc00;}
+body[data-p2s="silver"] {--p2-c:#dddddd;--p2-d1:#181818;--p2-d2:#282828;--p2-bd:#aaaaaa;--p2-sh:rgba(170,170,170,.4);--p2-hb:#555555;--c2-col:#cccccc;}
+body[data-p2s="white"]  {--p2-c:#eeeeee;--p2-d1:#1c1c1c;--p2-d2:#2c2c2c;--p2-bd:#aaaaaa;--p2-sh:rgba(200,200,200,.3);--p2-hb:#666666;--c2-col:#dddddd;}
+body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:#666666;--p2-sh:rgba(120,120,120,.3);--p2-hb:#444444;--c2-col:#888888;}
+/* Title neon + buttons follow P1 color */
+.ov-title button { color:var(--p1-c); border-color:var(--p1-bd); }
+.ov-title button:hover { box-shadow:0 0 8px var(--p1-sh); }
 /* Swatch picker */
 .sk-swatches{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .sk-sw{flex:1;min-width:50px;padding:5px 2px;font-size:.52rem;letter-spacing:.5px;border-color:#1a2a1a;color:#446644;text-align:center;cursor:pointer;}
@@ -901,10 +918,16 @@ body[data-ps="mono"] {--p1-c:#eeeeee;--p1-d1:#1c1c1c;--p1-d2:#2c2c2c;--p1-bd:#aa
       <div style="display:flex;gap:5px" id="sk-bt"></div>
     </div>
 
-    <!-- Piece Skin -->
+    <!-- P1 Color -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// P1 COLOR</div>
+      <div style="display:flex;gap:3px;flex-wrap:wrap" id="sk-p1"></div>
+    </div>
+
+    <!-- P2 Color -->
     <div style="margin-bottom:14px">
-      <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// PIECE SKIN</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap" id="sk-ps"></div>
+      <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// P2 COLOR</div>
+      <div style="display:flex;gap:3px;flex-wrap:wrap" id="sk-p2"></div>
     </div>
 
     <!-- Preview -->
@@ -2863,12 +2886,17 @@ const BOARD_THEMES_DATA = {
   amber: { name:'AMBER',  bg:'#0c0800', board:'#100a00', cell:'#150d00', border:'#3a2800', acc:'#ffaa00', g1:'#001a10', g1bd:'#005544', g2:'#1a0800', g2bd:'#884400' },
   ice:   { name:'ICE',    bg:'#000a14', board:'#000a1a', cell:'#03101e', border:'#1a2a3a', acc:'#44aaff', g1:'#000818', g1bd:'#1a3060', g2:'#080010', g2bd:'#301858' },
 };
-const PIECE_SKINS_DATA = {
-  default:{ name:'CLASSIC', p1:'#44aaff', p1bg:'rgba(0,40,100,.85)',  p1bd:'#0066cc', p2:'#ff6633', p2bg:'rgba(100,20,0,.85)',  p2bd:'#cc2200' },
-  cyber:  { name:'CYBER',   p1:'#44ffff', p1bg:'rgba(0,45,45,.85)',   p1bd:'#00cccc', p2:'#ff44ff', p2bg:'rgba(65,0,65,.85)',   p2bd:'#cc00cc' },
-  fire:   { name:'FIRE',    p1:'#ffaa44', p1bg:'rgba(65,28,0,.85)',   p1bd:'#ff6600', p2:'#ffff44', p2bg:'rgba(65,65,0,.85)',   p2bd:'#dddd00' },
-  royal:  { name:'ROYAL',   p1:'#ffe066', p1bg:'rgba(55,42,0,.85)',   p1bd:'#ffcc00', p2:'#dddddd', p2bg:'rgba(40,40,40,.85)', p2bd:'#aaaaaa' },
-  mono:   { name:'MONO',    p1:'#eeeeee', p1bg:'rgba(40,40,40,.85)',  p1bd:'#aaaaaa', p2:'#999999', p2bg:'rgba(65,65,65,.85)', p2bd:'#666666' },
+const COLOR_OPTIONS = {
+  blue:   { name:'BLUE',    c:'#44aaff', d1:'#001833', d2:'#003366', bd:'#0066cc' },
+  red:    { name:'RED',     c:'#ff6633', d1:'#1a0000', d2:'#3a0000', bd:'#cc2200' },
+  cyan:   { name:'CYAN',    c:'#44ffff', d1:'#001a1a', d2:'#003333', bd:'#00cccc' },
+  magenta:{ name:'MAGENTA', c:'#ff44ff', d1:'#1a001a', d2:'#330033', bd:'#cc00cc' },
+  orange: { name:'ORANGE',  c:'#ffaa44', d1:'#1a0800', d2:'#3a1500', bd:'#ff6600' },
+  yellow: { name:'YELLOW',  c:'#ffff44', d1:'#1a1500', d2:'#333000', bd:'#dddd00' },
+  gold:   { name:'GOLD',    c:'#ffe066', d1:'#1a1400', d2:'#2e2200', bd:'#ffcc00' },
+  silver: { name:'SILVER',  c:'#dddddd', d1:'#181818', d2:'#282828', bd:'#aaaaaa' },
+  white:  { name:'WHITE',   c:'#eeeeee', d1:'#1c1c1c', d2:'#2c2c2c', bd:'#aaaaaa' },
+  gray:   { name:'GRAY',    c:'#999999', d1:'#282828', d2:'#383838', bd:'#666666' },
 };
 
 function showSkin(){
@@ -2877,9 +2905,36 @@ function showSkin(){
   show('ov-skin');
 }
 
+function _buildColorRow(containerId, currentKey, applyFn){
+  const el = document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML='';
+  Object.entries(COLOR_OPTIONS).forEach(([id,co])=>{
+    const btn=document.createElement('button');
+    const isOn=id===currentKey;
+    btn.style.cssText=`flex:1;min-width:46px;padding:0;background:#050e05;border:1px solid ${isOn?co.bd:'#1a2a1a'};cursor:pointer;transition:border-color .15s;${isOn?'box-shadow:0 0 6px '+co.bd+'88;':''}`;
+    btn.title=co.name;
+    const dot=document.createElement('div');
+    dot.style.cssText=`padding:5px 3px 4px;display:flex;justify-content:center;border-bottom:1px solid ${isOn?co.bd+'66':'#1a2a1a'};`;
+    const p=document.createElement('div');
+    p.style.cssText=`width:22px;height:22px;background:linear-gradient(145deg,${co.d1},${co.d2});border:1px solid ${co.bd};border-radius:3px;display:flex;align-items:center;justify-content:center;`;
+    p.innerHTML=`<span style="font-size:9px;color:${co.c};font-family:'Courier New',monospace">P</span>`;
+    dot.appendChild(p);
+    const lbl=document.createElement('div');
+    lbl.style.cssText=`font-size:.42rem;letter-spacing:.3px;padding:3px 2px 3px;color:${isOn?co.c:'#446644'};font-family:'Courier New',monospace;text-align:center;`;
+    lbl.textContent=co.name;
+    btn.appendChild(dot);btn.appendChild(lbl);
+    btn.onmouseover=()=>{if(id!==currentKey)btn.style.borderColor=co.bd+'88';};
+    btn.onmouseleave=()=>{if(id!==currentKey)btn.style.borderColor='#1a2a1a';};
+    btn.onclick=()=>{ applyFn(id); _buildSkinUI(); _renderSkinPreview(); };
+    el.appendChild(btn);
+  });
+}
+
 function _buildSkinUI(){
   const curBt = localStorage.getItem('rai-bt')||'matrix';
-  const curPs = localStorage.getItem('rai-ps')||'default';
+  const curP1 = localStorage.getItem('rai-p1s')||'blue';
+  const curP2 = localStorage.getItem('rai-p2s')||'red';
 
   // ── Board theme swatches ──────────────────────────────────
   const btEl = document.getElementById('sk-bt');
@@ -2889,75 +2944,40 @@ function _buildSkinUI(){
     const isOn = id===curBt;
     btn.style.cssText = `flex:1;padding:0;background:#050e05;border:1px solid ${isOn?th.acc:'#1a2a1a'};cursor:pointer;transition:border-color .15s;${isOn?'box-shadow:0 0 8px '+th.acc+'55;':''}`;
     btn.title = th.name;
-
-    // 2×3 mini-board thumbnail
     const thumb = document.createElement('div');
     thumb.style.cssText = `background:${th.board};padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:1px;border-bottom:1px solid ${isOn?th.acc+'66':'#1a2a1a'};`;
-    [
-      [th.g1,  th.g1bd],
-      [th.cell, th.acc+'44'],
-      [th.cell, th.border],
-      [th.g2,  th.g2bd],
-    ].forEach(([bg,bd])=>{
+    [[th.g1,th.g1bd],[th.cell,th.acc+'44'],[th.cell,th.border],[th.g2,th.g2bd]].forEach(([bg,bd])=>{
       const c=document.createElement('div');
       c.style.cssText=`height:11px;background:${bg};border:1px solid ${bd};`;
       thumb.appendChild(c);
     });
-
     const lbl = document.createElement('div');
     lbl.style.cssText = `font-size:.5rem;letter-spacing:.5px;padding:4px 2px 3px;color:${isOn?th.acc:'#446644'};font-family:'Courier New',monospace;`;
     lbl.textContent = th.name;
-
-    btn.appendChild(thumb);
-    btn.appendChild(lbl);
-    btn.onmouseover = ()=>{if(id!==curBt)btn.style.borderColor=th.acc+'88';};
-    btn.onmouseleave= ()=>{if(id!==curBt)btn.style.borderColor='#1a2a1a';};
-    btn.onclick = ()=>{ applyBoardTheme(id); _buildSkinUI(); _renderSkinPreview(); };
+    btn.appendChild(thumb);btn.appendChild(lbl);
+    btn.onmouseover=()=>{if(id!==curBt)btn.style.borderColor=th.acc+'88';};
+    btn.onmouseleave=()=>{if(id!==curBt)btn.style.borderColor='#1a2a1a';};
+    btn.onclick=()=>{ applyBoardTheme(id); _buildSkinUI(); _renderSkinPreview(); };
     btEl.appendChild(btn);
   });
 
-  // ── Piece skin swatches ───────────────────────────────────
-  const psEl = document.getElementById('sk-ps');
-  psEl.innerHTML = '';
-  Object.entries(PIECE_SKINS_DATA).forEach(([id, sk]) => {
-    const btn = document.createElement('button');
-    const isOn = id===curPs;
-    btn.style.cssText = `flex:1;min-width:54px;padding:0;background:#050e05;border:1px solid ${isOn?'#00ff41':'#1a2a1a'};cursor:pointer;transition:border-color .15s;${isOn?'box-shadow:0 0 8px rgba(0,255,65,.35);':''}`;
-    btn.title = sk.name;
-
-    // P1 / P2 mini-piece preview
-    const thumb = document.createElement('div');
-    thumb.style.cssText = `display:flex;gap:3px;padding:5px 4px 4px;justify-content:center;border-bottom:1px solid ${isOn?'#00ff4166':'#1a2a1a'};`;
-    [[sk.p1,sk.p1bg,sk.p1bd,'P1'],[sk.p2,sk.p2bg,sk.p2bd,'P2']].forEach(([col,bg,bd,lbl])=>{
-      const p=document.createElement('div');
-      p.style.cssText=`width:20px;height:24px;background:${bg};border:1px solid ${bd};display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:2px;gap:1px;`;
-      p.innerHTML=`<span style="font-size:9px;color:${col};line-height:1">P</span><span style="font-size:4px;color:${col};opacity:.7">${lbl}</span>`;
-      thumb.appendChild(p);
-    });
-
-    const lbl = document.createElement('div');
-    lbl.style.cssText = `font-size:.5rem;letter-spacing:.5px;padding:3px 2px 3px;color:${isOn?'#00ff41':'#446644'};font-family:'Courier New',monospace;`;
-    lbl.textContent = sk.name;
-
-    btn.appendChild(thumb);
-    btn.appendChild(lbl);
-    btn.onmouseover = ()=>{if(id!==curPs)btn.style.borderColor='#00ff4155';};
-    btn.onmouseleave= ()=>{if(id!==curPs)btn.style.borderColor='#1a2a1a';};
-    btn.onclick = ()=>{ applyPieceSkin(id); _buildSkinUI(); _renderSkinPreview(); };
-    psEl.appendChild(btn);
-  });
+  // ── P1 / P2 color swatches ────────────────────────────────
+  _buildColorRow('sk-p1', curP1, applyP1Color);
+  _buildColorRow('sk-p2', curP2, applyP2Color);
 
   _renderSkinPreview();
 }
 
 function _renderSkinPreview(){
-  const bt = localStorage.getItem('rai-bt')||'matrix';
-  const ps = localStorage.getItem('rai-ps')||'default';
-  const th = BOARD_THEMES_DATA[bt];
-  const sk = PIECE_SKINS_DATA[ps];
-  const el = document.getElementById('skin-preview');
-  const info = document.getElementById('skin-preview-info');
-  if(!el||!th||!sk)return;
+  const bt  = localStorage.getItem('rai-bt')||'matrix';
+  const p1k = localStorage.getItem('rai-p1s')||'blue';
+  const p2k = localStorage.getItem('rai-p2s')||'red';
+  const th  = BOARD_THEMES_DATA[bt];
+  const co1 = COLOR_OPTIONS[p1k];
+  const co2 = COLOR_OPTIONS[p2k];
+  const el  = document.getElementById('skin-preview');
+  const info= document.getElementById('skin-preview-info');
+  if(!el||!th||!co1||!co2)return;
 
   // 4×4 mini board
   el.style.cssText=`display:inline-grid;grid-template-columns:repeat(4,38px);gap:2px;background:${th.board};border:2px solid ${th.acc}55;padding:5px;`;
@@ -2975,10 +2995,8 @@ function _renderSkinPreview(){
         const gk=r===0?'g2':'g1';
         d.style.cssText=`height:38px;background:${th[gk]};border:1px solid ${th[gk+'bd']};box-sizing:border-box;`;
       } else if(pc){
-        const col=pc.p===1?sk.p1:sk.p2;
-        const bg=pc.p===1?sk.p1bg:sk.p2bg;
-        const bd=pc.p===1?sk.p1bd:sk.p2bd;
-        d.style.cssText=`height:38px;background:${bg};border:1px solid ${bd};display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;font-family:'Courier New',monospace;color:${col};`;
+        const co=pc.p===1?co1:co2;
+        d.style.cssText=`height:38px;background:linear-gradient(145deg,${co.d1},${co.d2});border:1px solid ${co.bd};display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;font-family:'Courier New',monospace;color:${co.c};`;
         d.innerHTML=`<span style="font-size:11px;line-height:1">${pc.i}</span><span style="font-size:5px;opacity:.7">${pc.l}</span>`;
       } else {
         d.style.cssText=`height:38px;background:${th.cell};border:1px solid ${th.border};box-sizing:border-box;`;
@@ -2989,15 +3007,14 @@ function _renderSkinPreview(){
 
   if(info){
     info.innerHTML=`
-      <div style="font-size:.7rem;color:${th.acc};letter-spacing:1px;margin-bottom:2px">${th.name}</div>
-      <div style="font-size:.58rem;color:#446644;margin-bottom:10px">+ ${sk.name}</div>
+      <div style="font-size:.7rem;color:${th.acc};letter-spacing:1px;margin-bottom:6px">${th.name}</div>
       <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
-        <div style="width:11px;height:11px;border-radius:50%;background:${sk.p1};box-shadow:0 0 5px ${sk.p1}88;flex-shrink:0"></div>
-        <span style="font-size:.52rem;color:#446644">PLAYER 1</span>
+        <div style="width:11px;height:11px;border-radius:50%;background:${co1.c};box-shadow:0 0 5px ${co1.c}88;flex-shrink:0"></div>
+        <span style="font-size:.52rem;color:#446644">P1 · ${co1.name}</span>
       </div>
       <div style="display:flex;align-items:center;gap:5px">
-        <div style="width:11px;height:11px;border-radius:50%;background:${sk.p2};box-shadow:0 0 5px ${sk.p2}88;flex-shrink:0"></div>
-        <span style="font-size:.52rem;color:#446644">PLAYER 2</span>
+        <div style="width:11px;height:11px;border-radius:50%;background:${co2.c};box-shadow:0 0 5px ${co2.c}88;flex-shrink:0"></div>
+        <span style="font-size:.52rem;color:#446644">P2 · ${co2.name}</span>
       </div>`;
   }
 }
@@ -3213,23 +3230,26 @@ function applyBoardTheme(name){
   if(name==='matrix')delete document.body.dataset.bt;
   else document.body.dataset.bt=name;
   localStorage.setItem('rai-bt',name);
-  _updateSkUI();
 }
-function applyPieceSkin(name){
-  if(name==='default')delete document.body.dataset.ps;
-  else document.body.dataset.ps=name;
-  localStorage.setItem('rai-ps',name);
-  _updateSkUI();
+function applyP1Color(key){
+  if(key==='blue')delete document.body.dataset.p1s;
+  else document.body.dataset.p1s=key;
+  localStorage.setItem('rai-p1s',key);
   if(board)render();
 }
-function _updateSkUI(){
-  // ov-skin is rebuilt by _buildSkinUI(); nothing else needed
+function applyP2Color(key){
+  if(key==='red')delete document.body.dataset.p2s;
+  else document.body.dataset.p2s=key;
+  localStorage.setItem('rai-p2s',key);
+  if(board)render();
 }
 (()=>{
-  const bt=localStorage.getItem('rai-bt')||'matrix';
-  const ps=localStorage.getItem('rai-ps')||'default';
+  const bt =localStorage.getItem('rai-bt') ||'matrix';
+  const p1s=localStorage.getItem('rai-p1s')||'blue';
+  const p2s=localStorage.getItem('rai-p2s')||'red';
   if(bt!=='matrix')document.body.dataset.bt=bt;
-  if(ps!=='default')document.body.dataset.ps=ps;
+  if(p1s!=='blue')document.body.dataset.p1s=p1s;
+  if(p2s!=='red') document.body.dataset.p2s=p2s;
 })();
 
 </script>
