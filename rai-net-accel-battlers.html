@@ -46,8 +46,8 @@ h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:var(--p1-c); te
 .piece.hidden { background:linear-gradient(145deg,#111,#1e1e1e)!important; color:#555!important; box-shadow:none!important; }
 .piece.hidden.p1 { border:2px solid var(--p1-hb); }
 .piece.hidden.p2 { border:2px solid var(--p2-hb); }
-.piece.t-program.p1,.piece.t-firewall,.piece.t-virus,.piece.t-linker,.piece.t-medic,.piece.t-worm { background:linear-gradient(145deg,var(--p1-d1),var(--p1-d2)); border:2px solid var(--p1-bd); color:var(--p1-c); box-shadow:0 0 10px var(--p1-sh); }
-.piece.t-program.p2,.piece.t-firewall.p2,.piece.t-virus.p2,.piece.t-linker.p2,.piece.t-medic.p2,.piece.t-worm.p2 { background:linear-gradient(145deg,var(--p2-d1),var(--p2-d2)); border:2px solid var(--p2-bd); color:var(--p2-c); box-shadow:0 0 10px var(--p2-sh); }
+.piece.t-program.p1,.piece.t-firewall,.piece.t-virus,.piece.t-linker,.piece.t-medic,.piece.t-worm,.piece.t-spyder { background:linear-gradient(145deg,var(--p1-d1),var(--p1-d2)); border:2px solid var(--p1-bd); color:var(--p1-c); box-shadow:0 0 10px var(--p1-sh); }
+.piece.t-program.p2,.piece.t-firewall.p2,.piece.t-virus.p2,.piece.t-linker.p2,.piece.t-medic.p2,.piece.t-worm.p2,.piece.t-spyder.p2 { background:linear-gradient(145deg,var(--p2-d1),var(--p2-d2)); border:2px solid var(--p2-bd); color:var(--p2-c); box-shadow:0 0 10px var(--p2-sh); }
 .piece.t-linker { box-shadow:0 0 16px var(--p1-sh); animation:lp 1.8s ease-in-out infinite; }
 .piece.t-linker.p2 { box-shadow:0 0 16px var(--p2-sh); animation:lp2 1.8s ease-in-out infinite; }
 @keyframes lp  { 0%,100%{box-shadow:0 0 14px var(--p1-sh);}50%{box-shadow:0 0 28px var(--p1-sh);} }
@@ -103,6 +103,12 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 @keyframes worm-p  { 0%,100%{box-shadow:0 0 8px var(--p1-sh);}50%{box-shadow:0 0 24px var(--p1-sh);} }
 @keyframes worm-p2 { 0%,100%{box-shadow:0 0 8px var(--p2-sh);}50%{box-shadow:0 0 24px var(--p2-sh);} }
 .cap-chip.cw { background:#1a0033; border:1px solid #660099; color:#cc66ff; }
+.rt.spy { background:#1a0000; border:1px solid #cc2200; color:#ff5533; }
+.piece.t-spyder { animation:spy-p 1.4s ease-in-out infinite; }
+.piece.t-spyder.p2 { animation:spy-p2 1.4s ease-in-out infinite; }
+@keyframes spy-p  { 0%,100%{box-shadow:0 0 8px var(--p1-sh);}50%{box-shadow:0 0 22px var(--p1-sh),0 0 40px var(--p1-sh);} }
+@keyframes spy-p2 { 0%,100%{box-shadow:0 0 8px var(--p2-sh);}50%{box-shadow:0 0 22px var(--p2-sh),0 0 40px var(--p2-sh);} }
+.cap-chip.csp { background:#1a0000; border:1px solid #aa2200; color:#ff5533; }
 .cell.center-line { border-top:2px solid #226633!important; border-bottom:2px solid #226633!important; background:#050e05; }
 .mode-btn { padding:7px 4px; font-size:.7rem; letter-spacing:1px; border-color:#004400; color:#446644; background:#050e05; }
 .mode-btn.on { border-color:#00ff41; color:#00ff41; background:#0a1e0a; }
@@ -410,6 +416,9 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
         <button class="piece-card" onclick="openPieceModal('worm')">
           <span class="rt worm">≋WRM</span><span class="piece-card-name">WRM</span>
         </button>
+        <button class="piece-card" onclick="openPieceModal('spyder')">
+          <span class="rt spy">🕷SPY</span><span class="piece-card-name">SPY</span>
+        </button>
         <button class="piece-card" onclick="showRulesInGame()" style="border-color:#334455;color:#556677">
           <span style="font-size:.9rem">📖</span><span class="piece-card-name">ルール</span>
         </button>
@@ -479,10 +488,11 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
   <div class="ov-sub" style="color:#00ff41;letter-spacing:3px;font-size:.9rem">CPU 対戦 — モード／難易度選択</div>
   <div class="ov-panel" style="width:min(300px,90vw)">
     <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px">
       <button id="cpu-mode-btn-classic" class="mode-btn on" onclick="setCpuMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6  8駒</span></button>
       <button id="cpu-mode-btn-extended" class="mode-btn" onclick="setCpuMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×6  10駒</span></button>
-      <button id="cpu-mode-btn-worm" class="mode-btn" onclick="setCpuMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×6  12駒</span></button>
+      <button id="cpu-mode-btn-worm" class="mode-btn" onclick="setCpuMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×8  12駒</span></button>
+      <button id="cpu-mode-btn-spyder" class="mode-btn" onclick="setCpuMode('spyder')">SPYDER<br><span style="font-size:.58rem;opacity:.7">6×8  12駒</span></button>
     </div>
     <button onclick="startCpuGame(2)" style="border-color:#00ff41;color:#00ff41">// 中級</button>
     <button onclick="startCpuGame(3)" style="border-color:#ff6600;color:#ff8833">// 上級</button>
@@ -589,6 +599,24 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
         ※ <span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">☁LINK</span>・<span class="rt med">MEDIC</span> には無効<br>
         ※ WORMは消費型！1回使い切り消える！      </div>
 
+      <div style="border:1px solid #660000;padding:8px;margin-top:10px">
+        <b style="color:#ff5533;letter-spacing:2px">[ SPYDER モード (6×8列) ]</b><br>
+        <span style="font-size:.62rem;color:#774444">WORMモードと同じ盤面。WORMの代わりにSPYDERが登場</span><br>
+        <br>
+        <span class="rt prog">PROG</span>　PROGRAM — 数値駒<br>
+        <span class="rt fw">F/W</span>　FIREWALL — 盾役<br>
+        <span class="rt vir">VIRUS</span>　VIRUS — 攻撃役<br>
+        <span class="rt med">✚MED</span>　MEDIC — 変身役<br>
+        <span class="rt spy">🕷SPY</span>　SPYDER — 狙撃型（下記参照）<br>
+        <br>
+        <b style="color:#ff5533">◁ SPYDERの狙撃</b><br>
+        <span class="rt spy">🕷SPY</span> は<b>表向き</b>の相手駒を<b>直線2マス以上</b>先から攻撃可<br>
+        縦・横・斜めの一直線上、経路に駒なし　が条件<br>
+        ① 攻撃したとき → <b>必ず勝つ</b>（全駒対象、F/Wも含む）<br>
+        ② 攻撃されたとき → <b>必ず負ける</b>（共倒れなし）<br>
+        ③ 通常1マス移動も可。隣接の表向き駒へは狙撃不可<br>
+      </div>
+
     </div>
       <div style="border:1px solid #2a2a1a;padding:8px;margin-top:10px">
         <b style="color:#ffaa00;letter-spacing:2px">[ ランク称号 ]</b><br><br>
@@ -624,10 +652,11 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
     </div>
     <div style="margin-bottom:10px">
       <div style="font-size:.62rem;color:#446644;margin-bottom:5px;letter-spacing:1px">// GAME MODE (HOSTが選択)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
         <button id="mode-btn-classic" class="mode-btn on" onclick="setOnlineMode('classic')">CLASSIC<br><span style="font-size:.58rem;opacity:.7">4×6  8駒</span></button>
         <button id="mode-btn-extended" class="mode-btn" onclick="setOnlineMode('extended')">EXTENDED<br><span style="font-size:.58rem;opacity:.7">5×6  10駒</span></button>
-        <button id="mode-btn-worm" class="mode-btn" onclick="setOnlineMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×6  12駒</span></button>
+        <button id="mode-btn-worm" class="mode-btn" onclick="setOnlineMode('worm')">WORM<br><span style="font-size:.58rem;opacity:.7">6×8  12駒</span></button>
+        <button id="mode-btn-spyder" class="mode-btn" onclick="setOnlineMode('spyder')">SPYDER<br><span style="font-size:.58rem;opacity:.7">6×8  12駒</span></button>
       </div>
     </div>
     <div style="font-size:.68rem;color:#446644;margin-bottom:10px;line-height:1.7">
@@ -1331,21 +1360,18 @@ function applyVariant(v){
   gameVariant=v;
   if(v==='extended'){ROWS=7;COLS=5;GOAL={1:0,2:6};HOME={1:[4,5],2:[1,2]};}
   else if(v==='worm'){ROWS=8;COLS=6;GOAL={1:0,2:7};HOME={1:[5,6],2:[1,2]};}
+  else if(v==='spyder'){ROWS=8;COLS=6;GOAL={1:0,2:7};HOME={1:[5,6],2:[1,2]};}
   else{ROWS=6;COLS=4;GOAL={1:0,2:5};HOME={1:[3,4],2:[1,2]};}
   if(typeof calcCellSize==='function')calcCellSize();
 }
 function setOnlineMode(m){
   selectedOnlineMode=m;
-  document.getElementById('mode-btn-classic').classList.toggle('on',m==='classic');
-  document.getElementById('mode-btn-extended').classList.toggle('on',m==='extended');
-  document.getElementById('mode-btn-worm').classList.toggle('on',m==='worm');
+  ['classic','extended','worm','spyder'].forEach(v=>document.getElementById(`mode-btn-${v}`)?.classList.toggle('on',v===m));
 }
 let selectedCpuMode='classic';
 function setCpuMode(m){
   selectedCpuMode=m;
-  document.getElementById('cpu-mode-btn-classic').classList.toggle('on',m==='classic');
-  document.getElementById('cpu-mode-btn-extended').classList.toggle('on',m==='extended');
-  document.getElementById('cpu-mode-btn-worm').classList.toggle('on',m==='worm');
+  ['classic','extended','worm','spyder'].forEach(v=>document.getElementById(`cpu-mode-btn-${v}`)?.classList.toggle('on',v===m));
 }
 
 // ── State ────────────────────────────────────────────
@@ -1361,7 +1387,7 @@ let opponentName='???';
 let _myRating=1400;
 let _oppRating=1500;
 let _wins=0,_losses=0,_draws=0;
-let _statsMode={classic:{w:0,l:0,d:0},extended:{w:0,l:0,d:0},worm:{w:0,l:0,d:0}};
+let _statsMode={classic:{w:0,l:0,d:0},extended:{w:0,l:0,d:0},worm:{w:0,l:0,d:0},spyder:{w:0,l:0,d:0}};
 let _statsVs={cpu:{w:0,l:0,d:0},online:{w:0,l:0,d:0}};
 let _streak={cur:0,best:0};
 let _ratingHistory=[];
@@ -1487,8 +1513,29 @@ function placePiecesWorm(player){
   for(let c=0;c<COLS;c++)board[frontRow][c]=pieces[c];
   for(let c=0;c<COLS;c++)board[backRow][c]=pieces[COLS+c];
 }
+function placePiecesSpyder(player){
+  const pieces=sh([
+    {player,type:'firewall',value:null,revealed:false},
+    {player,type:'firewall',value:null,revealed:false},
+    {player,type:'virus',value:null,revealed:false},
+    {player,type:'virus',value:null,revealed:false},
+    {player,type:'program',value:4,revealed:false},
+    {player,type:'program',value:3,revealed:false},
+    {player,type:'program',value:3,revealed:false},
+    {player,type:'program',value:2,revealed:false},
+    {player,type:'program',value:2,revealed:false},
+    {player,type:'medic',value:null,revealed:false},
+    {player,type:'spyder',value:null,revealed:false},
+    {player,type:'linker',value:null,revealed:false},
+  ]);
+  const frontRow=player===1?HOME[1][0]:HOME[2][0];
+  const backRow=player===1?HOME[1][1]:HOME[2][1];
+  for(let c=0;c<COLS;c++)board[frontRow][c]=pieces[c];
+  for(let c=0;c<COLS;c++)board[backRow][c]=pieces[COLS+c];
+}
 function placeFn(player){
   if(gameVariant==='worm')return placePiecesWorm(player);
+  if(gameVariant==='spyder')return placePiecesSpyder(player);
   if(gameVariant==='extended')return placePiecesExt(player);
   return placePieces(player);
 }
@@ -1505,13 +1552,29 @@ function beats(a,b){
   if(a.type==='linker')return b.type==='firewall';
   return false;
 }
-function resolveBattle(att,def){const aw=beats(att,def),dw=beats(def,att);if(aw&&!dw)return'att';if(dw&&!aw)return'def';return'both';}
-function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'☁LNK',medic:'MED',worm:'WRM'}[p.type]||'?';}
+function resolveBattle(att,def){
+  if(att.type==='spyder')return'att';
+  if(def.type==='spyder')return'def';
+  const aw=beats(att,def),dw=beats(def,att);if(aw&&!dw)return'att';if(dw&&!aw)return'def';return'both';
+}
+function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'☁LNK',medic:'MED',worm:'WRM',spyder:'SPY'}[p.type]||'?';}
 
 // ── Move ─────────────────────────────────────────────
 function getMoves(r,c){
-  return[[-1,0],[1,0],[0,-1],[0,1]].map(([dr,dc])=>[r+dr,c+dc])
+  const piece=board[r][c];
+  const adj=[[-1,0],[1,0],[0,-1],[0,1]].map(([dr,dc])=>[r+dr,c+dc])
     .filter(([nr,nc])=>nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]?.player!==turn);
+  if(piece?.type==='spyder'){
+    [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dr,dc])=>{
+      for(let d=2;;d++){
+        const nr=r+dr*d,nc=c+dc*d;
+        if(nr<0||nr>=ROWS||nc<0||nc>=COLS)break;
+        const t=board[nr][nc];
+        if(t){if(t.player!==turn&&t.revealed)adj.push([nr,nc]);break;}
+      }
+    });
+  }
+  return adj;
 }
 
 function doMove(fr,fc,tr,tc){
@@ -1710,6 +1773,19 @@ function aiChooseMove(){
 }
 function scoreMove(fr,fc,tr,tc,piece){
   let s=0;const tgt=board[tr][tc];
+  if(piece.type==='spyder'){
+    if(tgt?.revealed){
+      if(tgt.type==='linker')return 9e5;
+      s+=50;
+      if(tgt.type==='program')s+=tgt.value*8;
+      if(tgt.type==='medic')s+=30;
+    }else if(!tgt){
+      s+=(tr>fr)?6:-3;
+    }else{
+      s-=150;
+    }
+    return s;
+  }
   if(piece.type==='worm'){
     if(!tgt)return s+(tr>fr?8:-4);
     if(tgt.type==='program'){
@@ -1802,7 +1878,7 @@ function clickCell(r,c){
 function pieceInfo(p){
   const visible=p.player===myPN||p.revealed;
   if(!visible)return['?','???'];
-  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC'],worm:['≋','WORM']}[p.type];
+  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC'],worm:['≋','WORM'],spyder:['🕷','SPY']}[p.type];
 }
 function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type} p${p.player}`;}
 
@@ -1846,7 +1922,7 @@ function render(){
   else{const isMyTurn=turn===myPN;tl.innerHTML=isMyTurn?`<span class="c1">▶ ${myName} のターン</span>`:`<span class="c2">▶ ${gameMode==='cpu'?'CPU':opponentName} のターン</span>`;}
   renderCaptured();applySlideAnim();renderHUD();_revealAnim=false;
 }
-function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl',medic:'cm',worm:'cw'}[p.type]||'cp';}
+function capClass(p){return{program:'cp',firewall:'cf',virus:'cv',linker:'cl',medic:'cm',worm:'cw',spyder:'csp'}[p.type]||'cp';}
 function renderCaptured(){
   [1,2].forEach(pl=>{
     const el=document.getElementById(`cap${pl}`);const list=captured[pl];
@@ -2573,6 +2649,7 @@ const PIECE_INFO={
   virus:{title:'VIRUS / ウイルス',sub:'[ 奇襲役・2種 ]',body:'<span class="rt prog">PROG</span> 全種・<span class="rt lnk">☆LINK</span> に勝利。<br>ただし<span class="rt fw">F/W</span> と <span class="rt prog">P2</span> には負ける。<br><br>隠れている駒に突っ込んで正体を確認する使い方もある。',tip:'💡 相手のF/W位置を把握してから動かすこと。'},
   medic:{title:'✚MEDIC / メディック',sub:'[ 変身役・EXTENDEDのみ ]',body:'通常時は最弱。<span class="rt vir">VIRUS</span> にだけ勝利し、それ以外の全駒に負ける。<br><br>VIRUS を撃破すると<b>変身</b>！好きな駒に変身できる。<br><span class="rt lnk">☆LINK</span> に変身 → LINK が2枚に→2枚とも失うと敗北。',tip:'💡 相手から見ると「何か分からない」。奇襲の鍵。'},
   worm:{title:'≋WORM / ワーム',sub:'[ 感染型・WORMモードのみ ]',body:'隣接する相手の <span class="rt prog">PROG</span> へ移動することで<b>感染発動</b>。<br><br>① WORMが消滅<br>② ターゲットPROGが消滅<br>③ そのPROGの周囲1マスにいる相手PROGも<b>連鎖消滅</b><br><br><span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">☆LINK</span>・<span class="rt med">MEDIC</span> には通常戦闘で<b>必ず負ける</b>。',tip:'💡 PROG密集地帯への突撃で最大5枚を一撃。滅タイミングを見極めよ。'},
+  spyder:{title:'🕷SPYDER / スパイダー',sub:'[ 狙撃型・SPYDERモードのみ ]',body:'<b>表向きの</b>相手駒を<b>直線2マス以上先</b>から狙撃して攻撃できる。<br>縦・横・斜めの一直線上、経路に駒がないことが条件。<br><br>攻撃側なら<b>全駒に必ず勝つ</b>（F/Wも含む）。<br>攻撃されたら<b>全駒に必ず負ける</b>（共倒れなし）。<br><br>通常の1マス移動も可。<br>隣接（1マス先）の表向き駒への狙撃は不可。',tip:'💡 相手が駒を表向きにした瞬間が狙い目。ただし自分も表向きになれば狙われる。'},
 };;
 function openPieceModal(key){
   const d=PIECE_INFO[key];if(!d)return;
