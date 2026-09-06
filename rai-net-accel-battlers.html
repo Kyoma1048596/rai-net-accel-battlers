@@ -1554,7 +1554,7 @@ function beats(a,b){
 }
 function resolveBattle(att,def){
   if(att.type==='spyder')return'att';
-  if(def.type==='spyder')return'def';
+  if(def.type==='spyder')return'att';
   const aw=beats(att,def),dw=beats(def,att);if(aw&&!dw)return'att';if(dw&&!aw)return'def';return'both';
 }
 function pLabel(p){return{program:`P${p.value}`,firewall:'FW',virus:'VR',linker:'☁LNK',medic:'MED',worm:'WRM',spyder:'SPY'}[p.type]||'?';}
