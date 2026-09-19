@@ -116,7 +116,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 
 /* Overlays */
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); flex-direction:column; align-items:center; justify-content:center; z-index:200; gap:14px; padding:20px; }
-#ov-title { background:#000; }
+#ov-title { background:#000; justify-content:flex-start; padding-top:calc(env(safe-area-inset-top, 0px) + 6vh); }
 .overlay.on { display:flex; }
 .ov-title { font-size:clamp(1.2rem,4vw,2rem); letter-spacing:4px; text-align:center; line-height:1.4; text-shadow:0 0 20px currentColor; }
 .ov-sub { font-size:.75rem; color:#556655; letter-spacing:2px; text-align:center; }
