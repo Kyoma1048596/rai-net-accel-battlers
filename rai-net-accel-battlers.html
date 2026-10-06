@@ -2,13 +2,14 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>雷ネット・アクセルバトラーズ</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
+html { background:#050a05; }
 body {
   background:#050a05; color:#00ff41; font-family:'Courier New',monospace;
-  min-height:100vh; display:flex; flex-direction:column;
+  min-height:100dvh; display:flex; flex-direction:column;
   align-items:center; padding:16px; overflow-x:hidden;
 }
 body::before {
@@ -105,18 +106,20 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 @keyframes worm-p2 { 0%,100%{box-shadow:0 0 8px var(--p2-sh);}50%{box-shadow:0 0 24px var(--p2-sh);} }
 .cap-chip.cw { background:#1a0033; border:1px solid #660099; color:#cc66ff; }
 .rt.spy { background:#1a0000; border:1px solid #cc2200; color:#ff5533; }
+.piece.t-spyder,.piece.t-spyder.p1,.piece.t-spyder.p2 { background:linear-gradient(145deg,#1a0000,#300000)!important; border:2px solid #cc2200!important; color:#ff5533!important; box-shadow:0 0 10px rgba(255,51,34,.4)!important; }
 .piece.t-spyder { animation:spy-p 1.4s ease-in-out infinite; }
 .piece.t-spyder.p2 { animation:spy-p2 1.4s ease-in-out infinite; }
-@keyframes spy-p  { 0%,100%{box-shadow:0 0 8px var(--p1-sh);}50%{box-shadow:0 0 22px var(--p1-sh),0 0 40px var(--p1-sh);} }
-@keyframes spy-p2 { 0%,100%{box-shadow:0 0 8px var(--p2-sh);}50%{box-shadow:0 0 22px var(--p2-sh),0 0 40px var(--p2-sh);} }
+@keyframes spy-p  { 0%,100%{box-shadow:0 0 8px rgba(255,51,34,.4);}50%{box-shadow:0 0 22px rgba(255,51,34,.6),0 0 40px rgba(255,51,34,.3);} }
+@keyframes spy-p2 { 0%,100%{box-shadow:0 0 8px rgba(255,51,34,.4);}50%{box-shadow:0 0 22px rgba(255,51,34,.6),0 0 40px rgba(255,51,34,.3);} }
 .cap-chip.csp { background:#1a0000; border:1px solid #aa2200; color:#ff5533; }
 .cell.center-line { border-top:2px solid #226633!important; border-bottom:2px solid #226633!important; background:#050e05; }
 .mode-btn { padding:7px 4px; font-size:.7rem; letter-spacing:1px; border-color:#004400; color:#446644; background:#050e05; }
 .mode-btn.on { border-color:#00ff41; color:#00ff41; background:#0a1e0a; }
 
 /* Overlays */
-.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); flex-direction:column; align-items:center; justify-content:center; z-index:200; gap:14px; padding:20px; }
-#ov-title { background:#000; justify-content:flex-start; padding-top:calc(env(safe-area-inset-top, 0px) + 6vh); }
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); flex-direction:column; align-items:center; justify-content:center; z-index:200; gap:14px; padding:max(20px,calc(env(safe-area-inset-top)+12px)) 20px max(20px,calc(env(safe-area-inset-bottom)+12px)); overflow-y:auto; }
+#ov-title { background:#000; justify-content:flex-start; padding-top:calc(env(safe-area-inset-top)+16px); }
+#ov-splash { justify-content:center; padding-top:max(20px,calc(env(safe-area-inset-top)+12px)); }
 .overlay.on { display:flex; }
 .ov-title { font-size:clamp(1.2rem,4vw,2rem); letter-spacing:4px; text-align:center; line-height:1.4; text-shadow:0 0 20px currentColor; }
 .ov-sub { font-size:.75rem; color:#556655; letter-spacing:2px; text-align:center; }
@@ -289,6 +292,7 @@ h1::after { content:''; display:block; height:1px; margin-top:4px; background:li
 .hud-bar.p2 { background:linear-gradient(90deg,#880011,#ff3300); margin-top:3px; }
 
 /* ── Board themes ─────────────────────────────────────────────── */
+html[data-bt="void"]{background:#0a0012;}html[data-bt="amber"]{background:#0c0800;}html[data-bt="ice"]{background:#000a14;}
 body[data-bt="void"]{background:#0a0012;--bt-acc-sh:rgba(170,68,255,.45);}
 body[data-bt="void"] #board{background:#0e0818;border-color:#aa44ff;box-shadow:0 0 24px rgba(170,68,255,.2),inset 0 0 20px rgba(0,0,0,.5);}
 body[data-bt="void"] .cell{background:#110d1c;border-color:#2a1a3a;}
@@ -423,7 +427,7 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
           <span class="rt worm">≋WRM</span><span class="piece-card-name">WRM</span>
         </button>
         <button class="piece-card" onclick="openPieceModal('spyder')">
-          <span class="rt spy">🕷SPY</span><span class="piece-card-name">SPY</span>
+          <span class="rt spy"><svg viewBox="0 0 32 32" fill="none" width="1em" height="1em" style="vertical-align:middle"><ellipse cx="16" cy="19" rx="6" ry="7.5" fill="currentColor"/><circle cx="16" cy="10" r="4" fill="currentColor"/><rect x="15" y="14" width="2" height="2" fill="currentColor"/><path d="M10 9L5 5L1 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 13L4 11L0 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 18L4 18L1 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M11 24L7 26L6 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 9L27 5L31 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 13L28 11L32 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 18L28 18L31 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M21 24L25 26L26 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>SPY</span><span class="piece-card-name">SPY</span>
         </button>
         <button class="piece-card" onclick="showRulesInGame()" style="border-color:#334455;color:#556677">
           <span style="font-size:.9rem">📖</span><span class="piece-card-name">ルール</span>
@@ -613,10 +617,10 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
         <span class="rt fw">F/W</span>　FIREWALL — 盾役<br>
         <span class="rt vir">VIRUS</span>　VIRUS — 攻撃役<br>
         <span class="rt med">✚MED</span>　MEDIC — 変身役<br>
-        <span class="rt spy">🕷SPY</span>　SPYDER — 狙撃型（下記参照）<br>
+        <span class="rt spy"><svg viewBox="0 0 32 32" fill="none" width="1em" height="1em" style="vertical-align:middle"><ellipse cx="16" cy="19" rx="6" ry="7.5" fill="currentColor"/><circle cx="16" cy="10" r="4" fill="currentColor"/><rect x="15" y="14" width="2" height="2" fill="currentColor"/><path d="M10 9L5 5L1 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 13L4 11L0 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 18L4 18L1 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M11 24L7 26L6 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 9L27 5L31 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 13L28 11L32 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 18L28 18L31 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M21 24L25 26L26 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>SPY</span>　SPYDER — 狙撃型（下記参照）<br>
         <br>
         <b style="color:#ff5533">◁ SPYDERの狙撃</b><br>
-        <span class="rt spy">🕷SPY</span> は<b>表向き</b>の相手駒を<b>直線2マス以上</b>先から攻撃可<br>
+        <span class="rt spy"><svg viewBox="0 0 32 32" fill="none" width="1em" height="1em" style="vertical-align:middle"><ellipse cx="16" cy="19" rx="6" ry="7.5" fill="currentColor"/><circle cx="16" cy="10" r="4" fill="currentColor"/><rect x="15" y="14" width="2" height="2" fill="currentColor"/><path d="M10 9L5 5L1 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 13L4 11L0 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 18L4 18L1 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M11 24L7 26L6 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 9L27 5L31 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 13L28 11L32 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 18L28 18L31 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M21 24L25 26L26 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>SPY</span> は<b>表向き</b>の相手駒を<b>直線2マス以上</b>先から攻撃可<br>
         縦・横・斜めの一直線上、経路に駒なし　が条件<br>
         ① 攻撃したとき → <b>必ず勝つ</b>（全駒対象、F/Wも含む）<br>
         ② 攻撃されたとき → <b>必ず負ける</b>（共倒れなし）<br>
@@ -1881,10 +1885,11 @@ function clickCell(r,c){
 }
 
 // ── Render ───────────────────────────────────────────
+const _SPY_IC='<svg viewBox="0 0 32 32" fill="none" width="1em" height="1em" style="vertical-align:middle;display:inline-block"><ellipse cx="16" cy="19" rx="6" ry="7.5" fill="currentColor"/><circle cx="16" cy="10" r="4" fill="currentColor"/><rect x="15" y="14" width="2" height="2" fill="currentColor"/><path d="M10 9L5 5L1 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 13L4 11L0 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 18L4 18L1 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M11 24L7 26L6 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 9L27 5L31 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 13L28 11L32 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 18L28 18L31 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M21 24L25 26L26 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
 function pieceInfo(p){
   const visible=p.player===myPN||p.revealed;
   if(!visible)return['?','???'];
-  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC'],worm:['≋','WORM'],spyder:['🕷','SPY']}[p.type];
+  return{program:[p.value,'PROG'],firewall:['⊘','F/W'],virus:['V!','VIRUS'],linker:['★','LINK'],medic:['✚','MEDIC'],worm:['≋','WORM'],spyder:[_SPY_IC,'SPY']}[p.type];
 }
 function pieceClass(p,visible){if(!visible)return`piece p${p.player} hidden`;return`piece t-${p.type} p${p.player}`;}
 
@@ -2655,7 +2660,7 @@ const PIECE_INFO={
   virus:{title:'VIRUS / ウイルス',sub:'[ 奇襲役・2種 ]',body:'<span class="rt prog">PROG</span> 全種・<span class="rt lnk">☆LINK</span> に勝利。<br>ただし<span class="rt fw">F/W</span> と <span class="rt prog">P2</span> には負ける。<br><br>隠れている駒に突っ込んで正体を確認する使い方もある。',tip:'💡 相手のF/W位置を把握してから動かすこと。'},
   medic:{title:'✚MEDIC / メディック',sub:'[ 変身役・EXTENDEDのみ ]',body:'通常時は最弱。<span class="rt vir">VIRUS</span> にだけ勝利し、それ以外の全駒に負ける。<br><br>VIRUS を撃破すると<b>変身</b>！好きな駒に変身できる。<br><span class="rt lnk">☆LINK</span> に変身 → LINK が2枚に→2枚とも失うと敗北。',tip:'💡 相手から見ると「何か分からない」。奇襲の鍵。'},
   worm:{title:'≋WORM / ワーム',sub:'[ 感染型・WORMモードのみ ]',body:'隣接する相手の <span class="rt prog">PROG</span> へ移動することで<b>感染発動</b>。<br><br>① WORMが消滅<br>② ターゲットPROGが消滅<br>③ そのPROGの周囲1マスにいる相手PROGも<b>連鎖消滅</b><br><br><span class="rt fw">F/W</span>・<span class="rt vir">VIRUS</span>・<span class="rt lnk">☆LINK</span>・<span class="rt med">MEDIC</span> には通常戦闘で<b>必ず負ける</b>。',tip:'💡 PROG密集地帯への突撃で最大5枚を一撃。滅タイミングを見極めよ。'},
-  spyder:{title:'🕷SPYDER / スパイダー',sub:'[ 狙撃型・SPYDERモードのみ ]',body:'<b>表向きの</b>相手駒を<b>直線2マス以上先</b>から狙撃して攻撃できる。<br>縦・横・斜めの一直線上、経路に駒がないことが条件。<br><br>攻撃側なら<b>全駒に必ず勝つ</b>（F/Wも含む）。<br>攻撃されたら<b>全駒に必ず負ける</b>（共倒れなし）。<br><br>通常の1マス移動も可。<br>隣接（1マス先）の表向き駒への狙撃は不可。',tip:'💡 相手が駒を表向きにした瞬間が狙い目。ただし自分も表向きになれば狙われる。'},
+  spyder:{title:'<svg viewBox="0 0 32 32" fill="none" width="1em" height="1em" style="vertical-align:middle"><ellipse cx="16" cy="19" rx="6" ry="7.5" fill="currentColor"/><circle cx="16" cy="10" r="4" fill="currentColor"/><rect x="15" y="14" width="2" height="2" fill="currentColor"/><path d="M10 9L5 5L1 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 13L4 11L0 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 18L4 18L1 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M11 24L7 26L6 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 9L27 5L31 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 13L28 11L32 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 18L28 18L31 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M21 24L25 26L26 31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>SPYDER / スパイダー',sub:'[ 狙撃型・SPYDERモードのみ ]',body:'<b>表向きの</b>相手駒を<b>直線2マス以上先</b>から狙撃して攻撃できる。<br>縦・横・斜めの一直線上、経路に駒がないことが条件。<br><br>攻撃側なら<b>全駒に必ず勝つ</b>（F/Wも含む）。<br>攻撃されたら<b>全駒に必ず負ける</b>（共倒れなし）。<br><br>通常の1マス移動も可。<br>隣接（1マス先）の表向き駒への狙撃は不可。',tip:'💡 相手が駒を表向きにした瞬間が狙い目。ただし自分も表向きになれば狙われる。'},
 };;
 function openPieceModal(key){
   const d=PIECE_INFO[key];if(!d)return;
@@ -3310,8 +3315,8 @@ document.addEventListener('touchstart',function(e){
 
 // ── Board Theme & Piece Skin ──────────────────────────────────
 function applyBoardTheme(name){
-  if(name==='matrix')delete document.body.dataset.bt;
-  else document.body.dataset.bt=name;
+  if(name==='matrix'){delete document.body.dataset.bt;delete document.documentElement.dataset.bt;}
+  else{document.body.dataset.bt=name;document.documentElement.dataset.bt=name;}
   localStorage.setItem('rai-bt',name);
 }
 function applyP1Color(key){
@@ -3330,7 +3335,7 @@ function applyP2Color(key){
   const bt =localStorage.getItem('rai-bt') ||'matrix';
   const p1s=localStorage.getItem('rai-p1s')||'blue';
   const p2s=localStorage.getItem('rai-p2s')||'red';
-  if(bt!=='matrix')document.body.dataset.bt=bt;
+  if(bt!=='matrix'){document.body.dataset.bt=bt;document.documentElement.dataset.bt=bt;}
   if(p1s!=='blue')document.body.dataset.p1s=p1s;
   if(p2s!=='red') document.body.dataset.p2s=p2s;
 })();
