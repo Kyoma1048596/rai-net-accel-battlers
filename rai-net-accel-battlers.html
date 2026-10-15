@@ -10,21 +10,37 @@
 <meta name="theme-color" content="#050a05">
 <script>
 // iOS home-screen app: round the neon frame's corners to match the screen.
-// Top corners only when the page actually reaches the top of the screen (black-translucent status bar).
+// iOS 26 bug (WebKit 301994): the status bar stays opaque-ish and position:fixed is clipped below it,
+// but scrolled page content still draws behind it. So when that gap exists we keep the page scrolled
+// down by the gap and draw the top of the frame with a sticky band (#sb-band) that lives in that area.
 (function(){
+  var gap = 0;
   function fitFrame(){
     var standalone = window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
     var root = document.documentElement;
-    if(!standalone){ root.style.removeProperty('--frame-r-top'); root.style.removeProperty('--frame-r-bot'); return; }
+    if(!standalone){ gap = 0; root.classList.remove('sbfix'); root.style.removeProperty('--frame-r-top'); root.style.removeProperty('--frame-r-bot'); return; }
     var portrait = window.innerHeight > window.innerWidth;
     var screenH = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-    var fullTop = screenH - window.innerHeight < 2;
-    root.style.setProperty('--frame-r-top', fullTop ? '52px' : '0px');
+    gap = Math.max(0, Math.min(80, screenH - window.innerHeight));
+    root.style.setProperty('--frame-r-top', gap < 2 ? '52px' : '0px');
     root.style.setProperty('--frame-r-bot', '52px');
+    if(gap >= 2 && portrait){ root.classList.add('sbfix'); root.style.setProperty('--sb-gap', gap + 'px'); }
+    else { gap = 0; root.classList.remove('sbfix'); }
+    clampScroll();
   }
+  function clampScroll(){ if(gap && window.scrollY < gap) window.scrollTo(0, gap); }
   fitFrame();
+  window.addEventListener('scroll', clampScroll, { passive:true });
   window.addEventListener('resize', fitFrame);
   window.addEventListener('orientationchange', function(){ setTimeout(fitFrame, 300); });
+  document.addEventListener('DOMContentLoaded', function(){
+    var band = document.createElement('div');
+    band.id = 'sb-band';
+    band.appendChild(document.createElement('div'));
+    document.body.insertBefore(band, document.body.firstChild);
+    fitFrame();
+  });
+  window.addEventListener('load', function(){ setTimeout(fitFrame, 50); });
 })();
 </script>
 <title>雷ネット・アクセルバトラーズ</title>
@@ -271,6 +287,19 @@ body::after {
   box-shadow:
     inset 0 0 35px 10px var(--bt-acc-sh),
     inset 0 0 75px 28px var(--bt-acc-sh);
+}
+/* iOS 26 status-bar workaround (see fitFrame): sticky band draws the frame's top edge behind the status bar */
+#sb-band { display:none; }
+html.sbfix { overscroll-behavior-y:none; }
+html.sbfix body { min-height:calc(100dvh + var(--sb-gap)); }
+html.sbfix body::after { top:-140px; }
+html.sbfix #sb-band {
+  display:block; position:sticky; top:calc(-1 * var(--sb-gap)); align-self:stretch; flex-shrink:0;
+  height:var(--sb-gap); margin:-16px -16px 16px; overflow:hidden; z-index:99999; pointer-events:none; background:#000;
+}
+html.sbfix #sb-band > div {
+  height:calc(var(--sb-gap) + 200px); border:3px solid var(--bt-acc-b); border-radius:52px 52px 0 0;
+  box-shadow:inset 0 0 35px 10px var(--bt-acc-sh), inset 0 0 75px 28px var(--bt-acc-sh);
 }
 .box { box-shadow:4px 4px 14px rgba(0,0,0,.8),-2px -2px 8px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.05); }
 .ov-panel { box-shadow:6px 6px 22px rgba(0,0,0,.9),-3px -3px 12px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.06); }
