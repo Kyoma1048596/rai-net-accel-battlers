@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -9,17 +9,18 @@
 <meta name="apple-mobile-web-app-title" content="雷ネット">
 <meta name="theme-color" content="#050a05">
 <script>
-// iOS home-screen app: fixed top:0 sits below the status bar, so measure the gap and stretch the neon frame up into it
+// iOS home-screen app: round the neon frame's corners to match the screen.
+// Top corners only when the page actually reaches the top of the screen (black-translucent status bar).
 (function(){
   function fitFrame(){
     var standalone = window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
     var root = document.documentElement;
-    if(!standalone){ root.style.removeProperty('--sb-gap'); root.style.removeProperty('--frame-r'); return; }
+    if(!standalone){ root.style.removeProperty('--frame-r-top'); root.style.removeProperty('--frame-r-bot'); return; }
     var portrait = window.innerHeight > window.innerWidth;
     var screenH = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-    var gap = Math.max(0, Math.min(80, screenH - window.innerHeight));
-    root.style.setProperty('--sb-gap', gap + 'px');
-    root.style.setProperty('--frame-r', '52px');
+    var fullTop = screenH - window.innerHeight < 2;
+    root.style.setProperty('--frame-r-top', fullTop ? '52px' : '0px');
+    root.style.setProperty('--frame-r-bot', '52px');
   }
   fitFrame();
   window.addEventListener('resize', fitFrame);
@@ -265,7 +266,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 /* ── Dark Neumorphism + Polish ─────────────────────────────── */
 body { background:radial-gradient(ellipse 130% 55% at 50% 0%,#071407 0%,#050a05 68%); }
 body::after {
-  content:''; position:fixed; inset:0; top:calc(-1 * var(--sb-gap,0px)); pointer-events:none; z-index:99999; border-radius:var(--frame-r,0);
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:99999; border-radius:var(--frame-r-top,0) var(--frame-r-top,0) var(--frame-r-bot,0) var(--frame-r-bot,0);
   border:3px solid var(--bt-acc-b);
   box-shadow:
     inset 0 0 35px 10px var(--bt-acc-sh),
@@ -3365,39 +3366,6 @@ function applyP2Color(key){
   if(p2s!=='red') document.body.dataset.p2s=p2s;
 })();
 
-</script>
-<!-- TEMP: status-bar probe (remove after test) -->
-<script>
-(function(){
-  var Z = 2147483000;
-  var red = document.createElement('div');
-  red.style.cssText = 'position:fixed;left:8%;width:22%;top:-50px;height:50px;background:#ff2030;z-index:'+Z+';pointer-events:none;';
-  var blue = document.createElement('div');
-  blue.style.cssText = 'position:absolute;left:39%;width:22%;top:-50px;height:50px;background:#2060ff;z-index:'+Z+';pointer-events:none;';
-  var yel = document.createElement('div');
-  yel.style.cssText = 'position:sticky;top:-50px;margin-top:-66px;margin-bottom:16px;height:50px;width:22%;align-self:flex-end;margin-right:-8px;background:#ffd400;z-index:'+Z+';pointer-events:none;flex-shrink:0;';
-  document.body.appendChild(red);
-  document.body.appendChild(blue);
-  document.body.insertBefore(yel, document.body.firstChild);
-  var envp = document.createElement('div');
-  envp.style.cssText = 'position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);';
-  document.body.appendChild(envp);
-  var info = document.createElement('div');
-  info.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000;color:#fff;border:1px solid #fff;font:12px/1.5 monospace;padding:6px 10px;z-index:'+Z+';pointer-events:none;white-space:pre;';
-  document.body.appendChild(info);
-  function upd(){
-    var cs = getComputedStyle(envp), vv = window.visualViewport;
-    info.textContent =
-      'standalone=' + (navigator.standalone ? 1 : 0) + '\n' +
-      'screen=' + screen.width + 'x' + screen.height + '\n' +
-      'inner=' + innerWidth + 'x' + innerHeight + '\n' +
-      'client=' + document.documentElement.clientHeight + '\n' +
-      'vv=' + (vv ? Math.round(vv.height) + ' off=' + Math.round(vv.offsetTop) : '-') + '\n' +
-      'safeTop=' + cs.paddingTop + ' safeBot=' + cs.paddingBottom + '\n' +
-      'sbGap=' + (document.documentElement.style.getPropertyValue('--sb-gap') || '-');
-  }
-  upd(); addEventListener('resize', upd); setInterval(upd, 1000);
-})();
 </script>
 </body>
 </html>
