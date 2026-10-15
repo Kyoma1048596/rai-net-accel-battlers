@@ -8,6 +8,24 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="雷ネット">
 <meta name="theme-color" content="#050a05">
+<script>
+// iOS home-screen app: fixed top:0 sits below the status bar, so measure the gap and stretch the neon frame up into it
+(function(){
+  function fitFrame(){
+    var standalone = window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+    var root = document.documentElement;
+    if(!standalone){ root.style.removeProperty('--sb-gap'); root.style.removeProperty('--frame-r'); return; }
+    var portrait = window.innerHeight > window.innerWidth;
+    var screenH = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+    var gap = Math.max(0, Math.min(80, screenH - window.innerHeight));
+    root.style.setProperty('--sb-gap', gap + 'px');
+    root.style.setProperty('--frame-r', '52px');
+  }
+  fitFrame();
+  window.addEventListener('resize', fitFrame);
+  window.addEventListener('orientationchange', function(){ setTimeout(fitFrame, 300); });
+})();
+</script>
 <title>雷ネット・アクセルバトラーズ</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -247,7 +265,7 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 /* ── Dark Neumorphism + Polish ─────────────────────────────── */
 body { background:radial-gradient(ellipse 130% 55% at 50% 0%,#071407 0%,#050a05 68%); }
 body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:99999; border-radius:0;
+  content:''; position:fixed; inset:0; top:calc(-1 * var(--sb-gap,0px)); pointer-events:none; z-index:99999; border-radius:var(--frame-r,0);
   border:3px solid var(--bt-acc-b);
   box-shadow:
     inset 0 0 35px 10px var(--bt-acc-sh),
