@@ -168,7 +168,7 @@ button:hover { background:#0a1e0a; box-shadow:0 0 8px rgba(0,255,65,.25); }
 @keyframes worm-p  { 0%,100%{box-shadow:0 0 8px var(--p1-sh);}50%{box-shadow:0 0 24px var(--p1-sh);} }
 @keyframes worm-p2 { 0%,100%{box-shadow:0 0 8px var(--p2-sh);}50%{box-shadow:0 0 24px var(--p2-sh);} }
 .cap-chip.cw { background:#1a0033; border:1px solid #660099; color:#cc66ff; }
-.rt.spy { background:#001a10; border:1px solid #006644; color:#44cc88; }
+.rt.spy { background:#1a0500; border:1px solid #993322; color:#ff5533; }
 .piece.t-spyder { animation:spy-p 1.4s ease-in-out infinite; }
 .piece.t-spyder.p2 { animation:spy-p2 1.4s ease-in-out infinite; }
 @keyframes spy-p  { 0%,100%{box-shadow:0 0 8px var(--p1-sh);}50%{box-shadow:0 0 22px var(--p1-sh),0 0 40px var(--p1-sh);} }
@@ -316,6 +316,13 @@ html.sbfix #bg-band {
   display:block; width:100%; height:var(--sb-gap); pointer-events:none; background:var(--sb-bg,#000);
   border:3px solid var(--sb-b,var(--bt-acc-b)); border-bottom:none; border-radius:52px 52px 0 0; transition:opacity .4s;
 }
+/* page content scrolls up into the status-bar strip and is cut there; fade it out instead of a hard edge (match screens only) */
+#top-fade { display:none; }
+html.sbfix #top-fade {
+  display:block; position:fixed; left:0; right:0; top:0; height:34px; z-index:150; pointer-events:none;
+  background:linear-gradient(to bottom, var(--sb-bg,#000) 0%, var(--sb-bg,#000) 20%, transparent 100%); transition:opacity .3s;
+}
+html.sbfix body:has(.overlay.on) #top-fade { opacity:0; }
 html.sbfix body { height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; }
 /* same geometry as the band (top edge at the very top of the screen) so the side lines continue without a step */
 html.sbfix body::after { top:calc(-1 * var(--sb-gap)); border-radius:52px 52px var(--frame-r-bot,0) var(--frame-r-bot,0); }
@@ -3434,6 +3441,9 @@ function applyP2Color(key){
   var cv = document.createElement('canvas');
   cv.id = 'bg-fx'; cv.setAttribute('aria-hidden', 'true');
   document.body.insertBefore(cv, document.body.firstChild);
+  var fade = document.createElement('div');
+  fade.id = 'top-fade'; fade.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(fade);
   // iOS home-screen app: fixed elements are clipped below the status bar, so the strip behind it gets its
   // own static canvas (#bg-band, shown only with html.sbfix) that draws the top slice of the same picture
   var band = document.createElement('canvas');
