@@ -14,6 +14,11 @@
 // but plain static page content still draws behind it. So when that gap exists we put a static band
 // (html::before) at the top of the document, keep the document scrolled by exactly the gap, and let the
 // game scroll inside <body> instead.
+// base colour of each board theme (body[data-bt]); the moving background canvas is filled with it
+window.__rainetThemeBg = function(){
+  var bt = document.body && document.body.dataset.bt;
+  return { void:'#0a0012', amber:'#0c0800', ice:'#000a14' }[bt] || '#050a05';
+};
 (function(){
   var gap = 0;
   function fitFrame(){
@@ -40,7 +45,8 @@
     root.style.setProperty('--sb-b', cs.getPropertyValue('--bt-acc-b'));
     root.style.setProperty('--sb-s', cs.getPropertyValue('--bt-acc-sh'));
     var base = rgba(cs.backgroundColor);
-    if(base[3] === 0) base = [7, 20, 7, 1]; // default theme uses a gradient whose top colour is #071407
+    // body is transparent while the moving background is on; use the colour the background canvas is filled with
+    if(base[3] === 0) base = rgba(window.__rainetThemeBg ? window.__rainetThemeBg() : 'rgb(7,20,7)');
     var ovs = document.querySelectorAll('.overlay'), top = null;
     for(var i = 0; i < ovs.length; i++){ var ocs = getComputedStyle(ovs[i]); if(ocs.display !== 'none' && (!top || (+ocs.zIndex || 0) >= top.z)) top = { z:+ocs.zIndex || 0, c:rgba(ocs.backgroundColor) }; }
     var c = base;
@@ -301,20 +307,24 @@ body { background:radial-gradient(ellipse 130% 55% at 50% 0%,#071407 0%,#050a05 
 body::after {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:99999; border-radius:var(--frame-r-top,0) var(--frame-r-top,0) var(--frame-r-bot,0) var(--frame-r-bot,0);
   border:3px solid var(--bt-acc-b);
-  box-shadow:
-    inset 0 0 35px 10px var(--bt-acc-sh),
-    inset 0 0 75px 28px var(--bt-acc-sh);
 }
 /* iOS 26 status-bar workaround (see fitFrame): static band above <body> draws the frame's top edge behind the status bar */
 html.sbfix { overflow:hidden; overscroll-behavior:none; }
 html.sbfix::before {
-  content:''; display:block; height:calc(var(--sb-gap) + 200px); margin-bottom:-200px; pointer-events:none; background:var(--sb-bg,#000);
+  content:''; display:block; height:var(--sb-gap); pointer-events:none; background:var(--sb-bg,#000);
   border:3px solid var(--sb-b,var(--bt-acc-b)); border-bottom:none; border-radius:52px 52px 0 0;
-  box-shadow:inset 0 0 35px 10px var(--sb-s,var(--bt-acc-sh)), inset 0 0 75px 28px var(--sb-s,var(--bt-acc-sh));
 }
 html.sbfix body { height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; }
-/* same geometry as the band (top edge at the very top of the screen) so the glow continues without a step */
+/* same geometry as the band (top edge at the very top of the screen) so the side lines continue without a step */
 html.sbfix body::after { top:calc(-1 * var(--sb-gap)); border-radius:52px 52px var(--frame-r-bot,0) var(--frame-r-bot,0); }
+/* Moving background (B grid horizon / D board echo, alternating per launch) — see bg-fx script at the end of <body> */
+#bg-fx { position:fixed; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; display:block; transition:opacity .4s; }
+html.bgfx body, html.bgfx body[data-bt] { background:transparent !important; }
+/* menu screens show the background; the board behind them is hidden instead of covered */
+html.bgfx #ov-splash, html.bgfx #ov-name, html.bgfx #ov-title, html.bgfx #ov-difficulty, html.bgfx #ov-online,
+html.bgfx #ov-waiting, html.bgfx #ov-gamestart, html.bgfx #ov-auth, html.bgfx #ov-recover, html.bgfx #ov-mypage,
+html.bgfx #ov-lb, html.bgfx #ov-settings, html.bgfx #ov-skin { background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; }
+html.bgfx body:has(#ov-splash.on, #ov-name.on, #ov-title.on, #ov-difficulty.on, #ov-online.on, #ov-waiting.on, #ov-gamestart.on, #ov-auth.on, #ov-recover.on, #ov-mypage.on, #ov-lb.on, #ov-settings.on, #ov-skin.on) > #game-wrap { visibility:hidden; }
 .box { box-shadow:4px 4px 14px rgba(0,0,0,.8),-2px -2px 8px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.05); }
 .ov-panel { box-shadow:6px 6px 22px rgba(0,0,0,.9),-3px -3px 12px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.06); }
 button { box-shadow:3px 3px 8px rgba(0,0,0,.7),-1px -1px 4px rgba(0,255,65,.05),inset 0 1px 0 rgba(0,255,65,.04); transition:background .15s,box-shadow .1s,transform .08s,color .15s; }
@@ -3409,6 +3419,120 @@ function applyP2Color(key){
   if(p2s!=='red') document.body.dataset.p2s=p2s;
 })();
 
+</script>
+<script>
+// ── Moving background: "neon receding" ─────────────────────────
+// B = grid horizon, D = board echo. Alternates on every app launch (odd launch → B, even → D).
+(function(){
+  var KEY = 'rainet_bg_launch';
+  var n = 1;
+  try { n = (parseInt(localStorage.getItem(KEY), 10) || 0) + 1; localStorage.setItem(KEY, String(n)); } catch(e) {}
+  var kind = n % 2 === 1 ? 'grid' : 'board';
+
+  var cv = document.createElement('canvas');
+  cv.id = 'bg-fx'; cv.setAttribute('aria-hidden', 'true');
+  document.body.insertBefore(cv, document.body.firstChild);
+  document.documentElement.classList.add('bgfx');
+  var ctx = cv.getContext('2d');
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var W = 0, H = 0, acc = [0, 255, 65], fill = '#050a05';
+
+  function rgba(a){ return 'rgba(' + acc[0] + ',' + acc[1] + ',' + acc[2] + ',' + a.toFixed(3) + ')'; }
+  function readTheme(){
+    var m = (getComputedStyle(document.body).getPropertyValue('--bt-acc-sh') || '').match(/[\d.]+/g);
+    if(m && m.length >= 3) acc = [+m[0], +m[1], +m[2]];
+    fill = window.__rainetThemeBg();
+  }
+  // menu screens show the background at full strength; during a match it is dimmed so the board stays readable
+  var MENUS = ['ov-splash','ov-name','ov-title','ov-difficulty','ov-online','ov-waiting','ov-gamestart','ov-auth','ov-recover','ov-mypage','ov-lb','ov-settings','ov-skin'];
+  function readScreen(){
+    var onMenu = MENUS.some(function(id){ var el = document.getElementById(id); return el && el.classList.contains('on'); });
+    cv.style.opacity = onMenu ? '1' : '0.4';
+  }
+  function size(){
+    var dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    var w = Math.max(1, Math.round(cv.clientWidth * dpr)), h = Math.max(1, Math.round(cv.clientHeight * dpr));
+    if(w !== W || h !== H){ cv.width = W = w; cv.height = H = h; }
+  }
+
+  function grid(t){
+    var w = W, h = H, hy = h * 0.47, vx = w / 2;
+    ctx.fillStyle = fill; ctx.fillRect(0, 0, w, h);
+    var sky = ctx.createLinearGradient(0, hy - h * 0.12, 0, hy + h * 0.12);
+    sky.addColorStop(0, 'rgba(0,0,0,0)'); sky.addColorStop(0.5, rgba(0.35)); sky.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sky; ctx.fillRect(0, hy - h * 0.12, w, h * 0.24);
+    ctx.globalCompositeOperation = 'lighter';
+    [1, -1].forEach(function(side){
+      var span = side > 0 ? h - hy : hy, base = side > 0 ? 1 : 0.55;
+      ctx.strokeStyle = rgba(0.55 * base); ctx.lineWidth = 1;
+      ctx.beginPath();
+      for(var k = -10; k <= 10; k++){ ctx.moveTo(vx, hy); ctx.lineTo(vx + k * w * 0.32, hy + side * span); }
+      ctx.stroke();
+      var phase = (t * 0.55) % 1;
+      for(var j = 0; j < 22; j++){
+        var z = 1 + j + phase, y = hy + side * span / z;
+        var a = Math.min(1, 2.2 / Math.sqrt(z)) * Math.min(1, (z - 1) / 0.6) * base;
+        ctx.strokeStyle = rgba(a * 0.9); ctx.lineWidth = Math.max(0.6, 2.2 / Math.sqrt(z));
+        ctx.shadowColor = rgba(a); ctx.shadowBlur = 6 / Math.sqrt(z);
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+    });
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = rgba(0.95); ctx.lineWidth = 1.5; ctx.shadowColor = rgba(1); ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.moveTo(0, hy); ctx.lineTo(w, hy); ctx.stroke();
+    ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function board(t){
+    var w = W, h = H, vx = w / 2, vy = h * 0.44, unit = Math.min(w, h * 0.62);
+    ctx.fillStyle = fill; ctx.fillRect(0, 0, w, h);
+    var g = ctx.createRadialGradient(vx, vy, 0, vx, vy, unit * 0.6);
+    g.addColorStop(0, rgba(0.16)); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    var N = 9, phase = (t * 0.18) % 1;
+    ctx.globalCompositeOperation = 'lighter';
+    for(var i = N - 1; i >= 0; i--){
+      var d = 1 + (i + phase) * 1.45;
+      var bw = unit * 0.86 / d, bh = bw * 1.5;
+      var cx = w / 2 + (vx - w / 2) * (1 - 1 / d), cy = h / 2 + (vy - h / 2) * (1 - 1 / d);
+      var a = Math.max(0, 1 - (d - 1) / 12) * Math.min(1, (d - 1) / 0.9);
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate((i + phase) * 0.22 + t * 0.05);
+      var cw = bw / 4, ch = bh / 6;
+      ctx.fillStyle = 'rgba(255,40,60,' + (a * 0.10).toFixed(3) + ')'; ctx.fillRect(-bw / 2, -bh / 2, bw, ch);
+      ctx.fillStyle = 'rgba(40,100,255,' + (a * 0.12).toFixed(3) + ')'; ctx.fillRect(-bw / 2, bh / 2 - ch, bw, ch);
+      ctx.strokeStyle = rgba(a * 0.35); ctx.lineWidth = Math.max(0.5, 1.2 / Math.sqrt(d));
+      ctx.beginPath();
+      for(var c = 1; c < 4; c++){ ctx.moveTo(-bw / 2 + c * cw, -bh / 2); ctx.lineTo(-bw / 2 + c * cw, bh / 2); }
+      for(var r = 1; r < 6; r++){ ctx.moveTo(-bw / 2, -bh / 2 + r * ch); ctx.lineTo(bw / 2, -bh / 2 + r * ch); }
+      ctx.stroke();
+      ctx.strokeStyle = rgba(a); ctx.lineWidth = Math.max(0.7, 2.4 / Math.sqrt(d));
+      ctx.shadowColor = rgba(a); ctx.shadowBlur = 4 + 12 / d;
+      ctx.strokeRect(-bw / 2, -bh / 2, bw, bh);
+      ctx.restore();
+    }
+    ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
+  }
+
+  var draw = kind === 'grid' ? grid : board;
+  var t = 0, last = performance.now(), sinceRead = 1;
+  function frame(now){
+    var dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt;
+    sinceRead += dt;
+    if(sinceRead > 0.4){ sinceRead = 0; readTheme(); readScreen(); }
+    size(); draw(t);
+    requestAnimationFrame(frame);
+  }
+  readTheme(); readScreen();
+  if(reduce){
+    var still = function(){ readTheme(); readScreen(); size(); draw(2.4); };
+    still();
+    window.addEventListener('resize', still);
+    new MutationObserver(still).observe(document.body, { attributes:true, attributeFilter:['data-bt'] });
+    setInterval(readScreen, 500);
+  } else {
+    requestAnimationFrame(frame);
+  }
+})();
 </script>
 </body>
 </html>
