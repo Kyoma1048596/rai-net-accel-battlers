@@ -10,9 +10,10 @@
 <meta name="theme-color" content="#050a05">
 <script>
 // iOS home-screen app: round the neon frame's corners to match the screen.
-// iOS 26 bug (WebKit 301994): the status bar stays opaque-ish and position:fixed is clipped below it,
-// but scrolled page content still draws behind it. So when that gap exists we keep the page scrolled
-// down by the gap and draw the top of the frame with a sticky band (#sb-band) that lives in that area.
+// iOS 26 bug (WebKit 301994): the status bar stays opaque-ish and fixed/sticky layers are clipped below it,
+// but plain static page content still draws behind it. So when that gap exists we put a static band
+// (html::before) at the top of the document, keep the document scrolled by exactly the gap, and let the
+// game scroll inside <body> instead.
 (function(){
   var gap = 0;
   function fitFrame(){
@@ -26,21 +27,26 @@
     root.style.setProperty('--frame-r-bot', '52px');
     if(gap >= 2 && portrait){ root.classList.add('sbfix'); root.style.setProperty('--sb-gap', gap + 'px'); }
     else { gap = 0; root.classList.remove('sbfix'); }
-    clampScroll();
+    syncTheme();
+    lockScroll();
   }
-  function clampScroll(){ if(gap && window.scrollY < gap) window.scrollTo(0, gap); }
+  function lockScroll(){ if(gap && Math.abs(window.scrollY - gap) > 0.5) window.scrollTo(0, gap); }
+  // theme colours live on <body>; html::before needs them on <html>
+  function syncTheme(){
+    if(!document.body) return;
+    var cs = getComputedStyle(document.body), root = document.documentElement;
+    root.style.setProperty('--sb-b', cs.getPropertyValue('--bt-acc-b'));
+    root.style.setProperty('--sb-s', cs.getPropertyValue('--bt-acc-sh'));
+  }
   fitFrame();
-  window.addEventListener('scroll', clampScroll, { passive:true });
+  window.addEventListener('scroll', lockScroll, { passive:true });
   window.addEventListener('resize', fitFrame);
   window.addEventListener('orientationchange', function(){ setTimeout(fitFrame, 300); });
   document.addEventListener('DOMContentLoaded', function(){
-    var band = document.createElement('div');
-    band.id = 'sb-band';
-    band.appendChild(document.createElement('div'));
-    document.body.insertBefore(band, document.body.firstChild);
     fitFrame();
+    new MutationObserver(syncTheme).observe(document.body, { attributes:true });
   });
-  window.addEventListener('load', function(){ setTimeout(fitFrame, 50); });
+  window.addEventListener('load', function(){ setTimeout(fitFrame, 50); setTimeout(fitFrame, 600); });
 })();
 </script>
 <title>雷ネット・アクセルバトラーズ</title>
@@ -288,19 +294,15 @@ body::after {
     inset 0 0 35px 10px var(--bt-acc-sh),
     inset 0 0 75px 28px var(--bt-acc-sh);
 }
-/* iOS 26 status-bar workaround (see fitFrame): sticky band draws the frame's top edge behind the status bar */
-#sb-band { display:none; }
-html.sbfix { overscroll-behavior-y:none; }
-html.sbfix body { min-height:calc(100dvh + var(--sb-gap)); }
+/* iOS 26 status-bar workaround (see fitFrame): static band above <body> draws the frame's top edge behind the status bar */
+html.sbfix { overflow:hidden; overscroll-behavior:none; }
+html.sbfix::before {
+  content:''; display:block; height:calc(var(--sb-gap) + 200px); margin-bottom:-200px; pointer-events:none; background:#000;
+  border:3px solid var(--sb-b,var(--bt-acc-b)); border-bottom:none; border-radius:52px 52px 0 0;
+  box-shadow:inset 0 0 35px 10px var(--sb-s,var(--bt-acc-sh)), inset 0 0 75px 28px var(--sb-s,var(--bt-acc-sh));
+}
+html.sbfix body { height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; }
 html.sbfix body::after { top:-140px; }
-html.sbfix #sb-band {
-  display:block; position:sticky; top:calc(-1 * var(--sb-gap)); align-self:stretch; flex-shrink:0;
-  height:var(--sb-gap); margin:-16px -16px 16px; overflow:hidden; z-index:99999; pointer-events:none; background:#000;
-}
-html.sbfix #sb-band > div {
-  height:calc(var(--sb-gap) + 200px); border:3px solid var(--bt-acc-b); border-radius:52px 52px 0 0;
-  box-shadow:inset 0 0 35px 10px var(--bt-acc-sh), inset 0 0 75px 28px var(--bt-acc-sh);
-}
 .box { box-shadow:4px 4px 14px rgba(0,0,0,.8),-2px -2px 8px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.05); }
 .ov-panel { box-shadow:6px 6px 22px rgba(0,0,0,.9),-3px -3px 12px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.06); }
 button { box-shadow:3px 3px 8px rgba(0,0,0,.7),-1px -1px 4px rgba(0,255,65,.05),inset 0 1px 0 rgba(0,255,65,.04); transition:background .15s,box-shadow .1s,transform .08s,color .15s; }
