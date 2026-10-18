@@ -17,7 +17,7 @@
 // base colour of each board theme (body[data-bt]); the moving background canvas is filled with it
 window.__rainetThemeBg = function(){
   var bt = document.body && document.body.dataset.bt;
-  return { void:'#0a0012', amber:'#0c0800', ice:'#000a14' }[bt] || '#050a05';
+  return { void:'rgb(10,0,18)', amber:'rgb(12,8,0)', ice:'rgb(0,10,20)' }[bt] || 'rgb(5,10,5)';
 };
 (function(){
   var gap = 0;
@@ -310,9 +310,11 @@ body::after {
 }
 /* iOS 26 status-bar workaround (see fitFrame): static band above <body> draws the frame's top edge behind the status bar */
 html.sbfix { overflow:hidden; overscroll-behavior:none; }
-html.sbfix::before {
-  content:''; display:block; height:var(--sb-gap); pointer-events:none; background:var(--sb-bg,#000);
-  border:3px solid var(--sb-b,var(--bt-acc-b)); border-bottom:none; border-radius:52px 52px 0 0;
+/* the band is a static canvas placed before <body>; the moving background draws its top slice into it */
+#bg-band { display:none; }
+html.sbfix #bg-band {
+  display:block; width:100%; height:var(--sb-gap); pointer-events:none; background:var(--sb-bg,#000);
+  border:3px solid var(--sb-b,var(--bt-acc-b)); border-bottom:none; border-radius:52px 52px 0 0; transition:opacity .4s;
 }
 html.sbfix body { height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; }
 /* same geometry as the band (top edge at the very top of the screen) so the side lines continue without a step */
@@ -3432,10 +3434,15 @@ function applyP2Color(key){
   var cv = document.createElement('canvas');
   cv.id = 'bg-fx'; cv.setAttribute('aria-hidden', 'true');
   document.body.insertBefore(cv, document.body.firstChild);
+  // iOS home-screen app: fixed elements are clipped below the status bar, so the strip behind it gets its
+  // own static canvas (#bg-band, shown only with html.sbfix) that draws the top slice of the same picture
+  var band = document.createElement('canvas');
+  band.id = 'bg-band'; band.setAttribute('aria-hidden', 'true');
+  document.documentElement.insertBefore(band, document.body);
   document.documentElement.classList.add('bgfx');
-  var ctx = cv.getContext('2d');
+  var mainCtx = cv.getContext('2d'), bandCtx = band.getContext('2d'), ctx = mainCtx;
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var W = 0, H = 0, acc = [0, 255, 65], fill = '#050a05';
+  var CW = 0, CH = 0, G = 0, BW = 0, BH = 0, dpr = 1, acc = [0, 255, 65], fill = 'rgb(5,10,5)';
 
   function rgba(a){ return 'rgba(' + acc[0] + ',' + acc[1] + ',' + acc[2] + ',' + a.toFixed(3) + ')'; }
   function readTheme(){
@@ -3447,16 +3454,32 @@ function applyP2Color(key){
   var MENUS = ['ov-splash','ov-name','ov-title','ov-difficulty','ov-online','ov-waiting','ov-gamestart','ov-auth','ov-recover','ov-mypage','ov-lb','ov-settings','ov-skin'];
   function readScreen(){
     var onMenu = MENUS.some(function(id){ var el = document.getElementById(id); return el && el.classList.contains('on'); });
+    var onPopup = !onMenu && !!document.querySelector('.overlay.on');
     cv.style.opacity = onMenu ? '1' : '0.4';
+    // in-match popups darken the screen with a near-black overlay that cannot reach the status-bar strip, so dim it to match
+    band.style.opacity = onMenu ? '1' : (onPopup ? '0.05' : '0.4');
   }
   function size(){
-    var dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    dpr = Math.min(1.5, window.devicePixelRatio || 1);
     var w = Math.max(1, Math.round(cv.clientWidth * dpr)), h = Math.max(1, Math.round(cv.clientHeight * dpr));
-    if(w !== W || h !== H){ cv.width = W = w; cv.height = H = h; }
+    if(w !== CW || h !== CH){ cv.width = CW = w; cv.height = CH = h; }
+    var sb = document.documentElement.classList.contains('sbfix');
+    G = sb ? Math.round((parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sb-gap')) || 0) * dpr) : 0;
+    var bw = sb ? Math.max(1, Math.round(band.clientWidth * dpr)) : 0, bh = sb ? Math.max(1, Math.round(band.clientHeight * dpr)) : 0;
+    if(bw !== BW || bh !== BH){ band.width = BW = Math.max(1, bw); band.height = BH = Math.max(1, bh); }
+  }
+  // one picture spanning the whole screen (status bar + page): the band shows its top G px, the main canvas the rest
+  function render(t){
+    size();
+    ctx = mainCtx; ctx.setTransform(1, 0, 0, 1, 0, -G); draw(t);
+    if(G && BW > 1){
+      ctx = bandCtx; ctx.setTransform(1, 0, 0, 1, -band.clientLeft * dpr, -band.clientTop * dpr); draw(t);
+    }
+    ctx = mainCtx; ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   function grid(t){
-    var w = W, h = H, hy = h * 0.47, vx = w / 2;
+    var w = CW, h = CH + G, hy = h * 0.70, vx = w / 2; // horizon kept low so it never sits behind the title text
     ctx.fillStyle = fill; ctx.fillRect(0, 0, w, h);
     var sky = ctx.createLinearGradient(0, hy - h * 0.12, 0, hy + h * 0.12);
     sky.addColorStop(0, 'rgba(0,0,0,0)'); sky.addColorStop(0.5, rgba(0.35)); sky.addColorStop(1, 'rgba(0,0,0,0)');
@@ -3484,7 +3507,7 @@ function applyP2Color(key){
   }
 
   function board(t){
-    var w = W, h = H, vx = w / 2, vy = h * 0.44, unit = Math.min(w, h * 0.62);
+    var w = CW, h = CH + G, vx = w / 2, vy = h * 0.44, unit = Math.min(w, h * 0.62);
     ctx.fillStyle = fill; ctx.fillRect(0, 0, w, h);
     var g = ctx.createRadialGradient(vx, vy, 0, vx, vy, unit * 0.6);
     g.addColorStop(0, rgba(0.16)); g.addColorStop(1, 'rgba(0,0,0,0)');
@@ -3519,12 +3542,12 @@ function applyP2Color(key){
     var dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt;
     sinceRead += dt;
     if(sinceRead > 0.4){ sinceRead = 0; readTheme(); readScreen(); }
-    size(); draw(t);
+    render(t);
     requestAnimationFrame(frame);
   }
   readTheme(); readScreen();
   if(reduce){
-    var still = function(){ readTheme(); readScreen(); size(); draw(2.4); };
+    var still = function(){ readTheme(); readScreen(); render(2.4); };
     still();
     window.addEventListener('resize', still);
     new MutationObserver(still).observe(document.body, { attributes:true, attributeFilter:['data-bt'] });
