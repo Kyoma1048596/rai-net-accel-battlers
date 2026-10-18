@@ -31,20 +31,31 @@
     lockScroll();
   }
   function lockScroll(){ if(gap && Math.abs(window.scrollY - gap) > 0.5) window.scrollTo(0, gap); }
-  // theme colours live on <body>; html::before needs them on <html>
+  // theme colours live on <body>; html::before needs them on <html>.
+  // The band's background also follows whatever sits just below it (open overlay or body) so there is no seam.
+  function rgba(s){ var m = (s || '').match(/[\d.]+/g) || []; return [+m[0]||0, +m[1]||0, +m[2]||0, m[3] === undefined ? (m.length >= 3 ? 1 : 0) : +m[3]]; }
   function syncTheme(){
     if(!document.body) return;
     var cs = getComputedStyle(document.body), root = document.documentElement;
     root.style.setProperty('--sb-b', cs.getPropertyValue('--bt-acc-b'));
     root.style.setProperty('--sb-s', cs.getPropertyValue('--bt-acc-sh'));
+    var base = rgba(cs.backgroundColor);
+    if(base[3] === 0) base = [7, 20, 7, 1]; // default theme uses a gradient whose top colour is #071407
+    var ovs = document.querySelectorAll('.overlay'), top = null;
+    for(var i = 0; i < ovs.length; i++){ var ocs = getComputedStyle(ovs[i]); if(ocs.display !== 'none' && (!top || (+ocs.zIndex || 0) >= top.z)) top = { z:+ocs.zIndex || 0, c:rgba(ocs.backgroundColor) }; }
+    var c = base;
+    if(top && top.c[3] > 0){ var a = top.c[3]; c = [0,1,2].map(function(k){ return Math.round(top.c[k] * a + base[k] * (1 - a)); }); }
+    root.style.setProperty('--sb-bg', 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')');
   }
+  var syncQueued = false;
+  function queueSync(){ if(syncQueued) return; syncQueued = true; requestAnimationFrame(function(){ syncQueued = false; syncTheme(); }); }
   fitFrame();
   window.addEventListener('scroll', lockScroll, { passive:true });
   window.addEventListener('resize', fitFrame);
   window.addEventListener('orientationchange', function(){ setTimeout(fitFrame, 300); });
   document.addEventListener('DOMContentLoaded', function(){
     fitFrame();
-    new MutationObserver(syncTheme).observe(document.body, { attributes:true });
+    new MutationObserver(queueSync).observe(document.body, { attributes:true, attributeFilter:['class','style','data-bt'], subtree:true });
   });
   window.addEventListener('load', function(){ setTimeout(fitFrame, 50); setTimeout(fitFrame, 600); });
 })();
@@ -297,12 +308,13 @@ body::after {
 /* iOS 26 status-bar workaround (see fitFrame): static band above <body> draws the frame's top edge behind the status bar */
 html.sbfix { overflow:hidden; overscroll-behavior:none; }
 html.sbfix::before {
-  content:''; display:block; height:calc(var(--sb-gap) + 200px); margin-bottom:-200px; pointer-events:none; background:#000;
+  content:''; display:block; height:calc(var(--sb-gap) + 200px); margin-bottom:-200px; pointer-events:none; background:var(--sb-bg,#000);
   border:3px solid var(--sb-b,var(--bt-acc-b)); border-bottom:none; border-radius:52px 52px 0 0;
   box-shadow:inset 0 0 35px 10px var(--sb-s,var(--bt-acc-sh)), inset 0 0 75px 28px var(--sb-s,var(--bt-acc-sh));
 }
 html.sbfix body { height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; }
-html.sbfix body::after { top:-140px; }
+/* same geometry as the band (top edge at the very top of the screen) so the glow continues without a step */
+html.sbfix body::after { top:calc(-1 * var(--sb-gap)); border-radius:52px 52px var(--frame-r-bot,0) var(--frame-r-bot,0); }
 .box { box-shadow:4px 4px 14px rgba(0,0,0,.8),-2px -2px 8px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.05); }
 .ov-panel { box-shadow:6px 6px 22px rgba(0,0,0,.9),-3px -3px 12px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.06); }
 button { box-shadow:3px 3px 8px rgba(0,0,0,.7),-1px -1px 4px rgba(0,255,65,.05),inset 0 1px 0 rgba(0,255,65,.04); transition:background .15s,box-shadow .1s,transform .08s,color .15s; }
