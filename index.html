@@ -325,13 +325,6 @@ html.sbfix #bg-band {
   display:block; width:100%; height:var(--sb-gap); pointer-events:none; background:var(--sb-bg,#000);
   border:3px solid var(--sb-b,var(--bt-acc-b)); border-bottom:none; border-radius:52px 52px 0 0; transition:opacity .4s;
 }
-/* page content scrolls up into the status-bar strip and is cut there; fade it out instead of a hard edge (match screens only) */
-#top-fade { display:none; }
-html.sbfix #top-fade {
-  display:block; position:fixed; left:0; right:0; top:0; height:34px; z-index:150; pointer-events:none;
-  background:linear-gradient(to bottom, var(--sb-bg,#000) 0%, var(--sb-bg,#000) 20%, transparent 100%); transition:opacity .3s;
-}
-html.sbfix body:has(.overlay.on) #top-fade { opacity:0; }
 html.sbfix body { height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; }
 /* same geometry as the band (top edge at the very top of the screen) so the side lines continue without a step */
 html.sbfix body::after { top:calc(-1 * var(--sb-gap)); border-radius:52px 52px var(--frame-r-bot,0) var(--frame-r-bot,0); }
@@ -3481,9 +3474,7 @@ function applyP2Color(key){
   var cv = document.createElement('canvas');
   cv.id = 'bg-fx'; cv.setAttribute('aria-hidden', 'true');
   document.body.insertBefore(cv, document.body.firstChild);
-  var fade = document.createElement('div');
-  fade.id = 'top-fade'; fade.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(fade);
+  // (no fixed element may touch the top edge with a gradient: iOS 26 then lays a dark blur over the status-bar area)
   // iOS home-screen app: fixed elements are clipped below the status bar, so the strip behind it is a static
   // element (#bg-band, shown only with html.sbfix) in one flat colour with the frame's top edge. It must stay a
   // plain element: iOS 26 lays a dark blur over that strip when it holds a canvas or anything not one flat colour.
