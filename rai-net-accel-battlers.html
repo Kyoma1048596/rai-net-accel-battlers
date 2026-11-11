@@ -122,6 +122,12 @@ h1 { font-size:clamp(1rem,3vw,1.6rem); letter-spacing:4px; color:var(--p1-c); te
 
 /* Panel */
 #panel { width:210px; min-width:190px; display:flex; flex-direction:column; gap:10px; }
+/* phones: the panel sits under the board, so make it exactly as wide as the board */
+@media (max-width:640px) {
+  #game-wrap { flex-direction:column; align-items:stretch; }
+  #board { align-self:center; }
+  #panel { width:auto; min-width:0; contain:inline-size; }
+}
 .box { background:#080e08; border:1px solid #1a3a1a; padding:12px; }
 .box h3 { font-size:.75rem; color:#00ff41; letter-spacing:2px; border-bottom:1px solid #0f2a0f; padding-bottom:6px; margin-bottom:8px; }
 #turn-label { font-size:.95rem; margin-bottom:6px; }
@@ -3464,10 +3470,7 @@ function applyP2Color(key){
   var MENUS = ['ov-splash','ov-name','ov-title','ov-difficulty','ov-online','ov-waiting','ov-gamestart','ov-auth','ov-recover','ov-mypage','ov-lb','ov-settings','ov-skin'];
   function readScreen(){
     var onMenu = MENUS.some(function(id){ var el = document.getElementById(id); return el && el.classList.contains('on'); });
-    var onPopup = !onMenu && !!document.querySelector('.overlay.on');
     cv.style.opacity = onMenu ? '1' : '0.4';
-    // in-match popups darken the screen with a near-black overlay that cannot reach the status-bar strip, so dim it to match
-    band.style.opacity = onMenu ? '1' : (onPopup ? '0.05' : '0.4');
   }
   function size(){
     dpr = Math.min(1.5, window.devicePixelRatio || 1);
@@ -3478,14 +3481,13 @@ function applyP2Color(key){
     var bw = sb ? Math.max(1, Math.round(band.clientWidth * dpr)) : 0, bh = sb ? Math.max(1, Math.round(band.clientHeight * dpr)) : 0;
     if(bw !== BW || bh !== BH){ band.width = BW = Math.max(1, bw); band.height = BH = Math.max(1, bh); }
   }
-  // one picture spanning the whole screen (status bar + page): the band shows its top G px, the main canvas the rest
+  // The picture is laid out for the whole screen (status bar + page); the main canvas shows everything below
+  // the status bar. The strip behind the status bar stays a solid colour (#bg-band background, not drawn on):
+  // iOS 26 only leaves that strip alone when it is one flat colour, and lays a dark blur over it otherwise.
   function render(t){
     size();
     ctx = mainCtx; ctx.setTransform(1, 0, 0, 1, 0, -G); draw(t);
-    if(G && BW > 1){
-      ctx = bandCtx; ctx.setTransform(1, 0, 0, 1, -band.clientLeft * dpr, -band.clientTop * dpr); draw(t);
-    }
-    ctx = mainCtx; ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   function grid(t){
