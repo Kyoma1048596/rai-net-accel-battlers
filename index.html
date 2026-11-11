@@ -53,6 +53,7 @@ window.__rainetThemeBg = function(){
     if(top && top.c[3] > 0){ var a = top.c[3]; c = [0,1,2].map(function(k){ return Math.round(top.c[k] * a + base[k] * (1 - a)); }); }
     root.style.setProperty('--sb-bg', 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')');
   }
+  window.__rainetSyncBand = syncTheme;
   var syncQueued = false;
   function queueSync(){ if(syncQueued) return; syncQueued = true; requestAnimationFrame(function(){ syncQueued = false; syncTheme(); }); }
   fitFrame();
@@ -212,6 +213,8 @@ body:has(.overlay.on) > h1, body:has(.overlay.on) > .subtitle, body:has(.overlay
 .settings-slider::-moz-range-thumb { width:14px; height:14px; border-radius:50%; background:#00ff41; box-shadow:0 0 6px #00ff41; cursor:pointer; border:none; }
 .snd-toggle { display:inline-block; width:auto; padding:3px 10px; font-size:.68rem; letter-spacing:1px; border-color:#334433; color:#446644; background:#050e05; }
 .snd-toggle.on { border-color:#00ff41; color:#00ff41; background:#0a1e0a; }
+.bg-choice { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:2px; }
+.bg-choice .snd-toggle { width:100%; padding:5px 0; text-align:center; }
 .pp-row { display:flex; gap:6px; }
 .pp-row input { flex:1; background:#0a0f0a; border:1px solid #1a3a1a; color:#00ff41; padding:7px; font-family:'Courier New',monospace; font-size:.8rem; outline:none; }
 .pp-row input:focus { border-color:#00ff41; }
@@ -316,7 +319,7 @@ body::after {
 }
 /* iOS 26 status-bar workaround (see fitFrame): static band above <body> draws the frame's top edge behind the status bar */
 html.sbfix { overflow:hidden; overscroll-behavior:none; }
-/* the band is a static canvas placed before <body>; the moving background draws its top slice into it */
+/* the band is a plain static element placed before <body>: one flat colour plus the frame's top edge */
 #bg-band { display:none; }
 html.sbfix #bg-band {
   display:block; width:100%; height:var(--sb-gap); pointer-events:none; background:var(--sb-bg,#000);
@@ -575,14 +578,14 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
   <div class="ov-sub">STEINS;GATE :: RAI-NET ACCEL BATTLERS <span class="ver-sub"></span></div>
   <div id="title-rating-display" style="font-size:.72rem;letter-spacing:2px;margin:4px 0 8px"></div>
   <div class="ov-panel" style="width:min(300px,90vw)">
-    <button onclick="selectDifficulty()">// ⚙ CPU 対戦</button>
-    <button class="btn-online" onclick="enterOnlineMode()">// 🌐 オンライン対戦</button>
-    <button onclick="showRules()" style="border-color:#445544;color:#669966;margin-top:4px">// 📖 ルール説明</button>
-    <button onclick="showTutorial()" style="border-color:#223322;color:#445544;font-size:.7rem;margin-top:2px">// 🎓 チュートリアル</button>
-    <button onclick="showSettings()" style="border-color:#1a2e1a;color:#334433;font-size:.7rem;margin-top:2px">// ⚙ 設定</button>
-    <button onclick="showMyPage()" style="border-color:#1a2e1a;color:#336644;font-size:.7rem;margin-top:2px">// 👤 マイページ</button>
-    <button onclick="showSkin()" style="border-color:#1a2a3a;color:#336655;font-size:.7rem;margin-top:2px">// 🎨 スキン</button>
-    <button onclick="showLeaderboard()" style="border-color:#1a1a2e;color:#334466;font-size:.7rem;margin-top:2px">// 🏆 リーダーボード</button>
+    <button onclick="selectDifficulty()">// ⚙ CPU</button>
+    <button class="btn-online" onclick="enterOnlineMode()">// 🌐 ONLINE</button>
+    <button onclick="showSkin()" style="border-color:#1a2a3a;color:#336655;font-size:.7rem;margin-top:4px">// 🎨 SKIN</button>
+    <button onclick="showMyPage()" style="border-color:#1a2e1a;color:#336644;font-size:.7rem;margin-top:2px">// 👤 MY PAGE</button>
+    <button onclick="showLeaderboard()" style="border-color:#1a1a2e;color:#334466;font-size:.7rem;margin-top:2px">// 🏆 RANK</button>
+    <button onclick="showRules()" style="border-color:#445544;color:#669966;font-size:.7rem;margin-top:2px">// 📖 RULES</button>
+    <button onclick="showTutorial()" style="border-color:#223322;color:#445544;font-size:.7rem;margin-top:2px">// 🎓 MANUAL</button>
+    <button onclick="showSettings()" style="border-color:#1a2e1a;color:#334433;font-size:.7rem;margin-top:2px">// ⚙ SET UP</button>
   </div>
   <div style="font-size:.6rem;color:#1a3a1a;margin-top:4px;letter-spacing:1px">[ F2 ] TITLE</div>
 </div>
@@ -1036,7 +1039,19 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
         <div class="settings-label" style="margin-top:3px"><span style="opacity:.6;font-size:.62rem">音量</span><span id="lbl-se"></span></div>
       </div>
     </div>
-    <div style="font-size:.57rem;color:#2a4a2a;margin-top:6px;line-height:1.7">※ BGM ON時、Spotify等の外部音楽アプリが<br>一時停止する場合があります</div>
+    <div class="settings-row">
+      <div class="settings-label"><span>BACKGROUND</span></div>
+      <div class="bg-choice" id="bg-mode-btns">
+        <button class="snd-toggle" data-bg-mode="mix" onclick="setBgMode('mix')">MIX</button>
+        <button class="snd-toggle" data-bg-mode="grid" onclick="setBgMode('grid')">GRID</button>
+        <button class="snd-toggle" data-bg-mode="board" onclick="setBgMode('board')">BOARD</button>
+        <button class="snd-toggle" data-bg-mode="off" onclick="setBgMode('off')">OFF</button>
+      </div>
+    </div>
+    <div class="settings-row" id="bg-motion-row">
+      <div class="settings-label"><span>MOTION</span><button id="btn-bg-motion" class="snd-toggle" onclick="toggleBgMotion()">ON</button></div>
+    </div>
+    <div style="font-size:.57rem;color:#2a4a2a;margin-top:6px;line-height:1.7">※ MIX：開くたびに GRID と BOARD が入れ替わります<br>※ 対戦中は背景の動きが自動で止まります<br>※ BGM ON時、Spotify等の外部音楽アプリが<br>一時停止する場合があります</div>
     <button onclick="closeSettings()" style="margin-top:10px">// 閉じる</button>
   </div>
 </div>
@@ -3025,9 +3040,22 @@ function showSettings(){
   document.getElementById('bgm-vol-wrap').style.display=_bgmEnabled?'':'none';
   document.getElementById('se-vol-wrap').style.display=_seEnabled?'':'none';
   _updateSoundToggles();
+  _updateBgToggles();
   show('ov-settings');
 }
 function closeSettings(){hide('ov-settings');}
+// SET UP → BACKGROUND / MOTION (the moving background lives in the bg-fx script at the end of <body>)
+function _updateBgToggles(){
+  if(!window.rainetBg)return;
+  const s=window.rainetBg.get();
+  document.querySelectorAll('#bg-mode-btns [data-bg-mode]').forEach(b=>b.classList.toggle('on',b.dataset.bgMode===s.mode));
+  const mb=document.getElementById('btn-bg-motion');
+  if(mb){mb.textContent=s.motion?'ON':'OFF';mb.classList.toggle('on',s.motion);}
+  const row=document.getElementById('bg-motion-row');
+  if(row)row.style.opacity=s.mode==='off'?'.35':'';
+}
+function setBgMode(m){if(!window.rainetBg)return;window.rainetBg.setMode(m);_updateBgToggles();}
+function toggleBgMotion(){if(!window.rainetBg)return;window.rainetBg.setMotion(!window.rainetBg.get().motion);_updateBgToggles();}
 function onBGMSlider(v){
   _bgmVol=+v;
   if(_bgmGainNode)_bgmGainNode.gain.value=_bgmVol;
@@ -3437,12 +3465,18 @@ function applyP2Color(key){
 </script>
 <script>
 // ── Moving background: "neon receding" ─────────────────────────
-// B = grid horizon, D = board echo. Alternates on every app launch (odd launch → B, even → D).
+// GRID = grid horizon, BOARD = board echo. SET UP → BACKGROUND picks MIX (alternate on every app launch:
+// odd → GRID, even → BOARD) / GRID / BOARD / OFF, and MOTION turns the animation on or off.
+// During a match the picture always stands still (last frame) to save battery and keep the board readable.
 (function(){
-  var KEY = 'rainet_bg_launch';
-  var n = 1;
-  try { n = (parseInt(localStorage.getItem(KEY), 10) || 0) + 1; localStorage.setItem(KEY, String(n)); } catch(e) {}
-  var kind = n % 2 === 1 ? 'grid' : 'board';
+  function lsGet(k, d){ try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
+  function lsSet(k, v){ try { localStorage.setItem(k, v); } catch(e) {} }
+  var n = (parseInt(lsGet('rainet_bg_launch', '0'), 10) || 0) + 1;
+  lsSet('rainet_bg_launch', String(n));
+  var launchKind = n % 2 === 1 ? 'grid' : 'board';
+  var mode = lsGet('rainet_bg_mode', 'mix');
+  if(['mix', 'grid', 'board', 'off'].indexOf(mode) < 0) mode = 'mix';
+  var motion = lsGet('rainet_bg_motion', '1') !== '0';
 
   var cv = document.createElement('canvas');
   cv.id = 'bg-fx'; cv.setAttribute('aria-hidden', 'true');
@@ -3450,26 +3484,29 @@ function applyP2Color(key){
   var fade = document.createElement('div');
   fade.id = 'top-fade'; fade.setAttribute('aria-hidden', 'true');
   document.body.appendChild(fade);
-  // iOS home-screen app: fixed elements are clipped below the status bar, so the strip behind it gets its
-  // own static canvas (#bg-band, shown only with html.sbfix) that draws the top slice of the same picture
-  var band = document.createElement('canvas');
+  // iOS home-screen app: fixed elements are clipped below the status bar, so the strip behind it is a static
+  // element (#bg-band, shown only with html.sbfix) in one flat colour with the frame's top edge. It must stay a
+  // plain element: iOS 26 lays a dark blur over that strip when it holds a canvas or anything not one flat colour.
+  var band = document.createElement('div');
   band.id = 'bg-band'; band.setAttribute('aria-hidden', 'true');
   document.documentElement.insertBefore(band, document.body);
-  document.documentElement.classList.add('bgfx');
-  var mainCtx = cv.getContext('2d'), bandCtx = band.getContext('2d'), ctx = mainCtx;
+  var ctx = cv.getContext('2d');
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CW = 0, CH = 0, G = 0, BW = 0, BH = 0, dpr = 1, acc = [0, 255, 65], fill = 'rgb(5,10,5)';
+  var CW = 0, CH = 0, G = 0, dpr = 1, acc = [0, 255, 65], fill = 'rgb(5,10,5)', themeKey = '';
 
   function rgba(a){ return 'rgba(' + acc[0] + ',' + acc[1] + ',' + acc[2] + ',' + a.toFixed(3) + ')'; }
   function readTheme(){
     var m = (getComputedStyle(document.body).getPropertyValue('--bt-acc-sh') || '').match(/[\d.]+/g);
     if(m && m.length >= 3) acc = [+m[0], +m[1], +m[2]];
     fill = window.__rainetThemeBg();
+    var key = acc.join(',') + fill;
+    if(key !== themeKey){ themeKey = key; dirty = true; }
   }
   // menu screens show the background at full strength; during a match it is dimmed so the board stays readable
   var MENUS = ['ov-splash','ov-name','ov-title','ov-difficulty','ov-online','ov-waiting','ov-gamestart','ov-auth','ov-recover','ov-mypage','ov-lb','ov-settings','ov-skin'];
+  var onMenu = true;
   function readScreen(){
-    var onMenu = MENUS.some(function(id){ var el = document.getElementById(id); return el && el.classList.contains('on'); });
+    onMenu = MENUS.some(function(id){ var el = document.getElementById(id); return el && el.classList.contains('on'); });
     cv.style.opacity = onMenu ? '1' : '0.4';
   }
   function size(){
@@ -3478,15 +3515,11 @@ function applyP2Color(key){
     if(w !== CW || h !== CH){ cv.width = CW = w; cv.height = CH = h; }
     var sb = document.documentElement.classList.contains('sbfix');
     G = sb ? Math.round((parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sb-gap')) || 0) * dpr) : 0;
-    var bw = sb ? Math.max(1, Math.round(band.clientWidth * dpr)) : 0, bh = sb ? Math.max(1, Math.round(band.clientHeight * dpr)) : 0;
-    if(bw !== BW || bh !== BH){ band.width = BW = Math.max(1, bw); band.height = BH = Math.max(1, bh); }
   }
-  // The picture is laid out for the whole screen (status bar + page); the main canvas shows everything below
-  // the status bar. The strip behind the status bar stays a solid colour (#bg-band background, not drawn on):
-  // iOS 26 only leaves that strip alone when it is one flat colour, and lays a dark blur over it otherwise.
+  // The picture is laid out for the whole screen (status bar + page); the canvas shows everything below the status bar.
   function render(t){
     size();
-    ctx = mainCtx; ctx.setTransform(1, 0, 0, 1, 0, -G); draw(t);
+    ctx.setTransform(1, 0, 0, 1, 0, -G); draw(t);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
@@ -3548,25 +3581,45 @@ function applyP2Color(key){
     ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
   }
 
-  var draw = kind === 'grid' ? grid : board;
-  var t = 0, last = performance.now(), sinceRead = 1;
+  var draw = grid, t = 2.4, last = 0, running = false, dirty = true;
+  function applyMode(){
+    var off = mode === 'off';
+    cv.style.display = off ? 'none' : '';
+    document.documentElement.classList.toggle('bgfx', !off);
+    var kind = mode === 'grid' ? 'grid' : mode === 'board' ? 'board' : launchKind;
+    draw = kind === 'grid' ? grid : board;
+    dirty = true;
+    if(window.__rainetSyncBand) window.__rainetSyncBand();
+  }
+  function animating(){ return mode !== 'off' && motion && !reduce && onMenu && !document.hidden; }
   function frame(now){
-    var dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt;
-    sinceRead += dt;
-    if(sinceRead > 0.4){ sinceRead = 0; readTheme(); readScreen(); }
-    render(t);
+    if(!animating()){ running = false; return; }
+    t += Math.min(0.05, (now - last) / 1000); last = now;
+    render(t); dirty = false;
     requestAnimationFrame(frame);
   }
-  readTheme(); readScreen();
-  if(reduce){
-    var still = function(){ readTheme(); readScreen(); render(2.4); };
-    still();
-    window.addEventListener('resize', still);
-    new MutationObserver(still).observe(document.body, { attributes:true, attributeFilter:['data-bt'] });
-    setInterval(readScreen, 500);
-  } else {
-    requestAnimationFrame(frame);
+  // checks screen / theme twice a second; starts the animation or redraws a still picture when something changed
+  function tick(){
+    if(mode === 'off') return;
+    readTheme(); readScreen();
+    if(animating()){
+      if(!running){ running = true; last = performance.now(); requestAnimationFrame(frame); }
+    } else if(dirty){
+      render(t); dirty = false;
+    }
   }
+  window.addEventListener('resize', function(){ dirty = true; tick(); });
+  document.addEventListener('visibilitychange', tick);
+  setInterval(tick, 500);
+
+  // used by SET UP → BACKGROUND / MOTION
+  window.rainetBg = {
+    get: function(){ return { mode: mode, motion: motion }; },
+    setMode: function(m){ mode = m; lsSet('rainet_bg_mode', m); applyMode(); tick(); },
+    setMotion: function(on){ motion = !!on; lsSet('rainet_bg_motion', on ? '1' : '0'); dirty = true; tick(); }
+  };
+  applyMode();
+  tick();
 })();
 </script>
 </body>
