@@ -76,7 +76,9 @@ body {
   min-height:100dvh; display:flex; flex-direction:column;
   align-items:center; padding:16px; overflow-x:hidden;
 }
-body::before {
+/* screen-wide layers (scanlines, neon frame, moving background) hang off <html>, not <body>: on the iOS home-screen
+   app <body> is the scroller, and iOS 26 dims/blurs the top of a scroller that sits under the status bar */
+html::before {
   content:''; position:fixed; inset:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);
   pointer-events:none; z-index:999;
@@ -240,7 +242,7 @@ body:has(.overlay.on) > h1, body:has(.overlay.on) > .subtitle, body:has(.overlay
 
 /* ── UI Enhancement ───────────────────────────────── */
 #board { box-shadow:0 0 40px rgba(0,255,65,.22),0 0 80px rgba(0,255,65,.07),inset 0 0 30px rgba(0,0,0,.65)!important; border-color:rgba(0,255,65,.45)!important; }
-body::before { background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.09) 1px,rgba(0,0,0,.09) 3px); }
+html::before { background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.09) 1px,rgba(0,0,0,.09) 3px); }
 .piece { transition:transform .12s ease,filter .12s ease; }
 .cell:not(.cpu-block):hover .piece { transform:scale(1.07) translateY(-2px); filter:brightness(1.3); }
 .box { box-shadow:0 0 12px rgba(0,255,65,.05),inset 0 0 8px rgba(0,0,0,.25); }
@@ -313,9 +315,9 @@ body::before { background:repeating-linear-gradient(0deg,transparent,transparent
 
 /* ── Dark Neumorphism + Polish ─────────────────────────────── */
 body { background:radial-gradient(ellipse 130% 55% at 50% 0%,#071407 0%,#050a05 68%); }
-body::after {
+html::after {
   content:''; position:fixed; inset:0; pointer-events:none; z-index:99999; border-radius:var(--frame-r-top,0) var(--frame-r-top,0) var(--frame-r-bot,0) var(--frame-r-bot,0);
-  border:3px solid var(--bt-acc-b);
+  border:3px solid var(--sb-b, var(--bt-acc-b)); /* theme colour is set on <body>; --sb-b mirrors it onto <html> */
 }
 /* iOS 26 status-bar workaround (see fitFrame): static band above <body> draws the frame's top edge behind the status bar */
 html.sbfix { overflow:hidden; overscroll-behavior:none; }
@@ -327,7 +329,7 @@ html.sbfix #bg-band {
 }
 html.sbfix body { height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; }
 /* same geometry as the band (top edge at the very top of the screen) so the side lines continue without a step */
-html.sbfix body::after { top:calc(-1 * var(--sb-gap)); border-radius:52px 52px var(--frame-r-bot,0) var(--frame-r-bot,0); }
+html.sbfix::after { top:calc(-1 * var(--sb-gap)); border-radius:52px 52px var(--frame-r-bot,0) var(--frame-r-bot,0); }
 /* Moving background (B grid horizon / D board echo, alternating per launch) — see bg-fx script at the end of <body> */
 #bg-fx { position:fixed; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; display:block; transition:opacity .4s; }
 html.bgfx body, html.bgfx body[data-bt] { background:transparent !important; }
@@ -3473,7 +3475,7 @@ function applyP2Color(key){
 
   var cv = document.createElement('canvas');
   cv.id = 'bg-fx'; cv.setAttribute('aria-hidden', 'true');
-  document.body.insertBefore(cv, document.body.firstChild);
+  document.documentElement.insertBefore(cv, document.body); // outside the <body> scroller (see html::before)
   // (no fixed element may touch the top edge with a gradient: iOS 26 then lays a dark blur over the status-bar area)
   // iOS home-screen app: fixed elements are clipped below the status bar, so the strip behind it is a static
   // element (#bg-band, shown only with html.sbfix) in one flat colour with the frame's top edge. It must stay a
