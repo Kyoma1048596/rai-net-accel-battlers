@@ -596,10 +596,12 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
 @keyframes u-tw{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
 @keyframes u-hsweep{0%{background-position:150% 0,0 0,0 0}60%,100%{background-position:-50% 0,0 0,0 0}}
 /* HOLOGRAM piece skin on the board: applies to my own face-up pieces (data-me = my player number) */
-body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden),body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden){position:relative;overflow:hidden;isolation:isolate;border:0!important;background:#0b0618!important;box-shadow:none!important;animation:u-bobt 2.4s ease-in-out infinite!important}
-body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden)::before,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden)::before{content:"";position:absolute;inset:-60%;z-index:-2;background:conic-gradient(#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);animation:u-spin 1.6s linear infinite}
-body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden)::after,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden)::after{content:"";position:absolute;inset:2.5px;z-index:-1;border-radius:4px;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%) 0 0/300% 100%,repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 3px),linear-gradient(135deg,#1a0a2e,#04161e 60%,#1e0a18);animation:u-hsweep 1.9s ease-in-out infinite}
-body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pi,body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pl,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden) .pi,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden) .pl{background:linear-gradient(90deg,#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:none;animation:u-hue 2s linear infinite}
+body[data-pfx="holo"] #skin-preview .u-pv1,body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden),body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden){position:relative;overflow:hidden;isolation:isolate;border:0!important;background:#0b0618!important;box-shadow:none!important;animation:u-bobt 2.4s ease-in-out infinite!important}
+body[data-pfx="holo"] #skin-preview .u-pv1::before,body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden)::before,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden)::before{content:"";position:absolute;inset:-60%;z-index:-2;background:conic-gradient(#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);animation:u-spin 1.6s linear infinite}
+body[data-pfx="holo"] #skin-preview .u-pv1::after,body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden)::after,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden)::after{content:"";position:absolute;inset:2.5px;z-index:-1;border-radius:4px;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%) 0 0/300% 100%,repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 3px),linear-gradient(135deg,#1a0a2e,#04161e 60%,#1e0a18);animation:u-hsweep 1.9s ease-in-out infinite}
+body[data-pfx="holo"] #skin-preview .u-pv1 .pi,body[data-pfx="holo"] #skin-preview .u-pv1 .pl,body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pi,body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pl,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden) .pi,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden) .pl{background:linear-gradient(90deg,#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:none;animation:u-hue 2s linear infinite}
+body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pi svg,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden) .pi svg{color:#44ffff;filter:drop-shadow(0 0 3px rgba(68,255,255,.7));animation:u-svghue 2s linear infinite}
+@keyframes u-svghue{from{filter:hue-rotate(0deg) drop-shadow(0 0 3px rgba(68,255,255,.7))}to{filter:hue-rotate(360deg) drop-shadow(0 0 3px rgba(68,255,255,.7))}}
 /* daily login */
 .u-streak{text-align:center;font-size:.72rem;color:#5f7f5f}
 .u-streak b{color:#00ff41;font-size:1.4rem;display:block;letter-spacing:3px}
@@ -3474,7 +3476,8 @@ function _renderSkinPreview(){
       } else if(pc){
         const co=pc.p===1?co1:co2;
         d.style.cssText=`height:38px;background:linear-gradient(145deg,${co.d1},${co.d2});border:1px solid ${co.bd};display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;font-family:'Courier New',monospace;color:${co.c};`;
-        d.innerHTML=`<span style="font-size:11px;line-height:1">${pc.i}</span><span style="font-size:5px;opacity:.7">${pc.l}</span>`;
+        if(pc.p===1)d.className='u-pv1';
+        d.innerHTML=`<span class="pi" style="font-size:11px;line-height:1">${pc.i}</span><span class="pl" style="font-size:5px;opacity:.7">${pc.l}</span>`;
       } else {
         d.style.cssText=`height:38px;background:${th.cell};border:1px solid ${th.border};box-sizing:border-box;`;
       }
