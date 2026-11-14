@@ -455,6 +455,32 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
 #ov-gacha,#ov-login{--u-dim:#5f7f5f;--u-fg:#cfe8cf;}
 .u-scr{width:min(360px,94vw);display:flex;flex-direction:column;gap:10px;color:#00ff41}
 #ov-gacha>.u-scr,#ov-login>.u-scr{background:rgba(2,5,2,.82);border:1px solid #0f2a0f;padding:12px}
+.u-banner{cursor:pointer}
+.u-ban-art{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:18px;transition:opacity .35s}
+.u-ban-art.fade{opacity:0}
+.u-dots{position:absolute;top:7px;right:8px;display:flex;gap:4px;z-index:2}
+.u-dots i{width:6px;height:6px;background:#3a3010;display:block}
+.u-dots i.on{background:#ffcc33}
+.u-bolt.big{width:64px;height:96px}
+.u-bolt.big path{stroke-width:2.5}
+.u-bgl{position:relative;font-size:1.3rem;font-weight:bold;letter-spacing:3px;color:#00ff41;white-space:nowrap}
+.u-bgl::before,.u-bgl::after{content:attr(data-t);position:absolute;inset:0}
+.u-bgl::before{color:#ff3355;animation:u-gls1 .3s steps(2) infinite}
+.u-bgl::after{color:#44ffff;animation:u-gls2 .25s steps(2) infinite}
+.u-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#ov-gacha .u-two .u-btn{font-size:.72rem;padding:10px 6px;letter-spacing:1px}
+#ov-gacha .u-two .u-lub{color:#00ff41}
+#u-lu{background:#020502}
+.u-lu-list{display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;min-height:0}
+.u-lu-h{font-size:.72rem;letter-spacing:3px;color:var(--rc);border-bottom:1px solid #1a2e1a;padding-bottom:4px;display:flex;justify-content:space-between}
+.u-lu-h span{color:#5f7f5f;letter-spacing:1px;font-size:.6rem}
+.u-lu-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.u-lu-c{border:1px solid #1a2e1a;border-top:3px solid var(--rc);padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;background:#030803}
+.u-lu-c .u-vis{height:52px}
+.u-lu-n{font-size:.62rem;color:#cfe8cf;text-align:center;line-height:1.2;word-break:break-all}
+.u-lu-k{font-size:.52rem;color:#5f7f5f}
+.u-lu-o{font-size:.52rem;letter-spacing:1px;color:#2a4a2a}
+.u-lu-c.own .u-lu-o{color:#00ff41}
 .u-top{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.72rem}
 #ov-gacha .u-back{width:auto;margin:0;padding:4px 10px;font-size:.7rem;border-color:#007700}
 .u-wallet{display:flex;gap:6px}
@@ -1281,7 +1307,7 @@ body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pi,body[data-pfx="hol
       </span>
     </div>
     <div class="u-ttlbar">GACHA</div>
-    <div class="u-banner"><div class="u-tun" id="u-ban-tun"></div><div class="u-lbl"><b>PICK UP UR</b><span>NEON TUNNEL</span></div></div>
+    <div class="u-banner" onclick="upaOpenLineup()"><div class="u-ban-art" id="u-ban-art"></div><div class="u-dots" id="u-ban-dots"></div><div class="u-lbl"><b>PICK UP UR</b><span id="u-ban-name">NEON TUNNEL</span></div></div>
     <div class="u-pity">
       <div class="u-row"><span>天井（URを1つ選べる）</span><span id="u-pity-t">0 / 50</span></div>
       <div class="u-bar"><i id="u-pity"></i></div>
@@ -1291,8 +1317,17 @@ body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pi,body[data-pfx="hol
     <button class="u-btn u-free" id="u-b-free" onclick="upaPull('free')"><span>FREE x1</span><small>今日の無料 1回</small></button>
     <button class="u-btn" id="u-b-one" onclick="upaPull('one')"><span>PULL x1</span><span class="u-cost"><span class="u-coin">U</span>100</span></button>
     <button class="u-btn u-big" id="u-b-ten" onclick="upaPull('ten')"><span>PULL x10<br><small>SR以上 1枠確定</small></span><span class="u-cost"><span class="u-coin">U</span>1000</span></button>
-    <button class="u-btn u-sub" onclick="upaOpenEx('shard')"><span class="u-shard"></span>カケラ交換（好きなアイテムと交換）</button>
+    <div class="u-two">
+      <button class="u-btn u-sub u-lub" onclick="upaOpenLineup()">≡ ラインナップ</button>
+      <button class="u-btn u-sub" onclick="upaOpenEx('shard')"><span class="u-shard"></span>カケラ交換</button>
+    </div>
     <div class="u-own" id="u-own"></div>
+  </div>
+  <div class="u-layer u-res" id="u-lu">
+    <div class="u-res-t">LINEUP</div>
+    <div class="u-hint" id="u-lu-note"></div>
+    <div class="u-lu-list" id="u-lu-list"></div>
+    <button class="u-btn" onclick="upaCloseLineup()"><span>BACK</span><small>戻る</small></button>
   </div>
   <div class="u-layer u-res" id="u-res">
     <div class="u-res-t" id="u-res-t">RESULT</div>
@@ -3857,7 +3892,7 @@ window.upaClaim=function(){
 };
 const _showTitle=showTitle;
 showTitle=function(){
-  ['u-res','u-ex','u-fx'].forEach(id=>{const e=$(id);if(e)e.classList.remove('on');});
+  ['u-res','u-ex','u-fx','u-lu'].forEach(id=>{const e=$(id);if(e)e.classList.remove('on');});
   hide('ov-gacha');
   _showTitle.apply(this,arguments);
   refresh();
@@ -4025,7 +4060,48 @@ _buildSkinUI=function(){syncCatalog();_buildSkin.apply(this,arguments);buildSkin
 const _loadCloud=loadCloudData;
 loadCloudData=async function(){await _loadCloud.apply(this,arguments);await cloudLoad();};
 
-tunnelRings($('u-ban-tun'),6);
+// ── PICK UP UR banner: shows each UR in turn, every 3 seconds ──
+const URS=ITEMS.filter(i=>i.r==='UR');
+let banIx=0;
+function bannerArt(it){
+  const a=$('u-ban-art');a.innerHTML='';a.style.background='';
+  if(it.key==='tunnel'){const t=document.createElement('div');t.className='u-tun';tunnelRings(t,6);a.appendChild(t);}
+  else if(it.key==='warp'){a.style.background='#000a14';const t=document.createElement('div');t.className='u-warp';
+    for(let i=0;i<16;i++){const s=document.createElement('i');s.style.top=(4+i*6)+'%';s.style.width=(18+((i*37)%45))+'%';s.style.animationDelay=(-(i*0.29)%1.2)+'s';s.style.animationDuration=(0.7+(i%4)*0.25)+'s';t.appendChild(s);}a.appendChild(t);}
+  else if(it.key==='bolt')a.innerHTML='<svg class="u-bolt big" viewBox="0 0 40 56"><path d="M24 2 L8 30 L20 30 L14 54 L32 22 L20 22 Z"/></svg><svg class="u-bolt big" viewBox="0 0 40 56" style="animation-delay:.4s"><path d="M24 2 L8 30 L20 30 L14 54 L32 22 L20 22 Z" style="animation-delay:.5s"/></svg>';
+  else if(it.key==='glitch')a.innerHTML='<span class="u-bgl" data-t="ACCESS GRANTED">ACCESS GRANTED</span>';
+  else if(it.key==='holo')a.innerHTML=holo(2,'L')+holo(2,'V');
+  $('u-ban-name').textContent=it.name;
+  $('u-ban-dots').innerHTML=URS.map((u,i)=>`<i class="${i===banIx?'on':''}"></i>`).join('');
+}
+function nextBanner(){
+  const g=$('ov-gacha');if(!g||!g.classList.contains('on')||$('u-fx').classList.contains('on'))return;
+  const a=$('u-ban-art');a.classList.add('fade');
+  setTimeout(()=>{banIx=(banIx+1)%URS.length;bannerArt(URS[banIx]);a.classList.remove('fade');},350);
+}
+setInterval(nextBanner,3000);
+
+// ── LINEUP: everything in the gacha, with what I already own ──
+window.upaOpenLineup=function(){
+  if(busy)return;
+  const L=$('u-lu-list');L.innerHTML='';
+  const n=ITEMS.filter(i=>owns(i.id)).length;
+  $('u-lu-note').textContent='全'+ITEMS.length+'種　・　所持 '+n+' / '+ITEMS.length;
+  [['UR','5%'],['SR','25%'],['R','70%']].forEach(([r,p])=>{
+    const list=ITEMS.filter(i=>i.r===r);
+    const sec=document.createElement('div');sec.className='u-'+r;
+    sec.innerHTML=`<div class="u-lu-h">${r}<span>${list.length}種　・　出る確率 ${p}</span></div>`;
+    const g=document.createElement('div');g.className='u-lu-g';
+    list.forEach(it=>{const c=document.createElement('div');c.className='u-lu-c'+(owns(it.id)?' own':'');
+      c.appendChild(vis(it));
+      c.insertAdjacentHTML('beforeend',`<div class="u-lu-n">${it.name}</div><div class="u-lu-k">${KIND[it.kind]}</div><div class="u-lu-o">${owns(it.id)?'✓ 所持':'未所持'}</div>`);
+      g.appendChild(c);});
+    sec.appendChild(g);L.appendChild(sec);});
+  $('u-lu').classList.add('on');
+};
+window.upaCloseLineup=function(){$('u-lu').classList.remove('on');};
+
+bannerArt(URS[0]);
 syncCatalog();applyAll();refresh();
 })();
 </script>
