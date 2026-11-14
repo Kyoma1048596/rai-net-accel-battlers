@@ -3782,8 +3782,10 @@ const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return ymd(d);}
 const item=id=>ITEMS.find(i=>i.id===id);
 
 // ── state ──
-function fresh(){return{v:1,upa:0,paid:0,shard:0,pity:0,owned:[],eq:{},login:{last:'',streak:0},freeDate:'',firstWin:'',ts:0};}
-function load(){try{const s=JSON.parse(localStorage.getItem(LS)||'null');if(s&&s.v===1){const f=fresh();return Object.assign(f,s,{eq:Object.assign({},s.eq),login:Object.assign(f.login,s.login),owned:Array.isArray(s.owned)?s.owned:[]});}}catch(e){}return fresh();}
+function fresh(){return{v:1,upa:0,paid:0,shard:0,pity:0,owned:[],eq:{},login:{last:'',streak:0},freeDate:'',firstWin:'',grants:[],ts:0};}
+function load(){try{const s=JSON.parse(localStorage.getItem(LS)||'null');if(s&&s.v===1){const f=fresh();return Object.assign(f,s,{eq:Object.assign({},s.eq),login:Object.assign(f.login,s.login),owned:Array.isArray(s.owned)?s.owned:[],grants:Array.isArray(s.grants)?s.grants:[]});}}catch(e){}return fresh();}
+// one-time gifts to a specific account (given once after the cloud data is loaded)
+const GRANTS=[{id:'g_kojima_2000',uid:'85PJAv11sTWtQmfGP8iMZJpI9A83',upa:2000}];
 let S=load();
 const owns=id=>S.owned.indexOf(id)>=0;
 function save(){S.ts=Date.now();try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}queueCloud();refresh();}
@@ -3797,10 +3799,12 @@ function merge(c){
   const own=Array.from(new Set(S.owned.concat(Array.isArray(c.owned)?c.owned:[])));
   if((c.ts||0)>(S.ts||0)){const f=fresh();const eq=S.eq;S=Object.assign(f,c,{login:Object.assign(f.login,c.login),eq:Object.assign({},c.eq)});if(!Object.keys(S.eq).length)S.eq=eq;}
   S.owned=own;
+  S.grants=Array.from(new Set((S.grants||[]).concat(Array.isArray(c.grants)?c.grants:[])));
   try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}
   queueCloud();syncCatalog();applyAll();refresh();
 }
-async function cloudLoad(){if(!authed())return;try{const r=await fetch(`${FB_DB}/users/${_authUid}/upa.json?auth=${_authToken}`);if(r.ok)merge(await r.json());}catch(e){}}
+async function cloudLoad(){if(!authed())return;try{const r=await fetch(`${FB_DB}/users/${_authUid}/upa.json?auth=${_authToken}`);if(!r.ok)return;merge(await r.json());applyGrants();}catch(e){}}
+function applyGrants(){if(!Array.isArray(S.grants))S.grants=[];let got=0;GRANTS.forEach(g=>{if(g.uid===_authUid&&S.grants.indexOf(g.id)<0){S.grants.push(g.id);S.upa+=g.upa;got+=g.upa;}});if(got){save();toast('🎁 プレゼント '+got+' UPA');}}
 window.upaOwns=owns;
 
 // ── gacha items in the game ──
