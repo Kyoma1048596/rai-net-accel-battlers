@@ -336,8 +336,8 @@ html.bgfx body, html.bgfx body[data-bt] { background:transparent !important; }
 /* menu screens show the background; the board behind them is hidden instead of covered */
 html.bgfx #ov-splash, html.bgfx #ov-name, html.bgfx #ov-title, html.bgfx #ov-difficulty, html.bgfx #ov-online,
 html.bgfx #ov-waiting, html.bgfx #ov-gamestart, html.bgfx #ov-auth, html.bgfx #ov-recover, html.bgfx #ov-mypage,
-html.bgfx #ov-lb, html.bgfx #ov-settings, html.bgfx #ov-skin { background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; }
-html.bgfx body:has(#ov-splash.on, #ov-name.on, #ov-title.on, #ov-difficulty.on, #ov-online.on, #ov-waiting.on, #ov-gamestart.on, #ov-auth.on, #ov-recover.on, #ov-mypage.on, #ov-lb.on, #ov-settings.on, #ov-skin.on) > #game-wrap { visibility:hidden; }
+html.bgfx #ov-lb, html.bgfx #ov-settings, html.bgfx #ov-skin, html.bgfx #ov-gacha { background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; }
+html.bgfx body:has(#ov-splash.on, #ov-name.on, #ov-title.on, #ov-difficulty.on, #ov-online.on, #ov-waiting.on, #ov-gamestart.on, #ov-auth.on, #ov-recover.on, #ov-mypage.on, #ov-lb.on, #ov-settings.on, #ov-skin.on, #ov-gacha.on) > #game-wrap { visibility:hidden; }
 .box { box-shadow:4px 4px 14px rgba(0,0,0,.8),-2px -2px 8px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.05); }
 .ov-panel { box-shadow:6px 6px 22px rgba(0,0,0,.9),-3px -3px 12px rgba(0,255,65,.04),inset 0 1px 0 rgba(0,255,65,.06); }
 button { box-shadow:3px 3px 8px rgba(0,0,0,.7),-1px -1px 4px rgba(0,255,65,.05),inset 0 1px 0 rgba(0,255,65,.04); transition:background .15s,box-shadow .1s,transform .08s,color .15s; }
@@ -451,6 +451,168 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
 .sk-sw{flex:1;min-width:50px;padding:5px 2px;font-size:.52rem;letter-spacing:.5px;border-color:#1a2a1a;color:#446644;text-align:center;cursor:pointer;}
 .sk-sw.on{border-color:#00ff41;color:#00ff41;background:#061806;}
 .sk-dot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin:0 1px;}
+/* ── UPA: gacha / daily login / gacha items ───────────────────── */
+#ov-gacha,#ov-login{--u-dim:#5f7f5f;--u-fg:#cfe8cf;}
+.u-scr{width:min(360px,94vw);display:flex;flex-direction:column;gap:10px;color:#00ff41}
+#ov-gacha>.u-scr,#ov-login>.u-scr{background:rgba(2,5,2,.82);border:1px solid #0f2a0f;padding:12px}
+.u-top{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.72rem}
+#ov-gacha .u-back{width:auto;margin:0;padding:4px 10px;font-size:.7rem;border-color:#007700}
+.u-wallet{display:flex;gap:6px}
+.u-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid #1a4a1a;padding:2px 8px;border-radius:10px;font-variant-numeric:tabular-nums;color:#cfe8cf}
+.u-coin{width:13px;height:13px;border-radius:50%;background:#ffcc33;color:#1a1000;font-size:9px;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.u-shard{width:10px;height:12px;background:#cc66ff;clip-path:polygon(50% 0,100% 40%,70% 100%,20% 100%,0 40%);display:inline-block;flex:none;vertical-align:-1px}
+.u-ttlbar{text-align:center;font-size:1.05rem;letter-spacing:5px}
+.u-banner{border:1px solid #ffcc33;height:140px;position:relative;overflow:hidden;background:#06030a}
+.u-tun{position:absolute;inset:0}
+.u-tun i{position:absolute;left:50%;top:50%;border:1px solid #ff3cac;transform:translate(-50%,-50%);animation:u-tun 2.4s linear infinite;opacity:0}
+@keyframes u-tun{0%{width:4px;height:3px;opacity:0}15%{opacity:1}100%{width:150%;height:150%;opacity:0}}
+.u-lbl{position:absolute;left:8px;bottom:6px;right:8px;display:flex;justify-content:space-between;align-items:flex-end}
+.u-lbl b{color:#ffcc33;font-size:.62rem;letter-spacing:2px;border:1px solid #ffcc33;padding:1px 5px;background:#06030a}
+.u-lbl span{font-size:.9rem;color:#fff;letter-spacing:2px;background:#06030a;padding:0 3px}
+.u-pity{font-size:.66rem;color:var(--u-dim);display:flex;flex-direction:column;gap:4px}
+.u-row{display:flex;justify-content:space-between}
+.u-bar{height:6px;border:1px solid #1a4a1a;position:relative}
+.u-bar i{position:absolute;inset:0 auto 0 0;background:#ffcc33;width:0}
+.u-rates{font-size:.62rem;color:var(--u-dim);text-align:center;letter-spacing:1px}
+.u-rates .r{color:#44aaff}.u-rates .s{color:#cc66ff}.u-rates .u{color:#ffcc33}
+#ov-gacha .u-btn,#ov-login .u-btn{display:flex;justify-content:space-between;align-items:center;width:100%;margin:0;background:#050e05;color:#00ff41;border:1px solid #007700;padding:10px 12px;font-size:.82rem;letter-spacing:2px;text-align:left}
+#ov-gacha .u-btn small,#ov-login .u-btn small{font-size:.62rem;color:var(--u-dim);letter-spacing:0}
+.u-cost{display:flex;align-items:center;gap:4px;color:#cfe8cf}
+#ov-gacha .u-free,#ov-login .u-free{background:#00ff41;color:#000;border-color:#00ff41}
+#ov-gacha .u-free small,#ov-login .u-free small{color:#033}
+#ov-gacha .u-big{border-color:#ffcc33;color:#ffcc33}
+#ov-gacha .u-pityb{border-color:#ffcc33;background:#ffcc33;color:#1a1000}
+#ov-gacha .u-pityb small{color:#3a2a00}
+#ov-gacha .u-sub{justify-content:center;gap:8px;font-size:.72rem;border-color:#1a4a1a;color:#cc66ff}
+#ov-gacha .u-btn:disabled,#ov-login .u-btn:disabled{opacity:.35;cursor:default}
+.u-hide{display:none!important}
+.u-own{text-align:center;font-size:.6rem;color:var(--u-dim);letter-spacing:2px}
+.u-layer{display:none;position:fixed;inset:0;z-index:610;flex-direction:column;align-items:center;gap:10px;padding:max(24px,calc(env(safe-area-inset-top) + 16px)) 16px max(20px,calc(env(safe-area-inset-bottom) + 14px))}
+.u-layer.on{display:flex}
+.u-res{background:rgba(2,5,2,.97)}
+.u-res>*{width:min(360px,100%)}
+.u-res-t{text-align:center;letter-spacing:4px;font-size:.95rem;color:#00ff41}
+.u-res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;overflow-y:auto;min-height:0;flex:1;align-content:start}
+.u-res-grid.one{grid-template-columns:1fr;max-width:200px;flex:none;margin:20px auto 0}
+.u-R{--rc:#44aaff}.u-SR{--rc:#cc66ff}.u-UR{--rc:#ffcc33}
+.u-rc{border:1px solid #1a2e1a;border-top:3px solid var(--rc);padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:.64rem;color:#5f7f5f;animation:u-flip .35s both}
+.u-rc .rr{color:var(--rc);letter-spacing:2px;font-size:.58rem}
+.u-rc .rn{color:#cfe8cf;font-size:.74rem}
+.u-rc .nw{color:#00ff41}.u-rc .dp{color:#cc66ff}
+@keyframes u-flip{from{transform:rotateY(90deg);opacity:0}to{transform:none;opacity:1}}
+.u-hint{font-size:.6rem;color:#5f7f5f;text-align:center;line-height:1.6}
+.u-ex-list{display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1;min-height:0}
+#ov-gacha .u-exi{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin:0;padding:8px 10px;border:1px solid #1a2e1a;border-left:4px solid var(--rc);background:#050e05;color:#cfe8cf;font-size:.72rem;letter-spacing:1px;text-align:left;flex:none}
+#ov-gacha .u-exi small{color:#5f7f5f;font-size:.6rem;display:block;letter-spacing:0}
+#ov-gacha .u-exi.ask{background:#1a1400;border-color:#ffcc33;color:#ffcc33}
+#ov-gacha .u-exi:disabled{opacity:.35;cursor:default}
+.u-toast{position:fixed;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px));transform:translateX(-50%);z-index:640;border:1px solid #00ff41;background:#050e05;padding:8px 14px;font-size:.74rem;color:#00ff41;display:none;white-space:nowrap}
+.u-toast.on{display:block}
+.u-fx{background:#010301;cursor:pointer;z-index:620;--hc:#00ff41}
+.u-fx>*{width:min(360px,100%)}
+.u-term{font-size:.7rem;color:#00ff41;min-height:118px;white-space:pre-wrap;line-height:1.55}
+.u-term .w{color:#ff3344;font-weight:bold;animation:u-jit .5s steps(1) 3}
+.u-term .c-R{color:#44aaff}.u-term .c-SR{color:#cc66ff}.u-term .c-UR{color:#ffcc33;font-weight:bold}
+.u-fbar{height:8px;border:1px solid #1a4a1a}
+.u-fbar i{display:block;height:100%;width:0;background:#00ff41;transition:width 1.2s linear,background .15s}
+.u-stage{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0}
+.u-skip{text-align:center;font-size:.58rem;color:#5f7f5f;letter-spacing:3px}
+.u-fx>.u-flash{position:absolute;inset:0;width:auto;opacity:0;pointer-events:none;z-index:9;animation:u-flash .55s ease-out}
+@keyframes u-flash{0%{opacity:.8}100%{opacity:0}}
+.u-shake{animation:u-shake .12s steps(2) 4!important}
+@keyframes u-shake{0%{transform:translate(-4px,2px)}50%{transform:translate(4px,-3px)}100%{transform:translate(-2px,-1px)}}
+.u-pk{width:190px;height:210px;position:relative;overflow:hidden;border-radius:4px;animation:u-pkin .3s both}
+.u-pk::before{content:"";position:absolute;inset:-60%;background:var(--hc)}
+.u-pk.urx::before{background:conic-gradient(#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);animation:u-spin 1.4s linear infinite}
+.u-pk-in{position:absolute;inset:3px;background:#030803;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+.u-scr2{font-size:.62rem;color:var(--hc);word-break:break-all;width:100%;line-height:1.25;text-align:center;opacity:.75}
+.u-rk{font-size:2.1rem;letter-spacing:6px;color:var(--hc);font-weight:bold;line-height:1;animation:u-stamp .35s both}
+.u-nm2{font-size:.85rem;color:#fff;letter-spacing:2px;min-height:1.2em;text-align:center}
+.u-tag{font-size:.64rem}.u-tag.nw{color:#00ff41}.u-tag.dp{color:#cc66ff}
+@keyframes u-stamp{from{transform:scale(2.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes u-pkin{from{transform:scale(.6);opacity:0}}
+@keyframes u-spin{to{transform:rotate(360deg)}}
+@keyframes u-jit{0%,88%{transform:none}90%{transform:translateX(2px) skewX(-10deg)}93%{transform:translateX(-2px)}96%{transform:none}}
+.u-tg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;width:100%}
+.u-tl{border:1px solid #1a3a1a;height:44px;font-size:.6rem;padding:3px 7px;display:flex;flex-direction:column;justify-content:center;color:#2f5f2f;overflow:hidden;word-break:break-all;line-height:1.2}
+.u-tl b{letter-spacing:2px}
+.u-tl.on{border-color:var(--hc);border-left:5px solid var(--hc);color:#cfe8cf;animation:u-pkin .2s;word-break:normal}
+.u-tl.on b{color:var(--hc)}
+.u-tl.on.u-UR{background:linear-gradient(90deg,#3a2800,#030803 80%)}
+.u-tl.wait{border-color:var(--hc);animation:u-pulse .25s steps(1) infinite}
+@keyframes u-pulse{50%{border-color:#030803}}
+.u-vis{width:100%;height:56px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.u-pc{width:34px;height:34px;border-radius:4px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:13px}
+.u-emo{font-size:.78rem;letter-spacing:2px;border:1px solid #00ff41;color:#00ff41;padding:4px 8px;border-radius:3px}
+.u-mb{display:grid;grid-template-columns:repeat(4,12px);gap:2px;padding:5px;border:1px solid}
+.u-mb i{width:12px;height:12px;display:block}
+.u-fr{width:70px;height:46px;border:3px solid;border-radius:10px}
+.u-tt{font-size:.72rem;border:1px solid;padding:2px 8px;border-radius:2px;white-space:nowrap}
+.u-warp{position:absolute;inset:0}
+.u-warp i{position:absolute;height:2px;background:linear-gradient(90deg,transparent,#44ffff 70%,#fff);animation:u-warp 1.2s linear infinite;left:-40%}
+@keyframes u-warp{to{left:120%}}
+.u-bolt{width:40px;height:56px}
+.u-bolt path{fill:none;stroke:#ffcc33;stroke-width:3;stroke-dasharray:90;animation:u-boltd 1.6s steps(8) infinite}
+@keyframes u-boltd{0%{stroke-dashoffset:90}40%,70%{stroke-dashoffset:0}100%{stroke-dashoffset:-90}}
+.u-glt{font-size:.66rem;color:#00ff41;letter-spacing:1px;animation:u-glt 1.8s steps(1) infinite}
+@keyframes u-glt{0%,88%{transform:none;color:#00ff41}90%{transform:translateX(3px);color:#ff3355}94%{transform:translateX(-2px);color:#44ffff}}
+.u-hw{position:relative;width:calc(40px*var(--s,1));height:calc(40px*var(--s,1));flex:none}
+.u-hp{position:absolute;inset:0;border-radius:calc(5px*var(--s,1));overflow:hidden;animation:u-bob 2.4s ease-in-out infinite}
+.u-hp::before{content:"";position:absolute;inset:-60%;background:conic-gradient(#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);animation:u-spin 1.6s linear infinite}
+.u-hp .core{position:absolute;inset:calc(2.5px*var(--s,1));border-radius:calc(3px*var(--s,1));background:linear-gradient(135deg,#1a0a2e,#04161e 60%,#1e0a18);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.u-hp .core::after{content:"";position:absolute;top:-50%;left:-80%;width:45%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);transform:rotate(20deg);animation:u-sweep 1.9s ease-in-out infinite}
+.u-hp span{font-weight:bold;font-size:calc(17px*var(--s,1));background:linear-gradient(90deg,#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;position:relative;z-index:1;animation:u-hue 2s linear infinite}
+.u-sp{position:absolute;width:calc(7px*var(--s,1));height:calc(7px*var(--s,1));background:#fff;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:u-tw 1.5s ease-in-out infinite;opacity:0;z-index:2}
+@keyframes u-sweep{0%{left:-80%}60%,100%{left:140%}}
+@keyframes u-hue{to{background-position:200% 0}}
+@keyframes u-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes u-bobt{0%,100%{translate:0 0}50%{translate:0 -3px}}
+@keyframes u-tw{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
+@keyframes u-hsweep{0%{background-position:150% 0,0 0,0 0}60%,100%{background-position:-50% 0,0 0,0 0}}
+/* HOLOGRAM piece skin on the board: applies to my own face-up pieces (data-me = my player number) */
+body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden),body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden){position:relative;overflow:hidden;isolation:isolate;border:0!important;background:#0b0618!important;box-shadow:none!important;animation:u-bobt 2.4s ease-in-out infinite!important}
+body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden)::before,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden)::before{content:"";position:absolute;inset:-60%;z-index:-2;background:conic-gradient(#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);animation:u-spin 1.6s linear infinite}
+body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden)::after,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden)::after{content:"";position:absolute;inset:2.5px;z-index:-1;border-radius:4px;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%) 0 0/300% 100%,repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 3px),linear-gradient(135deg,#1a0a2e,#04161e 60%,#1e0a18);animation:u-hsweep 1.9s ease-in-out infinite}
+body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pi,body[data-pfx="holo"][data-me="1"] .piece.p1:not(.hidden) .pl,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden) .pi,body[data-pfx="holo"][data-me="2"] .piece.p2:not(.hidden) .pl{background:linear-gradient(90deg,#ff3cac,#ffcc33,#44ffff,#9966ff,#ff3cac);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:none;animation:u-hue 2s linear infinite}
+/* daily login */
+.u-streak{text-align:center;font-size:.72rem;color:#5f7f5f}
+.u-streak b{color:#00ff41;font-size:1.4rem;display:block;letter-spacing:3px}
+.u-days{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.u-day{border:1px solid #1a2e1a;padding:7px 2px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.6rem;color:#5f7f5f;position:relative;min-height:70px}
+.u-day .amt{display:flex;align-items:center;gap:3px;color:#cfe8cf;font-size:.74rem}
+.u-day.done{opacity:.45}
+.u-day.done::after{content:"ACK";position:absolute;inset:16px 6px;display:flex;align-items:center;justify-content:center;color:#00ff41;font-size:.9rem;letter-spacing:2px;transform:rotate(-14deg);border:2px solid #00ff41}
+.u-day.today{border-color:#00ff41;color:#00ff41}
+.u-day.d7{grid-column:span 2;border-color:#ffcc33;color:#ffcc33}
+.u-day.d7 .amt{font-size:1rem}
+.u-boxx{border:1px solid #1a2e1a;padding:9px 10px;display:flex;flex-direction:column;gap:6px;font-size:.7rem}
+.u-h{display:flex;justify-content:space-between;color:#5f7f5f;font-size:.6rem;letter-spacing:2px}
+.u-t{color:#cfe8cf;font-size:.8rem}
+.u-title-upa{font-size:.7rem;letter-spacing:2px;color:#cfe8cf;display:flex;align-items:center;gap:6px;justify-content:center;margin:-6px 0 4px}
+.u-earn{color:#ffcc33;font-size:.72rem;margin-top:4px;letter-spacing:1px}
+.u-earn span{color:#887744;font-size:.62rem}
+.u-mytitle{margin-left:6px;letter-spacing:1px}
+/* SKIN STUDIO additions */
+#sk-bt{flex-wrap:wrap}
+#sk-bt>button{min-width:64px}
+.u-skin-row{display:flex;gap:4px;flex-wrap:wrap}
+#ov-skin .u-skin-opt{width:auto;flex:1 1 auto;min-width:60px;margin:0;padding:5px 6px;font-size:.6rem;letter-spacing:1px;border-color:#1a2a1a;color:#669966;background:#050e05}
+#ov-skin .u-skin-opt.on{border-color:#00ff41;background:#061806}
+.u-skin-none{font-size:.58rem;color:#2a4a2a}
+/* win effects */
+.u-winfx{position:fixed;inset:0;z-index:650;pointer-events:none}
+.u-winfx svg{position:absolute;inset:0;width:100%;height:100%}
+.u-winflash{position:absolute;inset:0;background:#fff6c0;animation:u-flash .3s ease-out both}
+.u-gl{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);animation:u-glbg 1.9s linear both}
+@keyframes u-glbg{0%{opacity:0}6%{opacity:1}85%{opacity:1}100%{opacity:0}}
+.u-gl span{position:relative;font:bold clamp(1.5rem,8vw,3rem) 'Courier New',monospace;letter-spacing:4px;color:#00ff41;animation:u-gljit 1.9s steps(1) both;white-space:nowrap}
+.u-gl span::before,.u-gl span::after{content:attr(data-t);position:absolute;inset:0}
+.u-gl span::before{color:#ff3355;animation:u-gls1 .3s steps(2) infinite}
+.u-gl span::after{color:#44ffff;animation:u-gls2 .25s steps(2) infinite}
+@keyframes u-gls1{0%{clip-path:inset(0 0 70% 0);transform:translateX(-5px)}50%{clip-path:inset(30% 0 40% 0);transform:translateX(5px)}100%{clip-path:inset(60% 0 10% 0);transform:translateX(-3px)}}
+@keyframes u-gls2{0%{clip-path:inset(55% 0 0 0);transform:translateX(5px)}50%{clip-path:inset(10% 0 65% 0);transform:translateX(-4px)}100%{clip-path:inset(40% 0 30% 0);transform:translateX(3px)}}
+@keyframes u-gljit{0%{transform:skewX(-25deg) scale(1.3)}8%{transform:none}40%{transform:translateX(4px)}42%{transform:none}70%{transform:skewX(12deg)}72%{transform:none}}
+@media (prefers-reduced-motion:reduce){.u-fx *,.u-hp,.u-hp *,.u-gl *{animation:none!important}}
 </style>
 </head>
 <body>
@@ -572,10 +734,12 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
   <div class="ov-title" style="color:#00ff41;font-size:clamp(1.1rem,4vw,2rem)">雷ネット・アクセルバトラーズ</div>
   <div class="ov-sub">STEINS;GATE :: RAI-NET ACCEL BATTLERS <span class="ver-sub"></span></div>
   <div id="title-rating-display" style="font-size:.72rem;letter-spacing:2px;margin:4px 0 8px"></div>
+  <div id="title-upa" class="u-title-upa"></div>
   <div class="ov-panel" style="width:min(300px,90vw)">
     <button onclick="selectDifficulty()">// ⚙ CPU</button>
     <button class="btn-online" onclick="enterOnlineMode()">// 🌐 ONLINE</button>
     <button onclick="showSkin()" style="border-color:#1a2a3a;color:#336655;font-size:.7rem;margin-top:4px">// 🎨 SKIN</button>
+    <button onclick="showGacha()" style="border-color:#665500;color:#ffcc33;font-size:.7rem;margin-top:2px">// 🎰 GACHA</button>
     <button onclick="showMyPage()" style="border-color:#1a2e1a;color:#336644;font-size:.7rem;margin-top:2px">// 👤 MY PAGE</button>
     <button onclick="showLeaderboard()" style="border-color:#1a1a2e;color:#334466;font-size:.7rem;margin-top:2px">// 🏆 RANK</button>
     <button onclick="showRules()" style="border-color:#445544;color:#669966;font-size:.7rem;margin-top:2px">// 📖 RULES</button>
@@ -1041,6 +1205,8 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
         <button class="snd-toggle" data-bg-mode="grid" onclick="setBgMode('grid')">GRID</button>
         <button class="snd-toggle" data-bg-mode="board" onclick="setBgMode('board')">BOARD</button>
         <button class="snd-toggle" data-bg-mode="off" onclick="setBgMode('off')">OFF</button>
+        <button class="snd-toggle u-hide" data-bg-mode="tunnel" data-upa="bg_tunnel" onclick="setBgMode('tunnel')">TUNNEL</button>
+        <button class="snd-toggle u-hide" data-bg-mode="warp" data-upa="bg_warp" onclick="setBgMode('warp')">WARP</button>
       </div>
     </div>
     <div class="settings-row" id="bg-motion-row">
@@ -1073,6 +1239,24 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
       <div style="display:flex;gap:3px;flex-wrap:wrap" id="sk-p2"></div>
     </div>
 
+    <!-- Gacha items -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// PIECE SKIN（自分の駒）</div>
+      <div class="u-skin-row" id="sk-pfx"></div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// FRAME NEON</div>
+      <div class="u-skin-row" id="sk-fr"></div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// WIN EFFECT</div>
+      <div class="u-skin-row" id="sk-win"></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:5px">// TITLE（称号）</div>
+      <div class="u-skin-row" id="sk-ttl"></div>
+    </div>
+
     <!-- Preview -->
     <div style="margin-bottom:14px">
       <div style="font-size:.56rem;color:#446644;letter-spacing:1px;margin-bottom:6px">// PREVIEW</div>
@@ -1083,6 +1267,59 @@ body[data-p2s="gray"]   {--p2-c:#999999;--p2-d1:#282828;--p2-d2:#383838;--p2-bd:
     </div>
 
     <button onclick="hide('ov-skin');showTitle()" style="border-color:#1a2a1a;color:#335533;font-size:.65rem">// ← BACK</button>
+  </div>
+</div>
+
+<!-- Gacha overlay -->
+<div class="overlay" id="ov-gacha">
+  <div class="u-scr">
+    <div class="u-top">
+      <button class="u-back" onclick="closeGacha()">&lt; BACK</button>
+      <span class="u-wallet">
+        <span class="u-chip"><span class="u-coin">U</span><span id="u-upa">0</span></span>
+        <span class="u-chip"><span class="u-shard"></span><span id="u-shard">0</span></span>
+      </span>
+    </div>
+    <div class="u-ttlbar">GACHA</div>
+    <div class="u-banner"><div class="u-tun" id="u-ban-tun"></div><div class="u-lbl"><b>PICK UP UR</b><span>NEON TUNNEL</span></div></div>
+    <div class="u-pity">
+      <div class="u-row"><span>天井（URを1つ選べる）</span><span id="u-pity-t">0 / 50</span></div>
+      <div class="u-bar"><i id="u-pity"></i></div>
+    </div>
+    <div class="u-rates"><b class="r">R</b> 70% ・ <b class="s">SR</b> 25% ・ <b class="u">UR</b> 5%　［提供割合］</div>
+    <button class="u-btn u-pityb u-hide" id="u-b-pity" onclick="upaOpenEx('pity')"><span>天井到達！</span><small>URを1つ選ぶ</small></button>
+    <button class="u-btn u-free" id="u-b-free" onclick="upaPull('free')"><span>FREE x1</span><small>今日の無料 1回</small></button>
+    <button class="u-btn" id="u-b-one" onclick="upaPull('one')"><span>PULL x1</span><span class="u-cost"><span class="u-coin">U</span>100</span></button>
+    <button class="u-btn u-big" id="u-b-ten" onclick="upaPull('ten')"><span>PULL x10<br><small>SR以上 1枠確定</small></span><span class="u-cost"><span class="u-coin">U</span>1000</span></button>
+    <button class="u-btn u-sub" onclick="upaOpenEx('shard')"><span class="u-shard"></span>カケラ交換（好きなアイテムと交換）</button>
+    <div class="u-own" id="u-own"></div>
+  </div>
+  <div class="u-layer u-res" id="u-res">
+    <div class="u-res-t" id="u-res-t">RESULT</div>
+    <div class="u-res-grid" id="u-res-grid"></div>
+    <div class="u-hint">手に入れたアイテムは SKIN で使えます（背景エフェクトは SET UP → BACKGROUND）</div>
+    <button class="u-btn" onclick="upaCloseRes()"><span>OK</span><small>閉じる</small></button>
+  </div>
+  <div class="u-layer u-res" id="u-ex">
+    <div class="u-res-t" id="u-ex-t">カケラ交換</div>
+    <div class="u-hint" id="u-ex-note"></div>
+    <div class="u-ex-list" id="u-ex-list"></div>
+    <button class="u-btn" onclick="upaCloseEx()"><span>BACK</span><small>戻る</small></button>
+  </div>
+  <div class="u-layer u-fx" id="u-fx"></div>
+  <div class="u-toast" id="u-toast"></div>
+</div>
+<!-- Daily login bonus overlay -->
+<div class="overlay" id="ov-login">
+  <div class="u-scr">
+    <div class="u-ttlbar">DAILY LOGIN</div>
+    <div class="u-streak"><b id="u-l-day">DAY 1</b><span id="u-l-sub"></span></div>
+    <div class="u-days" id="u-days"></div>
+    <div class="u-boxx">
+      <div class="u-h"><span>FREE GACHA</span><span id="u-l-free" style="color:#00ff41">READY</span></div>
+      <div class="u-t">今日の無料ガチャ 1回</div>
+    </div>
+    <button class="u-btn u-free" id="u-b-claim" onclick="upaClaim()"><span>CLAIM</span><small id="u-claim-s">受け取る</small></button>
   </div>
 </div>
 
@@ -3043,7 +3280,7 @@ function closeSettings(){hide('ov-settings');}
 function _updateBgToggles(){
   if(!window.rainetBg)return;
   const s=window.rainetBg.get();
-  document.querySelectorAll('#bg-mode-btns [data-bg-mode]').forEach(b=>b.classList.toggle('on',b.dataset.bgMode===s.mode));
+  document.querySelectorAll('#bg-mode-btns [data-bg-mode]').forEach(b=>{b.classList.toggle('on',b.dataset.bgMode===s.mode);if(b.dataset.upa)b.classList.toggle('u-hide',!(window.upaOwns&&window.upaOwns(b.dataset.upa)));});
   const mb=document.getElementById('btn-bg-motion');
   if(mb){mb.textContent=s.motion?'ON':'OFF';mb.classList.toggle('on',s.motion);}
   const row=document.getElementById('bg-motion-row');
@@ -3232,6 +3469,11 @@ const EMOTES=[
   {id:'nice', text:'>> NICE', desc:'iCXI'},
   {id:'hmm',  text:'>> ???',  desc:'f'},
   {id:'ex',   text:'>> !',    desc:''},
+  // gacha emotes: listed here so a received one always displays; the picker shows them only when owned
+  {id:'hacked',text:'>> HACKED',desc:'',gacha:'emo_hacked'},
+  {id:'e404',  text:'>> 404',   desc:'',gacha:'emo_404'},
+  {id:'oops',  text:'>> OOPS',  desc:'',gacha:'emo_oops'},
+  {id:'sync',  text:'>> SYNC',  desc:'',gacha:'emo_sync'},
 ];
 let _emoteLastTs=0,_emoteCooldownIv=null,_emoteListenIv=null,_emoteLastOppTs=0;
 
@@ -3240,7 +3482,7 @@ function toggleEmotePopup(){
   if(popup.classList.contains('on')){popup.classList.remove('on');return;}
   const cdLeft=Math.max(0,10000-(Date.now()-_emoteLastTs));
   popup.innerHTML='';
-  EMOTES.forEach(e=>{
+  EMOTES.filter(e=>!e.gacha||(window.upaOwns&&window.upaOwns(e.gacha))).forEach(e=>{
     const btn=document.createElement('button');
     btn.className='emote-item'+(cdLeft>0?' cooldown':'');
     btn.innerHTML=`<span style="color:#00ff41">${e.text}</span> <span style="color:#335533;font-size:.6rem">${e.desc}</span>`;
@@ -3459,6 +3701,335 @@ function applyP2Color(key){
 
 </script>
 <script>
+// ── UPA: wallet, daily login bonus, gacha and gacha items ─────────────────────────────
+// Free currency only for now. State is kept in localStorage (rainet_upa) and, when logged in, in users/<uid>/upa.
+// 'paid' is kept apart from 'upa' so a paid currency can be added later without mixing the two.
+(function(){
+const LS='rainet_upa';
+const RANKS={R:0,SR:1,UR:2},HC={R:'#44aaff',SR:'#cc66ff',UR:'#ffcc33'};
+const SHARD_GET={R:1,SR:5,UR:20},SHARD_COST={R:10,SR:50,UR:200};
+const COST1=100,COST10=1000,PITY=50,PROMO_RATE=0.3;
+const EARN={cpu:{w:5,l:3,d:3},online:{w:10,l:3,d:3}},FIRST_WIN=20,LOGIN=10,LOGIN7=50;
+const T=(name,o)=>Object.assign({name},o);
+const ITEMS=[
+  {id:'col_lime',   r:'R',kind:'color',name:'LIME',   key:'lime',   co:{c:'#b8ff44',d1:'#0e1a00',d2:'#1e3300',bd:'#88dd00',sh:'rgba(136,221,0,.5)',hb:'#446600',col:'#99ee00'}},
+  {id:'col_pink',   r:'R',kind:'color',name:'PINK',   key:'pink',   co:{c:'#ff88cc',d1:'#1a0010',d2:'#330020',bd:'#ff55aa',sh:'rgba(255,85,170,.5)',hb:'#662244',col:'#ff66bb'}},
+  {id:'col_violet', r:'R',kind:'color',name:'VIOLET', key:'violet', co:{c:'#aa88ff',d1:'#0e0020',d2:'#1e0040',bd:'#7744ee',sh:'rgba(119,68,238,.5)',hb:'#332266',col:'#8866ff'}},
+  {id:'col_teal',   r:'R',kind:'color',name:'TEAL',   key:'teal',   co:{c:'#44ddbb',d1:'#001a14',d2:'#003328',bd:'#00aa88',sh:'rgba(0,170,136,.5)',hb:'#115544',col:'#22ccaa'}},
+  {id:'col_crimson',r:'R',kind:'color',name:'CRIMSON',key:'crimson',co:{c:'#ff4466',d1:'#1a0006',d2:'#33000c',bd:'#dd0033',sh:'rgba(221,0,51,.5)',hb:'#551122',col:'#ff2244'}},
+  {id:'col_mint',   r:'R',kind:'color',name:'MINT',   key:'mint',   co:{c:'#aaffdd',d1:'#001a10',d2:'#00301e',bd:'#55ddaa',sh:'rgba(85,221,170,.5)',hb:'#226650',col:'#77eebb'}},
+  {id:'emo_hacked',r:'R',kind:'emote',name:'HACKED'},
+  {id:'emo_404',   r:'R',kind:'emote',name:'404'},
+  {id:'emo_oops',  r:'R',kind:'emote',name:'OOPS'},
+  {id:'emo_sync',  r:'R',kind:'emote',name:'SYNC'},
+  {id:'bt_sakura', r:'SR',kind:'theme',name:'SAKURA', key:'sakura', th:{bg:'#120610',board:'#170a14',cell:'#1c0c18',border:'#3a1a30',hover:'#26101f',acc:'#ff88bb',rgb:'255,136,187',accb:'rgba(255,200,225,1)',g1:'#0c0820',g1bd:'#2a2060',g2:'#2a0818',g2bd:'#7a2048',sel:'#301028',pz:'#200c1c',pzbd:'#4a2040',cl:'#662244',clbg:'#140812',sub:'#993366'}},
+  {id:'bt_sunset', r:'SR',kind:'theme',name:'SUNSET', key:'sunset', th:{bg:'#120806',board:'#180a08',cell:'#1e0e0a',border:'#3e2014',hover:'#2a140e',acc:'#ff7744',rgb:'255,119,68',accb:'rgba(255,200,160,1)',g1:'#140824',g1bd:'#3a1a66',g2:'#2a0a04',g2bd:'#882a10',sel:'#321608',pz:'#24100a',pzbd:'#4e2414',cl:'#663018',clbg:'#160a06',sub:'#994422'}},
+  {id:'bt_abyss',  r:'SR',kind:'theme',name:'ABYSS',  key:'abyss',  th:{bg:'#01040c',board:'#020814',cell:'#040c1a',border:'#0e1e3a',hover:'#08142a',acc:'#2266ff',rgb:'34,102,255',accb:'rgba(150,190,255,1)',g1:'#000820',g1bd:'#102a70',g2:'#100418',g2bd:'#401860',sel:'#081a3a',pz:'#04102a',pzbd:'#10285a',cl:'#143066',clbg:'#020610',sub:'#1a3a88'}},
+  {id:'bt_circuit',r:'SR',kind:'theme',name:'CIRCUIT',key:'circuit',th:{bg:'#030c06',board:'#04100a',cell:'#06160c',border:'#143a20',hover:'#0a2214',acc:'#ffcc33',rgb:'255,204,51',accb:'rgba(255,235,150,1)',g1:'#021a10',g1bd:'#0a6040',g2:'#1a1000',g2bd:'#806010',sel:'#1a2a0a',pz:'#082010',pzbd:'#1a4a24',cl:'#3a5a20',clbg:'#040e06',sub:'#887722'}},
+  {id:'fr_red',  r:'SR',kind:'frame',name:'RED',  c:'#ff3344'},
+  {id:'fr_gold', r:'SR',kind:'frame',name:'GOLD', c:'#ffcc33'},
+  {id:'fr_white',r:'SR',kind:'frame',name:'WHITE',c:'#f2f2f2'},
+  {id:'ttl_novice',  r:'SR',kind:'title',name:'見習いハッカー',  c:'#88cc88'},
+  {id:'ttl_intruder',r:'SR',kind:'title',name:'侵入者',          c:'#ff7755'},
+  {id:'ttl_firewall',r:'SR',kind:'title',name:'ファイアウォール',c:'#44aaff'},
+  {id:'bg_tunnel', r:'UR',kind:'bg', name:'NEON TUNNEL',key:'tunnel'},
+  {id:'bg_warp',   r:'UR',kind:'bg', name:'DATA WARP',  key:'warp'},
+  {id:'win_bolt',  r:'UR',kind:'win',name:'LIGHTNING',  key:'bolt'},
+  {id:'win_glitch',r:'UR',kind:'win',name:'GLITCH',     key:'glitch'},
+  {id:'pfx_holo',  r:'UR',kind:'pfx',name:'HOLOGRAM',   key:'holo'},
+];
+const KIND={color:'駒の色',emote:'エモート',theme:'盤面テーマ',frame:'画面枠ネオン',title:'称号',bg:'背景エフェクト',win:'勝利演出',pfx:'駒スキン'};
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString('en-US');
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>ymd(new Date());
+const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return ymd(d);};
+const item=id=>ITEMS.find(i=>i.id===id);
+
+// ── state ──
+function fresh(){return{v:1,upa:0,paid:0,shard:0,pity:0,owned:[],eq:{},login:{last:'',streak:0},freeDate:'',firstWin:'',ts:0};}
+function load(){try{const s=JSON.parse(localStorage.getItem(LS)||'null');if(s&&s.v===1){const f=fresh();return Object.assign(f,s,{eq:Object.assign({},s.eq),login:Object.assign(f.login,s.login),owned:Array.isArray(s.owned)?s.owned:[]});}}catch(e){}return fresh();}
+let S=load();
+const owns=id=>S.owned.indexOf(id)>=0;
+function save(){S.ts=Date.now();try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}queueCloud();refresh();}
+let cloudT=null;
+function queueCloud(){clearTimeout(cloudT);cloudT=setTimeout(cloudSave,1200);}
+function authed(){return typeof _authUid!=='undefined'&&_authUid&&typeof _authToken!=='undefined'&&_authToken&&typeof FB_DB!=='undefined';}
+async function cloudSave(){if(!authed())return;try{await fetch(`${FB_DB}/users/${_authUid}/upa.json?auth=${_authToken}`,{method:'PUT',body:JSON.stringify(S)});}catch(e){}}
+// merge rule: the newer save wins for numbers; owned items are always combined (guest items carry over on login)
+function merge(c){
+  if(!c||typeof c!=='object'||c.v!==1){queueCloud();return;}
+  const own=Array.from(new Set(S.owned.concat(Array.isArray(c.owned)?c.owned:[])));
+  if((c.ts||0)>(S.ts||0)){const f=fresh();const eq=S.eq;S=Object.assign(f,c,{login:Object.assign(f.login,c.login),eq:Object.assign({},c.eq)});if(!Object.keys(S.eq).length)S.eq=eq;}
+  S.owned=own;
+  try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}
+  queueCloud();syncCatalog();applyAll();refresh();
+}
+async function cloudLoad(){if(!authed())return;try{const r=await fetch(`${FB_DB}/users/${_authUid}/upa.json?auth=${_authToken}`);if(r.ok)merge(await r.json());}catch(e){}}
+window.upaOwns=owns;
+
+// ── gacha items in the game ──
+function themeCss(k,t){const b=`body[data-bt="${k}"]`;return `html[data-bt="${k}"]{background:${t.bg}}${b}{background:${t.bg};--bt-acc-sh:rgba(${t.rgb},.45);--bt-acc-b:${t.accb}}${b} #board{background:${t.board};border-color:${t.acc};box-shadow:0 0 24px rgba(${t.rgb},.2),inset 0 0 20px rgba(0,0,0,.5)}${b} .cell{background:${t.cell};border-color:${t.border}}${b} .cell:hover{background:${t.hover}}${b} .cell.goal-top{background:${t.g2};border-color:${t.g2bd}}${b} .cell.goal-bot{background:${t.g1};border-color:${t.g1bd}}${b} .cell.selected{background:${t.sel};border-color:${t.acc};box-shadow:inset 0 0 12px rgba(${t.rgb},.35)}${b} .cell.moveable::after{background:rgba(${t.rgb},.18);border-color:rgba(${t.rgb},.5)}${b} .cell.place-zone{background:${t.pz};border-color:${t.pzbd}}${b} .cell.center-line{border-top-color:${t.cl}!important;border-bottom-color:${t.cl}!important;background:${t.clbg}}${b} .subtitle{color:${t.sub};text-shadow:0 0 8px ${t.sub}}${b} .push-start{color:${t.acc}}`;}
+function colorCss(k,c){return [1,2].map(p=>`body[data-p${p}s="${k}"]{--p${p}-c:${c.c};--p${p}-d1:${c.d1};--p${p}-d2:${c.d2};--p${p}-bd:${c.bd};--p${p}-sh:${c.sh};--p${p}-hb:${c.hb};--c${p}-col:${c.col}}`).join('');}
+(function(){const st=document.createElement('style');st.id='upa-item-css';
+  st.textContent=ITEMS.map(i=>i.kind==='theme'?themeCss(i.key,i.th):i.kind==='color'?colorCss(i.key,i.co):'').join('\n');document.head.appendChild(st);})();
+const _themeBg=window.__rainetThemeBg;
+window.__rainetThemeBg=function(){const bt=document.body&&document.body.dataset.bt;const it=ITEMS.find(i=>i.kind==='theme'&&i.key===bt);
+  if(it){const h=it.th.bg;return 'rgb('+parseInt(h.substr(1,2),16)+','+parseInt(h.substr(3,2),16)+','+parseInt(h.substr(5,2),16)+')';}return _themeBg();};
+// owned colours / themes join the SKIN STUDIO pickers
+function syncCatalog(){
+  ITEMS.forEach(i=>{if(!owns(i.id))return;
+    if(i.kind==='color'&&typeof COLOR_OPTIONS!=='undefined')COLOR_OPTIONS[i.key]={name:i.name,c:i.co.c,d1:i.co.d1,d2:i.co.d2,bd:i.co.bd};
+    if(i.kind==='theme'&&typeof BOARD_THEMES_DATA!=='undefined'){const t=i.th;BOARD_THEMES_DATA[i.key]={name:i.name,bg:t.bg,board:t.board,cell:t.cell,border:t.border,acc:t.acc,g1:t.g1,g1bd:t.g1bd,g2:t.g2,g2bd:t.g2bd};}
+  });
+}
+const eqItem=k=>{const it=item(S.eq[k]||'');return it&&owns(it.id)?it:null;};
+function applyAll(){
+  const fr=eqItem('frame');
+  if(fr)document.body.style.setProperty('--bt-acc-b',fr.c);else document.body.style.removeProperty('--bt-acc-b');
+  if(eqItem('pfx'))document.body.dataset.pfx='holo';else delete document.body.dataset.pfx;
+  if(window.__rainetSyncBand)window.__rainetSyncBand();
+  if(typeof renderRating==='function')try{renderRating();}catch(e){}
+}
+// which side is me (HOLOGRAM decorates my own pieces only)
+setInterval(()=>{try{const me=(typeof gameMode!=='undefined'&&gameMode==='online'&&typeof myPN!=='undefined'&&myPN)?String(myPN):'1';if(document.body.dataset.me!==me)document.body.dataset.me=me;}catch(e){}},700);
+document.body.dataset.me='1';
+
+// ── wallet display ──
+const freeReady=()=>S.freeDate!==today();
+let busy=false;
+function refresh(){
+  const t=$('title-upa');if(t)t.innerHTML=`<span class="u-coin">U</span>${fmt(S.upa)} UPA`;
+  if(!$('u-upa'))return;
+  $('u-upa').textContent=fmt(S.upa);$('u-shard').textContent=fmt(S.shard);
+  const p=Math.min(S.pity,PITY);$('u-pity-t').textContent=p+' / '+PITY;$('u-pity').style.width=(p/PITY*100)+'%';
+  $('u-b-pity').classList.toggle('u-hide',S.pity<PITY);
+  const fb=$('u-b-free');fb.disabled=busy||!freeReady();fb.querySelector('small').textContent=freeReady()?'今日の無料 1回':'無料は明日また引けます';
+  $('u-b-one').disabled=busy||S.upa<COST1;$('u-b-ten').disabled=busy||S.upa<COST10;
+  $('u-own').textContent='所持アイテム '+ITEMS.filter(i=>owns(i.id)).length+' / '+ITEMS.length;
+}
+function toast(msg){const t=$('u-toast');if(!t)return;t.textContent=msg;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2400);}
+
+// equipped title next to the rating line
+const _renderRating=renderRating;
+renderRating=function(){_renderRating.apply(this,arguments);const tt=eqItem('title');const el=$('title-rating-display');
+  if(el&&tt)el.insertAdjacentHTML('beforeend',`<span class="u-mytitle" style="color:${tt.c}">「${tt.name}」</span>`);};
+
+// ── earning after a match ──
+let lastAward=0;
+const _showWin=showWin;
+showWin=function(w){
+  _showWin.apply(this,arguments);
+  try{
+    if(gameMode!=='cpu'&&gameMode!=='online')return;
+    if(Date.now()-lastAward<3000)return;lastAward=Date.now();
+    const res=w==='draw'?'d':(((gameMode==='cpu'&&w===1)||(gameMode==='online'&&w===myPN))?'w':'l');
+    const g=EARN[gameMode][res];let first=0;
+    if(res==='w'&&S.firstWin!==today()){first=FIRST_WIN;S.firstWin=today();}
+    S.upa+=g+first;save();
+    const el=$('rating-change');
+    if(el)el.insertAdjacentHTML('beforeend',`<div class="u-earn"><span class="u-coin">U</span> +${g+first} UPA${first?' <span>（今日の初勝利 +'+FIRST_WIN+'）</span>':''}</div>`);
+    if(res==='w'&&eqItem('win'))setTimeout(()=>winFx(eqItem('win').key),350);
+  }catch(e){}
+};
+
+// ── daily login bonus ──
+const nextStreak=()=>S.login.last===yesterday()?(S.login.streak||0)+1:1;
+function buildLogin(claimed){
+  const st=claimed?S.login.streak:nextStreak(),day=((st-1)%7)+1;
+  $('u-l-day').textContent='DAY '+day;
+  $('u-l-sub').textContent='連続ログイン '+st+'日目　・　7日目にボーナス';
+  const d=$('u-days');d.innerHTML='';
+  for(let i=1;i<=7;i++){const el=document.createElement('div');
+    el.className='u-day'+((i<day||(claimed&&i===day))?' done':'')+(i===day&&!claimed?' today':'')+(i===7?' d7':'');
+    el.innerHTML=`<span>DAY ${i}</span><span class="amt"><span class="u-coin">U</span>${i===7?LOGIN7:LOGIN}</span>${i===day&&!claimed?'<span>TODAY</span>':''}${i===7?'<span>BONUS</span>':''}`;d.appendChild(el);}
+  $('u-l-free').textContent=freeReady()?'READY':'USED';
+  const b=$('u-b-claim');b.disabled=!!claimed;
+  $('u-claim-s').textContent=claimed?'受け取り済み':'今日の '+(day===7?LOGIN7:LOGIN)+' UPA を受け取る';
+}
+window.upaClaim=function(){
+  if(S.login.last===today())return;
+  const st=nextStreak(),day=((st-1)%7)+1,amt=day===7?LOGIN7:LOGIN;
+  S.upa+=amt;S.login={last:today(),streak:st};save();
+  buildLogin(true);
+  try{if(typeof sndSelect==='function')sndSelect();}catch(e){}
+  setTimeout(()=>hide('ov-login'),900);
+};
+const _showTitle=showTitle;
+showTitle=function(){
+  ['u-res','u-ex','u-fx'].forEach(id=>{const e=$(id);if(e)e.classList.remove('on');});
+  hide('ov-gacha');
+  _showTitle.apply(this,arguments);
+  refresh();
+  if(S.login.last!==today()){buildLogin(false);show('ov-login');}
+};
+
+// ── gacha ──
+window.showGacha=function(){hide('ov-title');refresh();show('ov-gacha');};
+window.closeGacha=function(){if(busy)return;hide('ov-gacha');showTitle();};
+function roll(guar){const x=Math.random()*100;let r;
+  if(guar)r=x<16.7?'UR':'SR';else r=x<5?'UR':(x<30?'SR':'R');
+  const pool=ITEMS.filter(i=>i.r===r);return pool[Math.random()*pool.length|0];}
+window.upaPull=async function(kind){
+  if(busy)return;
+  const n=kind==='ten'?10:1;
+  if(kind==='free'){if(!freeReady())return;S.freeDate=today();}
+  else{const cost=n===10?COST10:COST1;if(S.upa<cost){toast('UPAが足りません');return;}S.upa-=cost;}
+  busy=true;
+  const out=[];for(let i=0;i<n;i++)out.push(roll(n===10&&i===9&&!out.some(o=>o.r!=='R')));
+  const dups=out.map(it=>{const d=owns(it.id);if(d)S.shard+=SHARD_GET[it.r];else S.owned.push(it.id);return d;});
+  S.pity+=n;save();syncCatalog();
+  try{await play(out,dups,Math.random()<PROMO_RATE);}catch(e){}
+  const g=$('u-res-grid');g.innerHTML='';g.className='u-res-grid'+(n===1?' one':'');
+  out.forEach((it,i)=>{const c=document.createElement('div');c.className='u-rc u-'+it.r;c.style.animationDelay=(i*.06)+'s';
+    c.innerHTML=`<span class="rr">${it.r}</span><span class="rn">${it.name}</span><span>${KIND[it.kind]}</span>`+(dups[i]?`<span class="dp">ダブり → カケラ +${SHARD_GET[it.r]}</span>`:'<span class="nw">NEW!</span>');
+    g.appendChild(c);});
+  $('u-res-t').textContent=n===10?'RESULT x10':'RESULT';
+  $('u-res').classList.add('on');
+  busy=false;refresh();
+  if(S.pity>=PITY)toast('天井に到達：URを1つ選べます');
+};
+window.upaCloseRes=function(){$('u-res').classList.remove('on');};
+
+// pull effect: "hacking into the archive"
+const CH='01ABCDEF#$%&@<>/=+*';
+const rnd=n=>Array.from({length:n},()=>CH[Math.random()*CH.length|0]).join('');
+let sk=false,pend=[],ivs=[];
+const wait=ms=>new Promise(r=>{if(sk)return r();const f=()=>{clearTimeout(t);r();};const t=setTimeout(()=>{pend=pend.filter(x=>x!==f);r();},ms);pend.push(f);});
+function fxFlash(c){if(sk)return;const fx=$('u-fx'),f=document.createElement('div');f.className='u-flash';f.style.background=c;fx.appendChild(f);setTimeout(()=>f.remove(),600);}
+function fxShake(){if(sk)return;const o=$('ov-gacha');o.classList.remove('u-shake');void o.offsetWidth;o.classList.add('u-shake');try{if(navigator.vibrate)navigator.vibrate(30);}catch(e){}}
+async function typeLine(term,txt,cls){const d=document.createElement('div');if(cls)d.className=cls;term.appendChild(d);
+  for(let i=1;i<=txt.length&&!sk;i++){d.textContent=txt.slice(0,i);await wait(16);}d.textContent=txt;}
+function tunnelRings(el,n){for(let i=0;i<n;i++){const s=document.createElement('i');s.style.animationDelay=(i*2.4/n)+'s';el.appendChild(s);}}
+function holo(s,l){const sp=[[-8,-6,0],[88,10,.5],[80,82,1],[-6,70,.25]].map(p=>`<i class="u-sp" style="left:${p[0]}%;top:${p[1]}%;animation-delay:${p[2]}s"></i>`).join('');
+  return `<div class="u-hw" style="--s:${s}"><div class="u-hp"><div class="core"><span>${l}</span></div></div>${sp}</div>`;}
+function vis(it){const d=document.createElement('div');d.className='u-vis';
+  if(it.kind==='color'){const c=it.co;d.innerHTML=`<div class="u-pc" style="color:${c.c};border-color:${c.bd};background:linear-gradient(145deg,${c.d1},${c.d2})">P</div>`;}
+  else if(it.kind==='emote')d.innerHTML=`<span class="u-emo">&gt;&gt; ${it.name}</span>`;
+  else if(it.kind==='theme'){const t=it.th;let h='';for(let i=0;i<12;i++){const bg=i<4?t.g2:(i>7?t.g1:t.cell),bd=i<4?t.g2bd:(i>7?t.g1bd:t.border);h+=`<i style="background:${bg};border:1px solid ${bd}"></i>`;}d.innerHTML=`<div class="u-mb" style="border-color:${t.acc};background:${t.board}">${h}</div>`;}
+  else if(it.kind==='frame')d.innerHTML=`<div class="u-fr" style="border-color:${it.c}"></div>`;
+  else if(it.kind==='title')d.innerHTML=`<span class="u-tt" style="color:${it.c};border-color:${it.c}">${it.name}</span>`;
+  else if(it.key==='tunnel'){const t=document.createElement('div');t.className='u-tun';tunnelRings(t,5);d.appendChild(t);}
+  else if(it.key==='warp'){const t=document.createElement('div');t.className='u-warp';for(let i=0;i<9;i++){const s=document.createElement('i');s.style.top=(8+i*10)+'%';s.style.width=(20+((i*37)%40))+'%';s.style.animationDelay=(-(i*0.37)%1.2)+'s';s.style.animationDuration=(0.8+(i%3)*0.3)+'s';t.appendChild(s);}d.appendChild(t);}
+  else if(it.key==='bolt')d.innerHTML='<svg class="u-bolt" viewBox="0 0 40 56"><path d="M24 2 L8 30 L20 30 L14 54 L32 22 L20 22 Z"/></svg>';
+  else if(it.key==='glitch')d.innerHTML='<span class="u-glt">ACCESS GRANTED</span>';
+  else if(it.key==='holo')d.innerHTML=holo(1.2,'P');
+  return d;}
+async function play(out,dups,promo){
+  sk=false;pend=[];
+  const fx=$('u-fx');
+  const top=out.reduce((a,o)=>RANKS[o.r]>RANKS[a]?o.r:a,'R');
+  let start=top;if(promo&&top!=='R')start=top==='UR'?'SR':'R';
+  fx.innerHTML='<div class="u-term"></div><div class="u-fbar"><i></i></div><div class="u-stage"></div><div class="u-skip">TAP TO SKIP</div>';
+  fx.style.setProperty('--hc','#00ff41');fx.classList.add('on');
+  fx.onclick=()=>{sk=true;pend.splice(0).forEach(f=>f());};
+  const term=fx.querySelector('.u-term'),bar=fx.querySelector('.u-fbar i'),stage=fx.querySelector('.u-stage');
+  const LV={R:'LEVEL 1',SR:'LEVEL 2',UR:'LEVEL ∞'};
+  const hint=r=>{bar.style.background=HC[r];fx.style.setProperty('--hc',HC[r]);};
+  try{if(typeof sndSelect==='function')sndSelect();}catch(e){}
+  await typeLine(term,'> CONNECT  archive://upa');
+  requestAnimationFrame(()=>bar.style.width='70%');
+  await typeLine(term,'> BYPASS   firewall ...... OK');
+  await typeLine(term,'> DECRYPT  packet x'+out.length);
+  await wait(450);
+  hint(start);await typeLine(term,'> ACCESS   '+LV[start],'c-'+start);
+  if(start!==top){await wait(650);fxFlash('#ffffff');fxShake();await typeLine(term,'!! OVERRIDE !!','w');hint(top);await typeLine(term,'> ACCESS   '+LV[top],'c-'+top);}
+  if(top==='UR'){await wait(350);fxFlash('#ff2233');fxShake();await typeLine(term,'!! WARNING: UNKNOWN DATA !!','w');await wait(300);fxFlash(HC.UR);}
+  bar.style.width='100%';await wait(500);
+  if(out.length===1){
+    const it=out[0];
+    stage.innerHTML=`<div class="u-pk${it.r==='UR'?' urx':''}" style="--hc:${HC[it.r]}"><div class="u-pk-in"><div class="u-scr2"></div></div></div>`;
+    const scr=stage.querySelector('.u-scr2'),inn=stage.querySelector('.u-pk-in');
+    const iv=setInterval(()=>scr.textContent=rnd(96),50);ivs.push(iv);
+    await wait(it.r==='UR'?1300:it.r==='SR'?900:600);
+    clearInterval(iv);fxFlash(HC[it.r]);if(it.r==='UR')fxShake();
+    inn.innerHTML='';inn.appendChild(vis(it));
+    inn.insertAdjacentHTML('beforeend',`<div class="u-rk">${it.r}</div><div class="u-nm2"></div><div class="u-tag ${dups[0]?'dp':'nw'}"></div>`);
+    const nm=inn.querySelector('.u-nm2');
+    for(let i=0;i<=it.name.length&&!sk;i++){nm.textContent=it.name.slice(0,i)+rnd(it.name.length-i);await wait(45);}
+    nm.textContent=it.name;
+    inn.querySelector('.u-tag').textContent=dups[0]?'ダブり → カケラ +'+SHARD_GET[it.r]:'NEW!';
+    await wait(1500);
+  }else{
+    stage.innerHTML='<div class="u-tg">'+out.map(()=>'<div class="u-tl"></div>').join('')+'</div>';
+    const tl=[...stage.querySelectorAll('.u-tl')];
+    const iv=setInterval(()=>tl.forEach(t=>{if(!t.classList.contains('on'))t.textContent=rnd(40);}),60);ivs.push(iv);
+    await wait(400);
+    for(let i=0;i<out.length;i++){const it=out[i],t=tl[i];
+      if(it.r!=='R'){t.style.setProperty('--hc',HC[it.r]);t.classList.add('wait');await wait(it.r==='UR'?900:380);t.classList.remove('wait');}
+      t.style.setProperty('--hc',HC[it.r]);t.className='u-tl on u-'+it.r;
+      t.innerHTML=`<b>${it.r}</b>${it.name}${dups[i]?' <span style="color:#cc66ff">→カケラ</span>':' <span style="color:#00ff41">NEW</span>'}`;
+      if(it.r==='UR'){fxFlash(HC.UR);fxShake();}else if(it.r==='SR')fxFlash(HC.SR);
+      await wait(it.r==='R'?150:300);}
+    clearInterval(iv);await wait(1300);
+  }
+  ivs.forEach(clearInterval);ivs=[];
+  fx.classList.remove('on');fx.innerHTML='';fx.onclick=null;$('ov-gacha').classList.remove('u-shake');
+}
+
+// shard exchange / pity pick
+let exMode='shard',exAsk=null;
+window.upaOpenEx=function(mode){if(busy)return;exMode=mode;exAsk=null;buildEx();$('u-ex').classList.add('on');};
+window.upaCloseEx=function(){$('u-ex').classList.remove('on');refresh();};
+function buildEx(){
+  const L=$('u-ex-list');L.innerHTML='';
+  $('u-ex-t').innerHTML=exMode==='pity'?'天井：URを1つ選ぶ':'カケラ交換　<span class="u-shard"></span> '+fmt(S.shard);
+  $('u-ex-note').textContent=exMode==='pity'?'好きなURを1つ選べます。選ぶと天井カウントは0に戻ります。':'R=10 / SR=50 / UR=200 カケラ。持っていないアイテムと交換できます。';
+  const list=ITEMS.filter(i=>!owns(i.id)&&(exMode==='shard'||i.r==='UR')).sort((a,b)=>RANKS[b.r]-RANKS[a.r]);
+  if(!list.length){L.innerHTML='<div class="u-hint">交換できるアイテムはもうありません（全部持っています）</div>';return;}
+  list.forEach(it=>{const cost=exMode==='pity'?0:SHARD_COST[it.r];const b=document.createElement('button');
+    b.className='u-exi u-'+it.r+(exAsk===it.id?' ask':'');
+    b.innerHTML=`<span>${it.r}　${it.name}<small>${KIND[it.kind]}</small></span><span>${exAsk===it.id?'もう一度タップで決定':(exMode==='pity'?'選ぶ':'<span class="u-shard"></span> '+cost)}</span>`;
+    if(exMode==='shard'&&S.shard<cost)b.disabled=true;
+    b.onclick=()=>{
+      if(exAsk!==it.id){exAsk=it.id;buildEx();return;}
+      if(exMode==='pity'){if(S.pity<PITY)return;S.pity=0;}else{if(S.shard<cost)return;S.shard-=cost;}
+      S.owned.push(it.id);exAsk=null;save();syncCatalog();toast(it.name+' を手に入れました');
+      if(exMode==='pity')upaCloseEx();else buildEx();};
+    L.appendChild(b);});
+}
+
+// ── win effects ──
+function winFx(key){
+  const d=document.createElement('div');d.className='u-winfx';document.body.appendChild(d);
+  if(key==='glitch'){d.classList.add('u-gl');d.innerHTML='<span data-t="ACCESS GRANTED">ACCESS GRANTED</span>';setTimeout(()=>d.remove(),2000);return;}
+  let k=0;
+  const strike=()=>{
+    if(k++>=3){setTimeout(()=>d.remove(),300);return;}
+    const w=innerWidth,h=innerHeight;let x=w*(0.2+Math.random()*0.6),y=0;const pts=[[x,y]];
+    while(y<h){y+=h*(0.05+Math.random()*0.07);x+=(Math.random()-.5)*w*0.18;pts.push([x,y]);}
+    const b=pts.slice(2+(Math.random()*3|0));let bx=b[0][0],by=b[0][1];const br=[[bx,by]];for(let i=0;i<5;i++){by+=h*0.06;bx+=(Math.random()>.5?1:-1)*w*0.06;br.push([bx,by]);}
+    const P=a=>a.map(p=>p[0].toFixed(0)+','+p[1].toFixed(0)).join(' ');
+    d.innerHTML=`<div class="u-winflash"></div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${P(pts)}" fill="none" stroke="#ffcc33" stroke-width="10" opacity=".35"/><polyline points="${P(pts)}" fill="none" stroke="#fff6c0" stroke-width="3.5"/><polyline points="${P(br)}" fill="none" stroke="#fff6c0" stroke-width="2" opacity=".8"/></svg>`;
+    try{if(navigator.vibrate)navigator.vibrate(25);}catch(e){}
+    setTimeout(()=>{d.innerHTML='';setTimeout(strike,90+Math.random()*120);},180);
+  };
+  strike();
+}
+
+// ── SKIN STUDIO: rows for the gacha items ──
+function optRow(elId,kind,slot,noneLabel){
+  const el=$(elId);if(!el)return;el.innerHTML='';
+  const own=ITEMS.filter(i=>i.kind===kind&&owns(i.id));
+  if(!own.length){el.innerHTML='<div class="u-skin-none">ガチャで手に入ります</div>';return;}
+  [{id:'',name:noneLabel}].concat(own).forEach(o=>{const b=document.createElement('button');
+    b.className='u-skin-opt'+((S.eq[slot]||'')===o.id?' on':'');b.textContent=o.name;if(o.c)b.style.color=o.c;
+    b.onclick=()=>{S.eq[slot]=o.id;save();applyAll();buildSkinExtras();if(kind==='win'&&o.id)winFx(o.key);};
+    el.appendChild(b);});
+}
+function buildSkinExtras(){optRow('sk-pfx','pfx','pfx','NORMAL');optRow('sk-fr','frame','frame','THEME');optRow('sk-win','win','win','NONE');optRow('sk-ttl','title','title','NONE');}
+const _buildSkin=_buildSkinUI;
+_buildSkinUI=function(){syncCatalog();_buildSkin.apply(this,arguments);buildSkinExtras();};
+
+// cloud: read the wallet after the normal account data
+const _loadCloud=loadCloudData;
+loadCloudData=async function(){await _loadCloud.apply(this,arguments);await cloudLoad();};
+
+tunnelRings($('u-ban-tun'),6);
+syncCatalog();applyAll();refresh();
+})();
+</script>
+<script>
 // ── Moving background: "neon receding" ─────────────────────────
 // GRID = grid horizon, BOARD = board echo. SET UP → BACKGROUND picks MIX (alternate on every app launch:
 // odd → GRID, even → BOARD) / GRID / BOARD / OFF, and MOTION turns the animation on or off.
@@ -3470,7 +4041,10 @@ function applyP2Color(key){
   lsSet('rainet_bg_launch', String(n));
   var launchKind = n % 2 === 1 ? 'grid' : 'board';
   var mode = lsGet('rainet_bg_mode', 'mix');
-  if(['mix', 'grid', 'board', 'off'].indexOf(mode) < 0) mode = 'mix';
+  if(['mix', 'grid', 'board', 'off', 'tunnel', 'warp'].indexOf(mode) < 0) mode = 'mix';
+  // TUNNEL / WARP are gacha items (UPA script): fall back to MIX if not owned
+  function ownsBg(m){ return m !== 'tunnel' && m !== 'warp' || !!(window.upaOwns && window.upaOwns('bg_' + m)); }
+  if(!ownsBg(mode)) mode = 'mix';
   var motion = lsGet('rainet_bg_motion', '1') !== '0';
 
   var cv = document.createElement('canvas');
@@ -3496,7 +4070,7 @@ function applyP2Color(key){
     if(key !== themeKey){ themeKey = key; dirty = true; }
   }
   // menu screens show the background at full strength; during a match it is dimmed so the board stays readable
-  var MENUS = ['ov-splash','ov-name','ov-title','ov-difficulty','ov-online','ov-waiting','ov-gamestart','ov-auth','ov-recover','ov-mypage','ov-lb','ov-settings','ov-skin'];
+  var MENUS = ['ov-splash','ov-name','ov-title','ov-difficulty','ov-online','ov-waiting','ov-gamestart','ov-auth','ov-recover','ov-mypage','ov-lb','ov-settings','ov-skin','ov-gacha','ov-login'];
   var onMenu = true;
   function readScreen(){
     onMenu = MENUS.some(function(id){ var el = document.getElementById(id); return el && el.classList.contains('on'); });
@@ -3574,13 +4148,53 @@ function applyP2Color(key){
     ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
   }
 
+  // UR "NEON TUNNEL": neon rectangles rushing past from the centre
+  function tunnel(t){
+    var w = CW, h = CH + G, cx = w / 2, cy = h * 0.46;
+    ctx.fillStyle = fill; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = rgba(0.22); ctx.lineWidth = 1; ctx.beginPath();
+    [[0, 0], [w, 0], [0, h], [w, h]].forEach(function(p){ ctx.moveTo(cx, cy); ctx.lineTo(p[0], p[1]); });
+    ctx.stroke();
+    var N = 16, sp = t * 0.35, ph = sp % 1, k0 = Math.floor(sp);
+    for(var i = 0; i < N; i++){
+      var d = (i + ph) / N, s = d * d, rw = w * 1.7 * s, rh = h * 1.35 * s;
+      var a = Math.min(1, d * 4) * (1 - d * 0.3);
+      var pink = ((i - k0) % 2 + 2) % 2 === 0;
+      ctx.strokeStyle = (pink ? 'rgba(255,60,172,' : 'rgba(68,255,255,') + (a * 0.85).toFixed(3) + ')';
+      ctx.lineWidth = Math.max(0.6, 3.2 * d * dpr);
+      ctx.strokeRect(cx - rw / 2, cy - rh / 2, rw, rh);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  // UR "DATA WARP": streaks of light shooting out of the centre
+  var STARS = null;
+  function warp(t){
+    var w = CW, h = CH + G, cx = w / 2, cy = h * 0.46, R = Math.sqrt(w * w + h * h) * 0.6;
+    if(!STARS){ STARS = []; for(var i = 0; i < 150; i++) STARS.push([Math.random() * Math.PI * 2, Math.random(), 0.25 + Math.random() * 0.5]); }
+    ctx.fillStyle = fill; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    for(var j = 0; j < STARS.length; j++){
+      var s = STARS[j], z = (s[1] + t * s[2] * 0.5) % 1, r = z * z * R, len = Math.max(2, r * 0.22), a = Math.min(1, z * 3);
+      var co = Math.cos(s[0]), si = Math.sin(s[0]);
+      ctx.strokeStyle = (j % 5 === 0 ? 'rgba(255,255,255,' : 'rgba(68,255,255,') + (a * 0.8).toFixed(3) + ')';
+      ctx.lineWidth = Math.max(0.6, z * 2.4 * dpr);
+      ctx.beginPath(); ctx.moveTo(cx + co * r, cy + si * r); ctx.lineTo(cx + co * (r + len), cy + si * (r + len)); ctx.stroke();
+    }
+    var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.25);
+    g.addColorStop(0, 'rgba(68,255,255,0.12)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
   var draw = grid, t = 2.4, last = 0, running = false, dirty = true;
   function applyMode(){
+    if(!ownsBg(mode)) mode = 'mix';
     var off = mode === 'off';
     cv.style.display = off ? 'none' : '';
     document.documentElement.classList.toggle('bgfx', !off);
     var kind = mode === 'grid' ? 'grid' : mode === 'board' ? 'board' : launchKind;
-    draw = kind === 'grid' ? grid : board;
+    draw = mode === 'tunnel' ? tunnel : mode === 'warp' ? warp : kind === 'grid' ? grid : board;
     dirty = true;
     if(window.__rainetSyncBand) window.__rainetSyncBand();
   }
